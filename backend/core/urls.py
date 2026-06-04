@@ -17,4 +17,7 @@ urlpatterns = [
     # Authentication endpoints
     path('api/auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    
+    # App API Endpoints
+    path('api/', include('api.urls')),
 ]

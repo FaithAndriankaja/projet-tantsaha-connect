@@ -1,0 +1,134 @@
+<div class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="sticky top-0 z-50 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-md bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-sm">
+<h1 class="font-headline-md text-headline-md text-primary font-bold">Tantsaha Connect</h1>
+</div>
+<div class="hidden md:flex items-center gap-lg">
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md" routerLink="/">Home</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" routerLink="/boutique-desktop">Market</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" routerLink="/panier-recap">Orders</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" routerLink="/tantsaha-ferme">Profile</a>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary cursor-pointer">shopping_cart</span>
+<span class="material-symbols-outlined text-primary cursor-pointer">notifications</span>
+<span class="material-symbols-outlined text-primary cursor-pointer">person</span>
+</div>
+</header>
+<main class="flex-grow flex flex-col items-center px-margin-mobile md:px-margin-desktop py-lg max-w-[1200px] mx-auto w-full">
+<!-- Farmer Identity Strip -->
+<section class="w-full mb-lg">
+<div class="flex flex-col md:flex-row md:justify-between md:items-end gap-sm border-b-2 border-primary pb-sm">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">
+                    Bonjour Thomas <span class="text-primary-container font-medium text-body-lg">(Maraîcher Antsirabe)</span>
+</h2>
+<div class="flex items-center gap-xs text-primary font-bold bg-primary-fixed/20 px-sm py-xs rounded">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-label-md text-label-md uppercase tracking-wider">Compte Validé</span>
+</div>
+</div>
+</section>
+<!-- Main Data Container -->
+<section class="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-md md:p-lg">
+<div class="flex items-center gap-sm mb-lg">
+<span class="material-symbols-outlined text-primary">agriculture</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Ma Récolte de la Semaine</h3>
+</div>
+<!-- Responsive Table Container -->
+<div class="overflow-x-auto w-full mb-xl">
+<table class="w-full border-collapse border border-outline-variant text-left">
+<thead class="bg-surface-container-low">
+<tr>
+<th class="p-md border border-outline-variant font-label-md text-label-md text-on-surface-variant">Produit</th>
+<th class="p-md border border-outline-variant font-label-md text-label-md text-on-surface-variant">Quantité Totale à Récolter</th>
+<th class="p-md border border-outline-variant font-label-md text-label-md text-on-surface-variant">Unité</th>
+<th class="p-md border border-outline-variant font-label-md text-label-md text-on-surface-variant">Statut de Validation</th>
+</tr>
+</thead>
+<tbody class="bg-white">
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="p-md border border-outline-variant font-body-md text-body-md font-semibold text-primary">Tomates</td>
+<td class="p-md border border-outline-variant font-body-md text-body-md">25</td>
+<td class="p-md border border-outline-variant font-body-md text-body-md">kg</td>
+<td class="p-md border border-outline-variant">
+<span class="inline-block px-sm py-xs bg-primary-container text-on-primary font-label-sm text-label-sm rounded uppercase">Payé</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="p-md border border-outline-variant font-body-md text-body-md font-semibold text-primary">Carottes</td>
+<td class="p-md border border-outline-variant font-body-md text-body-md">12</td>
+<td class="p-md border border-outline-variant font-body-md text-body-md">kg</td>
+<td class="p-md border border-outline-variant">
+<span class="inline-block px-sm py-xs bg-primary-container text-on-primary font-label-sm text-label-sm rounded uppercase">Payé</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Action Button -->
+<div class="flex justify-center">
+<button class="w-full max-w-lg bg-primary text-on-primary hover:opacity-90 active:scale-95 transition-all py-md px-lg rounded-xl flex items-center justify-center gap-sm shadow-sm">
+<span class="material-symbols-outlined">picture_as_pdf</span>
+<span class="font-label-md text-label-md">Télécharger le Bon de Récolte en PDF</span>
+</button>
+</div>
+</section>
+<!-- Stats Grid (Visual Interest without Images) -->
+<section class="grid grid-cols-2 md:grid-cols-4 gap-md w-full mt-lg">
+<div class="bg-white border border-outline-variant p-md rounded-xl text-center">
+<div class="text-on-surface-variant font-label-sm text-label-sm mb-xs uppercase">Commandes</div>
+<div class="text-primary font-headline-md text-headline-md">14</div>
+</div>
+<div class="bg-white border border-outline-variant p-md rounded-xl text-center">
+<div class="text-on-surface-variant font-label-sm text-label-sm mb-xs uppercase">Total kg</div>
+<div class="text-primary font-headline-md text-headline-md">37</div>
+</div>
+<div class="bg-white border border-outline-variant p-md rounded-xl text-center">
+<div class="text-on-surface-variant font-label-sm text-label-sm mb-xs uppercase">Date de ramassage</div>
+<div class="text-secondary font-headline-md text-headline-md">24 Mai</div>
+</div>
+<div class="bg-white border border-outline-variant p-md rounded-xl text-center">
+<div class="text-on-surface-variant font-label-sm text-label-sm mb-xs uppercase">Progression</div>
+<div class="text-primary font-headline-md text-headline-md">100%</div>
+</div>
+</section>
+</main>
+  <!-- Bottom Navigation (Mobile Only) -->
+  <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center py-2 bg-primary z-50 shadow-lg">
+    <a routerLink="/" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Home</span>
+    </a>
+    <a routerLink="/boutique-desktop" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+      <span class="material-symbols-outlined">storefront</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Market</span>
+    </a>
+    <a routerLink="/panier-recap" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+      <span class="material-symbols-outlined">receipt_long</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Orders</span>
+    </a>
+    <a [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Profile</span>
+    </a>
+  </nav>
+<!-- Footer (Desktop Only) -->
+<footer class="hidden md:block w-full py-xl px-margin-desktop bg-surface-container-lowest border-t border-outline-variant mt-xl">
+<div class="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-lg">
+<div class="flex flex-col gap-xs">
+<span class="font-headline-md text-primary">Tantsaha Connect</span>
+<span class="font-body-md text-body-md text-on-surface-variant">© 2024 Tantsaha Connect. Pride of Madagascar.</span>
+</div>
+<div class="flex gap-lg">
+<a class="text-on-surface-variant hover:text-secondary transition-colors font-body-md text-body-md" routerLink="/">About Us</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors font-body-md text-body-md" routerLink="/tantsaha-recolte">Farmer Program</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors font-body-md text-body-md" routerLink="/mpandrindra-livraison">Shipping Policy</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors font-body-md text-body-md" routerLink="/register">Terms of Service</a>
+</div>
+</div>
+</footer>
+<!-- Spacer for mobile nav -->
+<div class="h-20 md:hidden"></div>
+
+</div>

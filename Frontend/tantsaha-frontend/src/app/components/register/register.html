@@ -1,0 +1,260 @@
+<div class="bg-surface text-on-surface font-body-md selection:bg-primary-fixed-dim min-h-screen flex flex-col">
+  <!-- Top Navigation -->
+  <header class="bg-surface/80 backdrop-blur-md border-b border-outline-variant/20 top-0 z-50 sticky">
+    <div
+      class="flex justify-between items-center h-16 w-full px-margin-mobile md:px-margin-desktop max-w-[1280px] mx-auto">
+
+      <a class="text-2xl font-bold text-primary tracking-tight" routerLink="/">Tantsaha Connect</a>
+      <a class="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors duration-200 cursor-pointer"
+        routerLink="/login">Login</a>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-grow flex flex-col md:flex-row max-w-[1440px] mx-auto w-full">
+    <!-- Visual Sidebar -->
+    <aside class="hidden md:flex w-1/2 relative overflow-hidden bg-primary min-h-[calc(100vh-64px)]">
+      <img class="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60"
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYZAO9ArEQnv5fVVMj22OzrnaEzQg9u3_veAs2m56G-eQP1WillkwGSpQYFLkuRojL9x82ROcD3ehOng6Ub_lruJK9IxxjF5pB7RXAj6GZFC7QA6ldPLPZSO_14KBe8JjWMxOf4wIS1-2KmRVs3odhFnza2kUpjp81sTZZ3ITKrPvFNCMUxAWLE33dHPX6TTDFz2_q5p_x4urFyevESc-KLAdmq8k0n87RZDVwm10T98nEd1HardxUAXJqSuGQEI5r2ZHNqGm6rtI" />
+      <div class="relative z-10 flex flex-col justify-end p-10 text-on-primary h-full max-w-lg">
+        <h2 class="text-5xl font-bold mb-4">
+          Bienvenue dans l'écosystème Tantsaha Connect.
+        </h2>
+        <p class="text-lg opacity-90">
+          Nourrir les communautés malgaches de manière durable, en connectant
+          directement les producteurs aux consommateurs.
+        </p>
+      </div>
+    </aside>
+
+    <!-- Onboarding Canvas -->
+    <section class="w-full md:w-1/2 p-6 md:p-10 flex flex-col bg-surface-container-lowest">
+      <!-- Step Indicator -->
+      <nav class="mb-8">
+        <div class="flex items-center gap-4 mb-2">
+          <span class="text-sm font-semibold text-primary flex items-center gap-2" id="step-1-label">
+            <span
+              class="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center text-[10px]">1</span>
+            Profil
+          </span>
+          <div class="h-px bg-outline-variant/30 flex-grow"></div>
+          <span class="text-sm font-semibold text-on-surface-variant/50 flex items-center gap-2" id="step-2-label">
+            <span
+              class="w-6 h-6 rounded-full bg-surface-container text-on-surface-variant/50 flex items-center justify-center text-[10px]">2</span>
+            Détails
+          </span>
+        </div>
+        <h3 class="text-3xl font-bold text-on-surface" id="step-title">
+          Choisissez votre profil
+        </h3>
+      </nav>
+
+      <form class="flex-grow flex flex-col gap-6" id="onboardingForm">
+        <!-- STEP 1: Role Selection -->
+        <div class="grid grid-cols-1 gap-4" id="step-1-content">
+          <label class="relative cursor-pointer group">
+            <input class="peer sr-only" name="role" required type="radio" value="mpanjifa" />
+            <div
+              class="p-4 rounded-xl border-2 border-outline-variant/30 bg-surface-container-lowest peer-checked:border-primary peer-checked:bg-primary/5 transition-all duration-300 flex items-start gap-4 shadow-sm hover:shadow-md">
+              <div
+                class="w-12 h-12 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center">
+                <span class="material-symbols-outlined">shopping_cart</span>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-on-surface">
+                  Mpanjifa (Acheteur)
+                </h4>
+                <p class="text-sm text-on-surface-variant mt-1">
+                  Accédez aux meilleurs produits locaux.
+                </p>
+              </div>
+            </div>
+          </label>
+          <label class="relative cursor-pointer group">
+            <input class="peer sr-only" name="role" type="radio" value="tantsaha" />
+            <div
+              class="p-4 rounded-xl border-2 border-outline-variant/30 bg-surface-container-lowest peer-checked:border-primary peer-checked:bg-primary/5 transition-all duration-300 flex items-start gap-4 shadow-sm hover:shadow-md">
+              <div
+                class="w-12 h-12 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center">
+                <span class="material-symbols-outlined">agriculture</span>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-on-surface">
+                  Tantsaha (Producteur)
+                </h4>
+                <p class="text-sm text-on-surface-variant mt-1">
+                  Vendez vos récoltes directement aux consommateurs.
+                </p>
+              </div>
+            </div>
+          </label>
+          <label class="relative cursor-pointer group">
+            <input class="peer sr-only" name="role" type="radio" value="mpandrindra" />
+            <div
+              class="p-4 rounded-xl border-2 border-outline-variant/30 bg-surface-container-lowest peer-checked:border-primary peer-checked:bg-primary/5 transition-all duration-300 flex items-start gap-4 shadow-sm hover:shadow-md">
+              <div
+                class="w-12 h-12 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center">
+                <span class="material-symbols-outlined">location_on</span>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-on-surface">
+                  Mpandrindra (Point de retrait)
+                </h4>
+                <p class="text-sm text-on-surface-variant mt-1">
+                  Devenez un maillon essentiel de votre communauté.
+                </p>
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <!-- STEP 2: Conditional Forms -->
+        <div class="hidden flex-grow flex flex-col gap-4" id="step-2-content">
+          <!-- Buyer Fields -->
+          <div class="hidden space-y-4" id="mpanjifa-fields">
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-semibold text-on-surface-variant">Nom Complet</label>
+              <input
+                class="h-14 px-4 rounded-xl bg-surface-container-low border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                placeholder="Ex: Jean Rakoto" type="text" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-semibold text-on-surface-variant">Téléphone</label>
+              <input
+                class="h-14 px-4 rounded-xl bg-surface-container-low border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                placeholder="+261" type="tel" />
+            </div>
+            <button
+              class="flex items-center justify-center gap-2 h-14 w-full border border-primary text-primary rounded-xl font-bold active:scale-95 transition-transform"
+              type="button">
+              <span class="material-symbols-outlined">my_location</span>
+              Détecter ma position
+            </button>
+          </div>
+
+          <!-- Producer Fields -->
+          <div class="hidden space-y-4" id="tantsaha-fields">
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-semibold text-on-surface-variant">Prénom et Nom</label>
+              <input
+                class="h-14 px-4 rounded-xl bg-surface-container-low border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                type="text" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-semibold text-on-surface-variant">Type de Production</label>
+              <select
+                class="h-14 px-4 rounded-xl bg-surface-container-low border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none">
+                <option>Maraîchage (Légumes)</option>
+                <option>Verger (Fruits)</option>
+                <option>Élevage</option>
+                <option>Riziculture</option>
+              </select>
+            </div>
+            <div
+              class="border-2 border-dashed border-outline-variant p-4 rounded-xl text-center hover:border-primary transition-colors cursor-pointer">
+              <span class="material-symbols-outlined text-4xl text-outline mb-2">upload_file</span>
+              <p class="text-sm font-semibold">
+                Charger vos certifications (BIO, etc.)
+              </p>
+            </div>
+          </div>
+
+          <!-- Manager Fields -->
+          <div class="hidden space-y-4" id="mpandrindra-fields">
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-semibold text-on-surface-variant">Adresse du Point de Retrait</label>
+              <input
+                class="h-14 px-4 rounded-xl bg-surface-container-low border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                type="text" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-semibold text-on-surface-variant">Capacité de Stockage (m³)</label>
+              <input
+                class="h-14 px-4 rounded-xl bg-surface-container-low border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                type="number" />
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-on-surface-variant mb-2 block">Disponibilités de retrait</label>
+              <div class="grid grid-cols-7 gap-1" id="timeGrid">
+                <!-- Populated via TS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Shared Auth -->
+          <div class="space-y-4 pt-2">
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-semibold text-on-surface-variant">Email</label>
+              <input
+                class="h-14 px-4 rounded-xl bg-surface-container-low border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                placeholder="contact@tantsaha.mg" type="email" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-semibold text-on-surface-variant">Mot de passe</label>
+              <input
+                class="h-14 px-4 rounded-xl bg-surface-container-low border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                placeholder="••••••••" type="password" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-auto flex flex-col gap-2">
+          <button
+            class="h-14 w-full bg-primary text-on-primary rounded-xl font-bold shadow-sm hover:opacity-90 transition-all active:scale-95 disabled:opacity-50"
+            disabled id="nextBtn" type="button">
+            Suivant
+          </button>
+          <button
+            class="hidden h-14 w-full bg-primary text-on-primary rounded-xl font-bold shadow-sm hover:opacity-90 transition-all active:scale-95"
+            id="submitBtn" type="submit">
+            S'inscrire
+          </button>
+          <button
+            class="hidden h-14 w-full text-on-surface-variant font-semibold hover:underline decoration-primary decoration-2 underline-offset-4 transition-all"
+            id="backBtn" type="button">
+            Retour au choix du profil
+          </button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-surface-container-lowest border-t border-outline-variant/10 w-full mt-auto">
+    <div
+      class="w-full py-6 px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-4 max-w-[1280px] mx-auto">
+      <span class="text-sm font-bold text-on-surface">Tantsaha Connect</span>
+      <div class="flex gap-4">
+        <a class="text-xs font-semibold text-on-surface-variant hover:text-primary transition-colors cursor-pointer">Privacy
+          Policy</a>
+        <a class="text-xs font-semibold text-on-surface-variant hover:text-primary transition-colors cursor-pointer">Terms
+          of Service</a>
+      </div>
+      <p class="text-xs font-semibold text-on-surface-variant opacity-80">
+        © 2024 Tantsaha Connect Marketplace. Nourishing communities
+        sustainably.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Bottom Navigation (Mobile Only) -->
+  <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center py-2 bg-primary z-50 shadow-lg">
+    <a routerLink="/" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Home</span>
+    </a>
+    <a routerLink="/boutique-desktop" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+      <span class="material-symbols-outlined">storefront</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Market</span>
+    </a>
+    <a routerLink="/panier-recap" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+      <span class="material-symbols-outlined">receipt_long</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Orders</span>
+    </a>
+    <a [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Profile</span>
+    </a>
+  </nav>
+</div>

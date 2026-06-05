@@ -1,0 +1,20 @@
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 15px rgba(1, 105, 72, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(1, 105, 72, 0.4);
+  }
+}
+.animate-glow {
+  animation: pulse-glow 3s infinite ease-in-out;
+}

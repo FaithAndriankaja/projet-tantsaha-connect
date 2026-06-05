@@ -1,0 +1,23 @@
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(188, 202, 192, 0.2);
+}
+
+.product-row-hover {
+  transition: all 0.3s ease;
+}
+
+.product-row-hover:hover {
+  background: rgba(1, 105, 72, 0.05);
+}
+
+.step-active {
+  color: #016948;
+  font-weight: 700;
+}

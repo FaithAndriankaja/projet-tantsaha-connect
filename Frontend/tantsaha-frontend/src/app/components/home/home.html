@@ -1,0 +1,284 @@
+<div class="bg-background text-on-surface font-body-md overflow-x-hidden">
+  <!-- Navigation Bar -->
+  <nav
+    class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-md shadow-sm border-b border-outline-variant/30">
+    <div class="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop h-16 flex justify-between items-center">
+      <!-- Brand Logo -->
+      <div class="text-headline-md font-bold text-primary">
+        <a class="text-2xl font-bold text-primary tracking-tight" routerLink="/">Tantsaha Connect</a>
+      </div>
+      <!-- Desktop Links -->
+      <div class="hidden md:flex items-center gap-8">
+        <a class="font-body-md" [routerLink]="['/']" routerLinkActive="text-primary border-b-2 border-primary pb-1"
+          [routerLinkActiveOptions]="{exact: true}">Accueil</a>
+        <a class="font-body-md text-on-surface-variant hover:text-primary transition-colors transition-all"
+          routerLink="/boutique-desktop" routerLinkActive="text-primary border-b-2 border-primary pb-1">Catalogue</a>
+        <a *ngIf="currentUser"
+          class="font-body-md text-on-surface-variant hover:text-primary transition-colors transition-all"
+          routerLink="/panier-recap" routerLinkActive="text-primary border-b-2 border-primary pb-1">Commandes</a>
+      </div>
+
+      <!-- Action Cluster -->
+      <div class="flex items-center gap-4">
+        <ng-container *ngIf="!currentUser">
+          <button class="px-4 py-2 font-label-md text-primary hover:bg-primary/5 rounded-lg transition-colors"
+            routerLink="/login">
+            Se connecter
+          </button>
+          <button
+            class="px-6 py-2.5 bg-primary text-on-primary font-label-md rounded-xl shadow-sm hover:opacity-90 transition-all active:scale-95"
+            routerLink="/register">
+            S'inscrire
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="currentUser">
+          <div class="flex items-center gap-4">
+            <!-- Icon: Mon Panier -->
+            <button class="relative p-2 text-on-surface-variant hover:text-primary transition-colors"
+              routerLink="/panier-recap" title="Mon panier">
+              <span class="material-symbols-outlined text-2xl">shopping_cart</span>
+              <span
+                class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">2</span>
+            </button>
+
+            <!-- Icon: Mon Profil -->
+            <button
+              class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold hover:shadow-md transition-all"
+              [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'"
+              title="Mon profil">
+              {{ currentUser?.name?.charAt(0)?.toUpperCase() }}
+            </button>
+
+            <!-- Logout -->
+            <button (click)="logout()" class="p-2 text-on-surface-variant hover:text-error transition-colors"
+              title="Déconnexion">
+              <span class="material-symbols-outlined">logout</span>
+            </button>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </nav>
+
+  <main class="pt-16">
+    <!-- Hero Section -->
+    <section
+      class="relative min-h-[700px] flex flex-col items-center justify-center text-center px-margin-mobile overflow-hidden">
+      <div
+        class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-secondary-container/20 via-background to-background">
+      </div>
+      <div class="max-w-4xl mx-auto space-y-4 relative z-10">
+        <span
+          class="inline-block px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm tracking-widest uppercase">Direct
+          du producteur</span>
+        <h1 class="font-display text-4xl md:text-6xl text-on-surface leading-tight font-bold">
+          Le goût de la ferme,<br />
+          <span class="text-primary italic">en bas de chez vous.</span>
+        </h1>
+        <p class="font-body-lg text-on-surface-variant max-w-2xl mx-auto">
+          Rejoignez le mouvement locavore. Commandez les produits les plus frais
+          de la région et récupérez-les au point de collecte le plus proche de
+          votre domicile.
+        </p>
+        <div class="pt-8">
+          <button
+            class="h-14 px-10 rounded-xl bg-primary text-on-primary font-headline-md shadow-sm hover:opacity-90 transition-all active:scale-[0.98] duration-200"
+            routerLink="/boutique-desktop">
+            Découvrir la vitrine éphémère
+          </button>
+        </div>
+      </div>
+      <!-- Visual Element (Floating Produce) -->
+      <div class="mt-8 w-full max-w-[1280px] px-margin-desktop">
+        <img alt="Fresh local produce"
+          class="w-full h-96 object-cover rounded-3xl shadow-xl border border-outline-variant/20"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-XiNGX689cqvIMKLojTbpk5lVdXUjYUOIdqERflOSQW98UFbIhsCnNj9GOL-HNkWMyg8NmHrXEeZhMUizixF5LXSbmnZTieeRhTYxgvlaM4rVQjtKJPm_gK0pgm7guC6bvIFOOP0gH_3A_oENGzLpsv_7UPHJG9lXirxBjVF9a_EVkuevBsptccpd2EkzepONznPQA8PInWLm41zaNd-jvirMlw-u6EgWDl0654ALphezs2-ZV7kLTI6xyYtAe-vAze3S3fbp0ZE" />
+      </div>
+    </section>
+
+    <!-- Flash Sale Timer -->
+    <section class="py-8 px-margin-mobile -mt-16 relative z-20">
+      <div class="max-w-2xl mx-auto">
+        <div class="glass-card p-8 rounded-2xl border border-primary/30 text-center animate-glow">
+          <div class="flex items-center justify-center gap-2 text-primary mb-2">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">bolt</span>
+            <span class="font-label-sm text-label-sm uppercase tracking-tighter">Vente Flash Exclusive</span>
+          </div>
+          <h3 class="font-headline-md text-headline-md mb-6 text-on-surface">Il reste :</h3>
+          <div class="flex justify-center items-center gap-4 md:gap-8" id="countdown">
+            <div class="flex flex-col items-center">
+              <span class="font-display text-4xl md:text-6xl text-primary font-extrabold leading-none"
+                id="days">02</span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant mt-2">JOURS</span>
+            </div>
+            <span class="font-display text-5xl md:text-7xl text-primary/30 mb-4">:</span>
+            <div class="flex flex-col items-center">
+              <span class="font-display text-4xl md:text-6xl text-primary font-extrabold leading-none"
+                id="hours">14</span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant mt-2">HEURES</span>
+            </div>
+            <span class="font-display text-5xl md:text-7xl text-primary/30 mb-4">:</span>
+            <div class="flex flex-col items-center">
+              <span class="font-display text-4xl md:text-6xl text-primary font-extrabold leading-none"
+                id="minutes">45</span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant mt-2">MINS</span>
+            </div>
+            <span class="font-display text-5xl md:text-7xl text-primary/30 mb-4">:</span>
+            <div class="flex flex-col items-center">
+              <span class="font-display text-4xl md:text-6xl text-primary font-extrabold leading-none"
+                id="seconds">12</span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant mt-2">SECS</span>
+            </div>
+          </div>
+          <p class="mt-6 font-body-md text-on-surface-variant">Jusqu'à -30% sur les paniers maraîchers d'hiver.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Map Section (Mock) -->
+    <section class="py-12 max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop">
+      <div class="grid md:grid-cols-3 gap-8 items-center">
+        <div class="md:col-span-1 space-y-4">
+          <h2 class="font-headline-lg text-on-surface">Points de retrait</h2>
+          <p class="font-body-md text-on-surface-variant">
+            Nous avons sélectionné pour vous des commerces de proximité
+            éco-responsables où récupérer vos commandes en toute simplicité.
+          </p>
+          <div class="space-y-4">
+            <div class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border-l-4 border-primary">
+              <span class="material-symbols-outlined text-primary">location_on</span>
+              <div>
+                <p class="font-label-md text-on-surface">
+                  Boulangerie du Village
+                </p>
+                <p class="text-xs text-on-surface-variant">
+                  A 500m de chez vous
+                </p>
+              </div>
+            </div>
+            <div
+              class="flex items-center gap-4 p-4 bg-white rounded-xl hover:bg-surface-container-low transition-colors cursor-pointer border border-outline-variant/30">
+              <span class="material-symbols-outlined text-outline">location_on</span>
+              <div>
+                <p class="font-label-md text-on-surface">L'Épicerie Fine</p>
+                <p class="text-xs text-on-surface-variant">
+                  A 1.2km de chez vous
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Mock Map -->
+        <div
+          class="md:col-span-2 relative h-[500px] bg-surface-dim rounded-3xl overflow-hidden border border-outline-variant/30 group">
+          <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+            style="
+              background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD74LcyiZbZSid7UlJjF1NFxFrNH1rvKvKKT2_HnET8jdRn9BZh_wwCPCc266pwEDHKj4PcXB0swZqZEItfsHBgEfzAHWQvscGKUUI0BPdfC5mrzmt2uGUiyP6OgCn1va_uO9XaVu7odRTxT8nW8oaDOCcJXR1oV51nsG4cKMUNY9MK13U6SfAaMCBBu0YC0CnipNrC3o1tU2SuR2KtbaJLAtwpQFObodHKDy9fAAEcWtxZdAw4iEhrQQDNFnbRmdird2qa0xQlJSc');
+            "></div>
+          <div class="absolute top-1/4 left-1/3 animate-bounce">
+            <div class="relative">
+              <div class="absolute -inset-4 bg-primary/20 rounded-full animate-ping"></div>
+              <span class="material-symbols-outlined text-primary text-5xl drop-shadow-lg"
+                style="font-variation-settings: 'FILL' 1">location_on</span>
+            </div>
+          </div>
+          <div class="absolute top-2/3 right-1/4">
+            <span class="material-symbols-outlined text-primary/60 text-4xl drop-shadow-md"
+              style="font-variation-settings: 'FILL' 1">location_on</span>
+          </div>
+          <div class="absolute bottom-1/4 left-1/2">
+            <span class="material-symbols-outlined text-primary/60 text-4xl drop-shadow-md"
+              style="font-variation-settings: 'FILL' 1">location_on</span>
+          </div>
+          <div class="absolute bottom-4 left-4 right-4">
+            <div class="glass-card p-4 rounded-xl flex justify-between items-center shadow-lg">
+              <div class="flex items-center gap-4">
+                <div class="bg-primary/10 p-2 rounded-lg">
+                  <span class="material-symbols-outlined text-primary">explore</span>
+                </div>
+                <div>
+                  <p class="font-label-md">12 points disponibles</p>
+                  <p class="text-[10px] text-on-surface-variant uppercase tracking-widest">
+                    Dans votre secteur
+                  </p>
+                </div>
+              </div>
+              <button class="bg-primary text-on-primary px-4 py-2 rounded-lg text-label-sm font-bold">
+                Agrandir
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="py-16 bg-surface-container-low/50 mt-12">
+      <div class="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop text-center">
+        <div class="max-w-2xl mx-auto space-y-4">
+          <h2 class="font-headline-lg text-on-surface">
+            Prêt pour la prochaine récolte ?
+          </h2>
+          <p class="font-body-md text-on-surface-variant">
+            Plus que quelques heures pour profiter des arrivages de la semaine.
+            Fraîcheur garantie de la terre à votre table.
+          </p>
+          <button
+            class="h-14 px-12 rounded-2xl bg-primary text-on-primary font-headline-md shadow-sm hover:opacity-90 transition-all active:scale-[0.98] duration-200"
+            routerLink="/boutique-desktop">
+            Découvrir la vitrine éphémère
+          </button>
+          <p class="font-label-sm text-on-surface-variant flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-sm">verified_user</span>
+            Paiement sécurisé et satisfaction garantie
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-surface-container-low w-full py-12 border-t border-outline-variant/30">
+    <div
+      class="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-8">
+      <div class="flex flex-col items-center md:items-start text-center md:text-left">
+        <div class="text-headline-md text-primary font-bold mb-2">
+          Tantsaha Connect
+        </div>
+        <p class="font-label-sm text-on-surface-variant">
+          © 2026 Tantsaha Connect. Pride of Madagascar.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bottom Navigation (Mobile Only) -->
+  <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center py-2 bg-primary z-50 shadow-lg">
+    <a routerLink="/"
+      routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1 animate-pulse"
+      [routerLinkActiveOptions]="{exact: true}"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Home</span>
+    </a>
+    <a routerLink="/boutique-desktop"
+      routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+      <span class="material-symbols-outlined">storefront</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Market</span>
+    </a>
+    <a routerLink="/panier-recap"
+      routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+      <span class="material-symbols-outlined">receipt_long</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Orders</span>
+    </a>
+    <a [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'"
+      routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Profile</span>
+    </a>
+  </nav>
+</div>

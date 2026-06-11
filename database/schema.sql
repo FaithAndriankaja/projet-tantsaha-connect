@@ -46,7 +46,8 @@ CREATE TABLE users (
     default_pickup_point_id UUID,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    profile_picture_path TEXT NULL
 );
 
 CREATE TABLE pickup_points (
@@ -76,6 +77,8 @@ CREATE TABLE producers (
     description TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    cover_picture_path TEXT NULL,
+    logo_picture_path TEXT NULL,  
     CONSTRAINT fk_producers_user
         FOREIGN KEY (user_id) REFERENCES users(id)
         ON DELETE CASCADE
@@ -113,6 +116,7 @@ CREATE TABLE products (
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    image_path TEXT NULL,
     CONSTRAINT fk_products_producer
         FOREIGN KEY (producer_id) REFERENCES producers(id)
         ON DELETE CASCADE,
@@ -431,7 +435,7 @@ CREATE TRIGGER trg_orders_release_stock_on_cancel
 AFTER UPDATE ON orders
 FOR EACH ROW EXECUTE FUNCTION release_stock_on_order_cancel();
 
-CREATE VIEW unified_shop_view AS
+CREATE OR REPLACE VIEW unified_shop_view AS
 SELECT
     ss.id AS sale_session_id,
     ss.pickup_point_id,
@@ -441,9 +445,12 @@ SELECT
     p.description AS product_description,
     p.unit,
     p.unit_price,
+    p.image_path AS product_image_path,
     c.name AS category_name,
     pr.id AS producer_id,
     pr.farm_name,
+    pr.logo_picture_path AS farm_logo_picture_path,
+    pr.cover_picture_path AS farm_cover_picture_path,
     ps.available_quantity,
     ps.reserved_quantity,
     (ps.available_quantity - ps.reserved_quantity) AS remaining_quantity,
@@ -459,6 +466,7 @@ JOIN products p ON p.producer_id = pr.id
 JOIN product_stocks ps ON ps.product_id = p.id AND ps.sale_session_id = ss.id
 LEFT JOIN categories c ON c.id = p.category_id
 WHERE p.is_active = TRUE;
+
 
 CREATE VIEW harvest_sheet_view AS
 SELECT

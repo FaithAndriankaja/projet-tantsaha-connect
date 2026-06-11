@@ -82,7 +82,7 @@ export class AuthService {
     const role = this.currentUserValue?.role;
     if (role === 'tantsaha') return '/tantsaha-recolte';
     if (role === 'mpandrindra') return '/mpandrindra-livraison';
-    return '/profil-acheteur';
+    return '/mes-commandes';
   }
 
   getDefaultRouteAfterAuth(): string {

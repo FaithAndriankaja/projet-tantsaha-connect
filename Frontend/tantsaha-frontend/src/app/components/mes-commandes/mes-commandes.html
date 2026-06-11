@@ -1,0 +1,204 @@
+<!-- Page: Mes Commandes -->
+<div class="bg-surface font-body-md text-on-surface antialiased min-h-screen">
+
+  <!-- Navigation Bar -->
+  <nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm border-b border-outline-variant/30">
+    <div class="max-w-[1280px] mx-auto px-6 md:px-12 h-16 flex justify-between items-center">
+      <a class="text-2xl font-bold text-primary tracking-tight" routerLink="/">Tantsaha Connect</a>
+
+      <div class="hidden md:flex items-center gap-8">
+        <a class="font-body-md text-on-surface-variant hover:text-primary transition-colors" routerLink="/">Accueil</a>
+        <a class="font-body-md text-on-surface-variant hover:text-primary transition-colors"
+          routerLink="/boutique-desktop">Catalogue</a>
+        <a class="font-body-md text-primary border-b-2 border-primary pb-1 font-semibold"
+          [routerLink]="ordersRoute">Commandes</a>
+      </div>
+
+      <div class="flex items-center gap-4" *ngIf="currentUser">
+        <button class="relative p-2 text-primary transition-colors" routerLink="/panier-recap" title="Mon panier">
+          <span class="material-symbols-outlined text-2xl"
+            style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+        </button>
+        <button
+          class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold hover:shadow-md transition-all"
+          [routerLink]="profileRoute" title="Mon profil">
+          {{ currentUser?.name?.charAt(0)?.toUpperCase() }}
+        </button>
+        <button (click)="logout()" class="p-2 text-on-surface-variant hover:text-error transition-colors"
+          title="Déconnexion">
+          <span class="material-symbols-outlined">logout</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Background Gradient -->
+  <div
+    class="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary-container/5 via-background to-background">
+  </div>
+
+  <!-- Main Content -->
+  <main class="max-w-[1280px] mx-auto px-6 md:px-12 pt-28 pb-20">
+
+    <!-- Page Header -->
+    <header class="mb-10">
+      <div class="flex items-center gap-3 mb-2">
+        <!-- <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">receipt_long</span> -->
+        <h1 class="text-3xl md:text-4xl font-bold text-on-surface">Mes Commandes</h1>
+      </div>
+      <p class="text-on-surface-variant ml-11">Suivez l'état de vos commandes et récupérez vos bons de retrait.</p>
+    </header>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex flex-col items-center justify-center py-32 gap-4">
+      <div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+      <p class="text-on-surface-variant font-semibold">Chargement de vos commandes...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="!loading && error" class="glass-card rounded-3xl p-10 text-center">
+      <span class="material-symbols-outlined text-5xl text-error/50 mb-4 block">wifi_off</span>
+      <p class="text-error font-semibold">{{ error }}</p>
+      <button (click)="loadOrders()"
+        class="mt-4 px-6 py-2.5 bg-primary text-on-primary rounded-xl font-bold hover:opacity-90 transition-all active:scale-95">
+        Réessayer
+      </button>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && !error && orders.length === 0" class="glass-card rounded-3xl p-16 text-center">
+      <span class="material-symbols-outlined text-6xl text-primary/30 mb-4 block">shopping_basket</span>
+      <h2 class="text-xl font-bold text-on-surface mb-2">Aucune commande pour l'instant</h2>
+      <p class="text-on-surface-variant mb-6">Tous vos achats sur Tantsaha Connect apparaîtront ici.</p>
+      <a routerLink="/boutique-desktop"
+        class="inline-block px-8 py-3 bg-primary text-on-primary rounded-xl font-bold shadow-md hover:opacity-90 transition-all active:scale-95">
+        Parcourir le catalogue
+      </a>
+    </div>
+
+    <!-- Orders List -->
+    <div *ngIf="!loading && !error && orders.length > 0" class="space-y-6">
+      <div *ngFor="let order of orders"
+        class="glass-card rounded-3xl overflow-hidden shadow-sm border border-outline-variant/20 transition-all duration-300">
+
+        <!-- Order Header (always visible) -->
+        <div class="p-6 cursor-pointer hover:bg-primary/[0.02] transition-colors" (click)="toggleOrder(order.id)">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+
+            <!-- Left: Code + date -->
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-primary">{{ statusIcon(order.status) }}</span>
+              </div>
+              <div>
+                <p class="font-bold text-on-surface tracking-wide">{{ order.transaction_code }}</p>
+                <p class="text-sm text-on-surface-variant">{{ formatDate(order.created_at) }}</p>
+              </div>
+            </div>
+
+            <!-- Center: Status + Price -->
+            <div class="flex items-center gap-4 ml-16 sm:ml-0">
+              <span class="px-3 py-1 rounded-full text-xs font-bold" [class]="statusColor(order.status)">
+                {{ statusLabel(order.status) }}
+              </span>
+              <span class="text-lg font-black text-secondary">{{ formatPrice(order.total_amount) }} Ar</span>
+            </div>
+
+            <!-- Right: expand arrow -->
+            <span class="material-symbols-outlined text-outline transition-transform duration-300 self-end sm:self-auto"
+              [class.rotate-180]="expandedOrderId === order.id">expand_more</span>
+          </div>
+
+          <!-- Progress Bar -->
+          <div *ngIf="order.status !== 'cancelled'" class="mt-5 ml-16 sm:flex items-center gap-0 hidden">
+            <ng-container *ngFor="let step of [1,2,3,4,5]; let i = index">
+              <div class="flex-1 h-1.5 rounded-full transition-colors duration-500"
+                [class.bg-primary]="progressStep(order.status) >= step"
+                [class.bg-outline-variant]="progressStep(order.status) < step">
+              </div>
+              <div *ngIf="i < 4" class="w-2"></div>
+            </ng-container>
+          </div>
+          <div *ngIf="order.status !== 'cancelled'"
+            class="mt-1 ml-16 hidden sm:flex justify-between text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wide">
+            <span>Paiement</span>
+            <span>Soumis</span>
+            <span>Confirmé</span>
+            <span>Dispo</span>
+            <span>Récupéré</span>
+          </div>
+        </div>
+
+        <!-- Expanded Details -->
+        <div *ngIf="expandedOrderId === order.id"
+          class="border-t border-outline-variant/30 bg-surface-container-lowest/50">
+
+          <!-- Pickup point + QR code zone -->
+          <div class="p-6 flex flex-col md:flex-row gap-6">
+            <div class="flex-1 space-y-4">
+              <h3 class="font-bold text-sm text-on-surface-variant uppercase tracking-wider">Détail de la commande</h3>
+              <div class="space-y-2">
+                <div *ngFor="let item of order.items"
+                  class="flex items-center justify-between p-3 bg-surface-container-low rounded-xl">
+                  <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary/50">eco</span>
+                    <div>
+                      <p class="font-semibold text-sm text-on-surface">{{ item.product_name }}</p>
+                      <p class="text-xs text-on-surface-variant">{{ item.quantity }} {{ item.unit }}</p>
+                    </div>
+                  </div>
+                  <span class="font-bold text-secondary text-sm">{{ formatPrice(item.unit_price) }} Ar</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bon de retrait -->
+            <div class="md:w-64 bg-white rounded-2xl border border-outline-variant/30 p-6 text-center shadow-sm">
+              <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">Bon de Retrait</p>
+              <div
+                class="w-20 h-20 bg-surface-dim rounded-xl mx-auto mb-3 flex items-center justify-center border border-outline-variant/30">
+                <span class="material-symbols-outlined text-3xl text-primary/40">qr_code_2</span>
+              </div>
+              <p class="text-2xl font-black text-primary tracking-widest mb-1">{{ order.transaction_code }}</p>
+              <p class="text-xs text-on-surface-variant">{{ order.pickup_point_name }}</p>
+              <div class="mt-4 pt-4 border-t border-outline-variant/20 text-left">
+                <p class="text-xs text-on-surface-variant"><span class="font-bold">Total :</span> {{
+                  formatPrice(order.total_amount) }} Ar</p>
+                <p class="text-xs text-on-surface-variant mt-1"><span class="font-bold">Statut :</span> {{
+                  statusLabel(order.status) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Navigation (Mobile Only) -->
+  <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center py-2 bg-primary z-50 shadow-lg">
+    <a routerLink="/" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      [routerLinkActiveOptions]="{exact: true}"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Home</span>
+    </a>
+    <a routerLink="/boutique-desktop"
+      routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+      <span class="material-symbols-outlined">storefront</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Market</span>
+    </a>
+    <a [routerLink]="ordersRoute"
+      routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">receipt_long</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Commandes</span>
+    </a>
+    <a [routerLink]="profileRoute"
+      routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Profil</span>
+    </a>
+  </nav>
+</div>

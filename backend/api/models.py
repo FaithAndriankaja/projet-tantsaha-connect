@@ -44,6 +44,9 @@ class User(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"{self.full_name} ({self.role})"
+
     class Meta:
         managed = False
         db_table = 'users'
@@ -58,6 +61,9 @@ class PickupPoint(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         managed = False
         db_table = 'pickup_points'
@@ -71,6 +77,9 @@ class Producer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.farm_name
+
     class Meta:
         managed = False
         db_table = 'producers'
@@ -83,6 +92,9 @@ class ProducerPickupPoint(models.Model):
     pickup_point = models.ForeignKey(PickupPoint, on_delete=models.CASCADE, db_column='pickup_point_id')
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.producer.farm_name} @ {self.pickup_point.name}"
+
     class Meta:
         managed = False
         db_table = 'producer_pickup_points'
@@ -94,6 +106,9 @@ class Category(models.Model):
     description = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         managed = False
@@ -111,6 +126,9 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         managed = False
         db_table = 'products'
@@ -126,6 +144,9 @@ class SaleSession(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"Session {self.pickup_point.name} - {self.pickup_date}"
+
     class Meta:
         managed = False
         db_table = 'sale_sessions'
@@ -139,6 +160,9 @@ class ProductStock(models.Model):
     reserved_quantity = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.product.name} ({self.sale_session.pickup_date})"
 
     class Meta:
         managed = False
@@ -156,6 +180,9 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"Order {self.transaction_code or self.id}"
+
     class Meta:
         managed = False
         db_table = 'orders'
@@ -169,6 +196,9 @@ class OrderItem(models.Model):
     unit_price = models.DecimalField(max_digits=12, decimal_places=2)
     line_total = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True) # Generated column
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.name}"
 
     class Meta:
         managed = False
@@ -185,6 +215,9 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"Payment for {self.order.transaction_code}"
+
     class Meta:
         managed = False
         db_table = 'payments'
@@ -196,6 +229,9 @@ class HandoverConfirmation(models.Model):
     handed_over_at = models.DateTimeField(auto_now_add=True)
     notes = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Handover for {self.order.transaction_code}"
 
     class Meta:
         managed = False

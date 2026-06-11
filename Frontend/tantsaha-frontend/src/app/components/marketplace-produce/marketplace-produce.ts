@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService, User } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
@@ -24,7 +24,8 @@ export class MarketplaceProduce implements OnInit {
   constructor(
     private authService: AuthService,
     private api: ApiService,
-    private cart: CartService
+    private cart: CartService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -56,14 +57,19 @@ export class MarketplaceProduce implements OnInit {
   loadProducts() {
     this.loading = true;
     this.error = '';
+    console.log('Marketplace: starting to load products');
     this.api.getShop().subscribe({
       next: (products) => {
+        console.log('Marketplace: received products in next():', products);
         this.products = products;
         this.loading = false;
+        this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err) => {
+        console.error('Marketplace: received error in subscribe():', err);
         this.error = 'Impossible de charger le catalogue. Vérifiez que le backend est démarré.';
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }

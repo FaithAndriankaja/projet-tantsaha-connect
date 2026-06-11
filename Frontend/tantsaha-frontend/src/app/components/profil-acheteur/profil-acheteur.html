@@ -1,37 +1,80 @@
 <div class="bg-surface min-h-screen">
-  <!-- Top Navigation Bar (Consistent with Home/Farmer Profile) -->
-  <nav class="sticky top-0 z-50 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 bg-surface/80 backdrop-blur-md border-b border-outline-variant">
-    <div class="flex items-center gap-4">
-      <a routerLink="/" class="text-2xl font-bold text-primary tracking-tight">Tantsaha Connect</a>
-    </div>
-    <div class="hidden md:flex items-center gap-8">
-      <a class="font-body-md text-on-surface-variant hover:text-primary transition-colors" routerLink="/">Accueil</a>
-      <a class="font-body-md text-on-surface-variant hover:text-primary transition-colors" routerLink="/boutique-desktop">Catalogue</a>
-      <a class="font-body-md text-primary font-bold border-b-2 border-primary pb-1" routerLink="/profil-acheteur">Mon Profil</a>
-    </div>
-    <div class="flex items-center gap-4">
-      <button class="relative p-2 text-on-surface-variant hover:text-primary transition-colors" routerLink="/panier-recap">
-        <span class="material-symbols-outlined text-2xl">shopping_cart</span>
-      </button>
-      <button (click)="logout()" class="p-2 text-on-surface-variant hover:text-error transition-colors" title="Déconnexion">
-        <span class="material-symbols-outlined">logout</span>
-      </button>
+  <!-- Top Navigation Bar (Consistent with Home/constumers Profile) -->
+  <nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm border-b border-outline-variant/30">
+    <div class="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop h-16 flex justify-between items-center">
+      <!-- Brand Logo -->
+      <div class="text-headline-md font-bold text-primary">
+        <a class="text-2xl font-bold text-primary tracking-tight" routerLink="/">Tantsaha Connect</a>
+      </div>
+      <!-- Desktop Links -->
+      <div class="hidden md:flex items-center gap-8">
+        <a class="font-body-md text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
+          routerLink="/">Accueil</a>
+        <a class="font-body-md text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
+          routerLink="/boutique-desktop">Catalogue</a>
+        <a *ngIf="currentUser" class="font-body-md text-primary border-b-2 border-primary pb-1 cursor-pointer"
+          routerLink="/mes-commandes">Commandes</a>
+      </div>
+
+      <!-- Action Cluster -->
+      <div class="flex items-center gap-4">
+        <ng-container *ngIf="!currentUser">
+          <button class="px-4 py-2 font-label-md text-primary hover:bg-primary/5 rounded-lg transition-colors"
+            routerLink="/login">
+            Se connecter
+          </button>
+          <button
+            class="px-6 py-2.5 bg-primary text-on-primary font-label-md rounded-xl shadow-sm hover:opacity-90 transition-all active:scale-95"
+            routerLink="/register">
+            S'inscrire
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="currentUser">
+          <div class="flex items-center gap-4">
+            <!-- Icon: Mon Panier -->
+            <button class="relative p-2 text-primary transition-colors" routerLink="/panier-recap" title="Mon panier">
+              <span class="material-symbols-outlined text-2xl"
+                style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+              <span
+                class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">{{
+                cartCount }}</span>
+            </button>
+
+            <!-- Icon: Mon Profil -->
+            <button
+              class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold hover:shadow-md transition-all"
+              [routerLink]="profileRoute" title="Mon profil">
+              {{ currentUser.name.charAt(0).toUpperCase() }}
+            </button>
+
+            <!-- Logout -->
+            <button (click)="logout()" class="p-2 text-on-surface-variant hover:text-error transition-colors"
+              title="Déconnexion">
+              <span class="material-symbols-outlined">logout</span>
+            </button>
+          </div>
+        </ng-container>
+      </div>
     </div>
   </nav>
 
   <!-- Main Content -->
   <main class="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop py-8 md:py-12">
-    
+
     <!-- User Hero Section -->
-    <header class="relative overflow-hidden rounded-3xl bg-secondary-container/10 border border-outline-variant/30 mb-8 p-6 md:p-10">
+    <header
+      class="relative overflow-hidden rounded-3xl bg-secondary-container/10 border border-outline-variant/30 mb-8 p-6 md:p-10">
       <div class="flex flex-col md:flex-row items-center gap-6 md:gap-10 relative z-10">
         <!-- Avatar -->
         <div class="relative group">
-          <div class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-primary/10 flex items-center justify-center text-primary text-5xl font-bold border-4 border-white shadow-xl overflow-hidden">
+          <div
+            class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-primary/10 flex items-center justify-center text-primary text-5xl font-bold border-4 border-white shadow-xl overflow-hidden">
             <span *ngIf="!currentUser?.name">{{ 'A' }}</span>
             <span *ngIf="currentUser?.name">{{ currentUser?.name?.charAt(0)?.toUpperCase() }}</span>
           </div>
-          <button class="absolute bottom-1 right-1 bg-white p-2 rounded-full shadow-md border border-outline-variant hover:bg-surface-container-low transition-colors">
+          <button
+            class="absolute bottom-1 right-1 bg-white p-2 rounded-full shadow-md border border-outline-variant hover:bg-surface-container-low transition-colors">
             <span class="material-symbols-outlined text-sm">edit</span>
           </button>
         </div>
@@ -40,26 +83,32 @@
         <div class="flex-grow text-center md:text-left space-y-2">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 class="font-display text-3xl md:text-4xl font-bold text-on-surface">Bonjour, {{ currentUser?.name || 'Acheteur' }} !</h1>
+              <h1 class="font-display text-3xl md:text-4xl font-bold text-on-surface">Bonjour, {{ currentUser?.name ||
+                'Acheteur' }} !</h1>
               <p class="font-body-md text-on-surface-variant flex items-center justify-center md:justify-start gap-1">
                 <span class="material-symbols-outlined text-sm">phone</span>
                 {{ currentUser?.phone || '—' }}
               </p>
             </div>
             <div class="flex gap-3 justify-center">
-              <button class="px-6 py-2.5 bg-primary text-on-primary rounded-xl font-label-md hover:opacity-90 transition-all active:scale-95 shadow-sm">
+              <button
+                class="px-6 py-2.5 bg-primary text-on-primary rounded-xl font-label-md hover:opacity-90 transition-all active:scale-95 shadow-sm">
                 Modifier le profil
               </button>
             </div>
           </div>
-          
+
           <div class="flex flex-wrap gap-2 justify-center md:justify-start mt-4">
-            <span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-label-sm font-medium">Acheteur Vérifié</span>
-            <span class="px-3 py-1 bg-surface-container-high text-on-surface-variant rounded-full text-label-sm font-medium">Membre depuis Juin 2024</span>
+            <span
+              class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-label-sm font-medium">Acheteur
+              Vérifié</span>
+            <span
+              class="px-3 py-1 bg-surface-container-high text-on-surface-variant rounded-full text-label-sm font-medium">Membre
+              depuis Juin 2024</span>
           </div>
         </div>
       </div>
-      
+
       <!-- Decorative Background Elements -->
       <div class="absolute -top-12 -right-12 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
       <div class="absolute -bottom-8 -left-8 w-48 h-48 bg-secondary/5 rounded-full blur-2xl"></div>
@@ -67,7 +116,7 @@
 
     <!-- Content Grid -->
     <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
-      
+
       <!-- Left Column: Navigation/Summary -->
       <aside class="md:col-span-4 space-y-6">
         <!-- Stats Cards -->
@@ -88,23 +137,28 @@
             <h3 class="font-label-md font-bold text-on-surface">Mon Compte</h3>
           </div>
           <nav class="flex flex-col">
-            <button class="flex items-center gap-3 px-4 py-3 text-primary bg-primary/5 border-l-4 border-primary text-label-md font-bold transition-all">
+            <button
+              class="flex items-center gap-3 px-4 py-3 text-primary bg-primary/5 border-l-4 border-primary text-label-md font-bold transition-all">
               <span class="material-symbols-outlined">person</span>
               Informations Personnelles
             </button>
-            <button class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low hover:text-primary text-label-md transition-all">
+            <button
+              class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low hover:text-primary text-label-md transition-all">
               <span class="material-symbols-outlined">local_shipping</span>
               Mes Commandes
             </button>
-            <button class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low hover:text-primary text-label-md transition-all">
+            <button
+              class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low hover:text-primary text-label-md transition-all">
               <span class="material-symbols-outlined">location_on</span>
               Carnet d'Adresses
             </button>
-            <button class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low hover:text-primary text-label-md transition-all">
+            <button
+              class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low hover:text-primary text-label-md transition-all">
               <span class="material-symbols-outlined">payments</span>
               Méthodes de Paiement
             </button>
-            <button class="flex items-center gap-3 px-4 py-3 text-error hover:bg-error/5 text-label-md transition-all mt-4 border-t border-outline-variant/30">
+            <button
+              class="flex items-center gap-3 px-4 py-3 text-error hover:bg-error/5 text-label-md transition-all mt-4 border-t border-outline-variant/30">
               <span class="material-symbols-outlined">delete</span>
               Supprimer mon compte
             </button>
@@ -114,14 +168,14 @@
 
       <!-- Right Column: Details Section -->
       <section class="md:col-span-8 space-y-8">
-        
+
         <!-- Personal Info Form View -->
         <div class="bg-white p-6 md:p-8 rounded-3xl border border-outline-variant/30 shadow-sm">
           <div class="flex items-center justify-between mb-6">
             <h2 class="font-headline-md text-on-surface font-bold">Informations Personnelles</h2>
             <button class="text-primary font-label-md hover:underline">Modifier</button>
           </div>
-          
+
           <div class="grid md:grid-cols-2 gap-6">
             <div class="space-y-1">
               <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">Nom Complet</p>
@@ -148,19 +202,21 @@
             <h2 class="font-headline-md text-on-surface font-bold">Dernières Commandes</h2>
             <button class="text-primary font-label-md hover:underline" routerLink="/profil-acheteur">Voir tout</button>
           </div>
-          
+
           <div *ngIf="loading" class="py-8 text-center text-on-surface-variant">Chargement...</div>
           <div *ngIf="error" class="py-8 text-center text-error">{{ error }}</div>
           <div *ngIf="!loading && !error && orders.length === 0" class="py-8 text-center text-on-surface-variant">
             Aucune commande pour le moment.
-            <a routerLink="/boutique-desktop" class="block text-primary font-bold mt-2 hover:underline">Parcourir le catalogue</a>
+            <a routerLink="/boutique-desktop" class="block text-primary font-bold mt-2 hover:underline">Parcourir le
+              catalogue</a>
           </div>
 
           <div class="space-y-4" *ngIf="!loading && orders.length">
             <div *ngFor="let order of orders"
               class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-2xl border border-outline-variant/20">
               <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-secondary-container/20 text-secondary rounded-xl flex items-center justify-center">
+                <div
+                  class="w-12 h-12 bg-secondary-container/20 text-secondary rounded-xl flex items-center justify-center">
                   <span class="material-symbols-outlined">shopping_basket</span>
                 </div>
                 <div>
@@ -183,22 +239,30 @@
       </section>
     </div>
   </main>
-  
+
   <!-- Bottom Navigation (Mobile Only) -->
   <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center py-2 bg-primary z-50 shadow-lg">
-    <a routerLink="/" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a routerLink="/" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      [routerLinkActiveOptions]="{exact: true}"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
       <span class="text-[10px] font-bold uppercase mt-1">Home</span>
     </a>
-    <a routerLink="/boutique-desktop" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a routerLink="/boutique-desktop"
+      routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">storefront</span>
       <span class="text-[10px] font-bold uppercase mt-1">Market</span>
     </a>
-    <a [routerLink]="ordersRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a [routerLink]="ordersRoute"
+      routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">receipt_long</span>
       <span class="text-[10px] font-bold uppercase mt-1">Commandes</span>
     </a>
-    <a [routerLink]="profileRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a [routerLink]="profileRoute"
+      routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">person</span>
       <span class="text-[10px] font-bold uppercase mt-1">Profile</span>
     </a>

@@ -15,7 +15,7 @@
           routerLink="/boutique-desktop" routerLinkActive="text-primary border-b-2 border-primary pb-1">Catalogue</a>
         <a *ngIf="currentUser"
           class="font-body-md text-on-surface-variant hover:text-primary transition-colors transition-all"
-          [routerLink]="ordersRoute" routerLinkActive="text-primary border-b-2 border-primary pb-1">Commandes</a>
+          routerLink="/mes-commandes" routerLinkActive="text-primary border-b-2 border-primary pb-1">Commandes</a>
       </div>
 
       <!-- Action Cluster -->
@@ -39,15 +39,15 @@
               routerLink="/panier-recap" title="Mon panier">
               <span class="material-symbols-outlined text-2xl">shopping_cart</span>
               <span *ngIf="cartCount > 0"
-                class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">{{ cartCount }}</span>
+                class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">{{
+                cartCount }}</span>
             </button>
 
             <!-- Icon: Mon Profil -->
             <button
               class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold hover:shadow-md transition-all"
-              [routerLink]="profileRoute"
-              title="Mon profil">
-              {{ currentUser?.name?.charAt(0)?.toUpperCase() }}
+              [routerLink]="profileRoute" title="Mon profil">
+              {{ currentUser.name.charAt(0).toUpperCase() }}
             </button>
 
             <!-- Logout -->
@@ -148,17 +148,17 @@
           <div class="space-y-4">
             <div *ngFor="let point of pickupPoints; let i = index"
               class="flex items-center gap-4 p-4 rounded-xl border-l-4 transition-colors"
-              [class.bg-surface-container-low]="i === 0"
-              [class.border-primary]="i === 0"
-              [class.bg-white]="i !== 0"
+              [class.bg-surface-container-low]="i === 0" [class.border-primary]="i === 0" [class.bg-white]="i !== 0"
               [class.border-outline-variant]="i !== 0">
-              <span class="material-symbols-outlined" [class.text-primary]="i === 0" [class.text-outline]="i !== 0">location_on</span>
+              <span class="material-symbols-outlined" [class.text-primary]="i === 0"
+                [class.text-outline]="i !== 0">location_on</span>
               <div>
                 <p class="font-label-md text-on-surface">{{ point.name }}</p>
                 <p class="text-xs text-on-surface-variant">{{ point.address }}, {{ point.city }}</p>
               </div>
             </div>
-            <p *ngIf="pickupPoints.length === 0" class="text-sm text-on-surface-variant">Chargement des points de retrait...</p>
+            <p *ngIf="pickupPoints.length === 0" class="text-sm text-on-surface-variant">Chargement des points de
+              retrait...</p>
           </div>
         </div>
         <!-- Mock Map -->

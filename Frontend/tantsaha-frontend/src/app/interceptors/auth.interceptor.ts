@@ -17,19 +17,24 @@ export class AuthInterceptor implements HttpInterceptor {
   constructor(private injector: Injector) {}
 
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+    console.log('AuthInterceptor: intercepting request:', req.url);
     const token = localStorage.getItem('access_token');
     const authReq = token
       ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
       : req;
 
+    if (token) console.log('AuthInterceptor: added token to request');
+
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
+        console.error('AuthInterceptor: request error:', error.status, req.url);
         if (
           error.status === 401 &&
           !req.url.includes('/auth/login') &&
           !req.url.includes('/auth/register') &&
           !req.url.includes('/auth/token/refresh')
         ) {
+          console.log('AuthInterceptor: 401 detected, attempting refresh');
           return this.refreshAndRetry(authReq, next);
         }
         return throwError(() => error);

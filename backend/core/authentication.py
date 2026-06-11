@@ -1,4 +1,5 @@
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.settings import api_settings
 
 from api.models import User as APIUser
 
@@ -10,7 +11,7 @@ class CustomJWTAuthentication(JWTAuthentication):
     instead of Django's default user model.
     """
     def get_user(self, validated_token):
-        user_id = validated_token.get(self.user_id_claim)
+        user_id = validated_token.get(api_settings.USER_ID_CLAIM)
         if user_id is None:
             return None
 

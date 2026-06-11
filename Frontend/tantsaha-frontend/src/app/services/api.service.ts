@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, tap } from 'rxjs';
 import { CreatedOrder, HarvestLine, ManagerDelivery, OrderSummary, PickupPoint, ProducerProfile, ShopProduct } from '../models/shop.models';
 
 @Injectable({ providedIn: 'root' })
@@ -10,8 +10,15 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   getShop(params?: Record<string, string>): Observable<ShopProduct[]> {
+    console.log('ApiService: loading shop with params:', params);
     return this.http.get<ShopProduct[] | { results: ShopProduct[] }>(`${this.base}/shop/unified/`, { params }).pipe(
-      map((res) => (Array.isArray(res) ? res : res.results ?? []))
+      map((res) => {
+        console.log('ApiService: shop loaded successfully:', res);
+        return Array.isArray(res) ? res : res.results ?? [];
+      }),
+      tap({
+        error: (err: any) => console.error('ApiService: error loading shop:', err)
+      })
     );
   }
 

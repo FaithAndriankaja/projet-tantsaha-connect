@@ -15,7 +15,7 @@
           routerLink="/boutique-desktop" routerLinkActive="text-primary border-b-2 border-primary pb-1">Catalogue</a>
         <a *ngIf="currentUser"
           class="font-body-md text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
-          [routerLink]="ordersRoute" routerLinkActive="text-primary border-b-2 border-primary pb-1">Commandes</a>
+          routerLink="/mes-commandes" routerLinkActive="text-primary border-b-2 border-primary pb-1">Commandes</a>
       </div>
 
       <!-- Action Cluster -->
@@ -39,14 +39,14 @@
               routerLink="/panier-recap" title="Mon panier">
               <span class="material-symbols-outlined text-2xl">shopping_cart</span>
               <span
-                class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">{{ cartCount }}</span>
+                class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">{{
+                cartCount }}</span>
             </button>
 
             <!-- Icon: Mon Profil -->
             <button
               class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold hover:shadow-md transition-all"
-              [routerLink]="profileRoute"
-              title="Mon profil">
+              [routerLink]="profileRoute" title="Mon profil">
               {{ userInitial }}
             </button>
 
@@ -161,26 +161,26 @@
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" *ngIf="!loading && products.length">
-        <div *ngFor="let product of products"
-          class="glass-card rounded-3xl overflow-hidden card-hover group shadow-sm">
+        <div *ngFor="let product of products" class="glass-card rounded-3xl overflow-hidden card-hover group shadow-sm">
           <div class="relative aspect-square overflow-hidden bg-surface-dim flex items-center justify-center">
             <span class="material-symbols-outlined text-6xl text-primary/30">eco</span>
             <span *ngIf="isOutOfStock(product)"
               class="absolute top-4 left-4 bg-error text-white px-3 py-1 text-[10px] font-bold rounded-lg uppercase tracking-widest shadow-md">Rupture</span>
             <span *ngIf="!isOutOfStock(product)"
-              class="absolute top-4 left-4 bg-secondary text-white px-3 py-1 text-[10px] font-bold rounded-lg uppercase tracking-widest shadow-md">{{ product.category_name }}</span>
+              class="absolute top-4 left-4 bg-secondary text-white px-3 py-1 text-[10px] font-bold rounded-lg uppercase tracking-widest shadow-md">{{
+              product.category_name }}</span>
           </div>
           <div class="p-6">
             <h3 class="text-lg font-bold text-primary mb-1">{{ product.product_name }}</h3>
-            <p class="text-base font-bold text-secondary mb-4">{{ formatPrice(product.unit_price) }} Ar / {{ product.unit }}</p>
+            <p class="text-base font-bold text-secondary mb-4">{{ formatPrice(product.unit_price) }} Ar / {{
+              product.unit }}</p>
             <div class="flex items-center gap-2 mb-2">
               <span class="material-symbols-outlined text-primary text-lg">verified</span>
               <span class="text-xs font-semibold text-on-surface-variant">{{ product.farm_name }}</span>
             </div>
-            <p class="text-xs text-on-surface-variant mb-4">{{ product.pickup_point_name }} · Stock: {{ product.remaining_quantity }} {{ product.unit }}</p>
-            <button
-              (click)="addToCart(product)"
-              [disabled]="isOutOfStock(product)"
+            <p class="text-xs text-on-surface-variant mb-4">{{ product.pickup_point_name }} · Stock: {{
+              product.remaining_quantity }} {{ product.unit }}</p>
+            <button (click)="addToCart(product)" [disabled]="isOutOfStock(product)"
               class="w-full h-12 rounded-xl font-bold transition-all active:scale-95"
               [class.bg-surface-container]="addedProductId !== product.product_id && !isOutOfStock(product)"
               [class.text-primary]="addedProductId !== product.product_id && !isOutOfStock(product)"
@@ -189,10 +189,10 @@
               [class.hover:bg-primary]="addedProductId !== product.product_id && !isOutOfStock(product)"
               [class.hover:text-on-primary]="addedProductId !== product.product_id && !isOutOfStock(product)"
               [class.bg-primary]="addedProductId === product.product_id"
-              [class.text-on-primary]="addedProductId === product.product_id"
-              [class.opacity-50]="isOutOfStock(product)"
+              [class.text-on-primary]="addedProductId === product.product_id" [class.opacity-50]="isOutOfStock(product)"
               [class.cursor-not-allowed]="isOutOfStock(product)">
-              {{ isOutOfStock(product) ? 'Stock épuisé' : (addedProductId === product.product_id ? 'Ajouté !' : 'Ajouter au panier') }}
+              {{ isOutOfStock(product) ? 'Stock épuisé' : (addedProductId === product.product_id ? 'Ajouté !' : 'Ajouter
+              au panier') }}
             </button>
           </div>
         </div>
@@ -230,19 +230,27 @@
 
   <!-- Bottom Navigation (Mobile Only) -->
   <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center py-2 bg-primary z-50 shadow-lg">
-    <a routerLink="/" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a routerLink="/" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      [routerLinkActiveOptions]="{exact: true}"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
       <span class="text-[10px] font-bold uppercase mt-1">Home</span>
     </a>
-    <a routerLink="/boutique-desktop" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a routerLink="/boutique-desktop"
+      routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">storefront</span>
       <span class="text-[10px] font-bold uppercase mt-1">Market</span>
     </a>
-    <a [routerLink]="ordersRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a [routerLink]="ordersRoute"
+      routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">receipt_long</span>
       <span class="text-[10px] font-bold uppercase mt-1">Commandes</span>
     </a>
-    <a [routerLink]="profileRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a [routerLink]="profileRoute"
+      routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">person</span>
       <span class="text-[10px] font-bold uppercase mt-1">Profile</span>
     </a>

@@ -11,6 +11,7 @@ import { FarmerProfile } from './components/farmer-profile/farmer-profile';
 import { Emargement } from './components/emargement/emargement';
 import { ProfilAcheteur } from './components/profil-acheteur/profil-acheteur';
 import { SuccessOrder } from './components/success-order/success-order';
+import { MesCommandes } from './components/mes-commandes/mes-commandes';
 import { authGuard, producerGuard, managerGuard, consumerGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -25,6 +26,7 @@ export const routes: Routes = [
   { path: 'tantsaha-recolte', component: FarmerDashboard, canActivate: [producerGuard] },
   { path: 'tantsaha-ferme', component: FarmerProfile, canActivate: [producerGuard] },
   { path: 'profil-acheteur', component: ProfilAcheteur, canActivate: [authGuard, consumerGuard] },
+  { path: 'mes-commandes', component: MesCommandes, canActivate: [authGuard, consumerGuard] },
   { path: 'mpandrindra-livraison', component: Emargement, canActivate: [authGuard, managerGuard] },
   { path: '**', redirectTo: '' },
 ];

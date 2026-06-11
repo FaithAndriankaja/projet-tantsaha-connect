@@ -44,6 +44,20 @@ class User(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Propriétés requises par Django REST Framework pour les permissions
+    @property
+    def is_authenticated(self):
+        """Toujours True pour un utilisateur récupéré depuis la base de données."""
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    @property
+    def is_staff(self):
+        return self.role == 'admin'
+
     def __str__(self):
         return f"{self.full_name} ({self.role})"
 
@@ -88,7 +102,7 @@ class ProducerPickupPoint(models.Model):
     # Table de liaison producteur <-> point de retrait
     # La table SQL utilise une clé primaire composite (producer_id, pickup_point_id) sans colonne 'id'.
     # On utilise 'producer' comme PK artificiel pour Django et unique_together pour la contrainte réelle.
-    producer = models.ForeignKey(Producer, on_delete=models.CASCADE, db_column='producer_id', primary_key=True)
+    producer = models.OneToOneField(Producer, on_delete=models.CASCADE, db_column='producer_id', primary_key=True)
     pickup_point = models.ForeignKey(PickupPoint, on_delete=models.CASCADE, db_column='pickup_point_id')
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -194,8 +208,35 @@ class OrderItem(models.Model):
     producer = models.ForeignKey(Producer, on_delete=models.RESTRICT, db_column='producer_id')
     quantity = models.DecimalField(max_digits=12, decimal_places=3)
     unit_price = models.DecimalField(max_digits=12, decimal_places=2)
-    line_total = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True) # Generated column
+    line_total = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True) # Colonne générée par PostgreSQL
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        """
+        Surcharge de save() pour éviter d'insérer la colonne générée 'line_total'.
+        PostgreSQL calcule automatiquement cette valeur via GENERATED ALWAYS AS.
+        """
+        if self._state.adding:
+            from django.db import connection
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO order_items (id, order_id, product_id, producer_id, quantity, unit_price, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, NOW())
+                    """,
+                    [
+                        str(self.id),
+                        str(self.order_id),
+                        str(self.product_id),
+                        str(self.producer_id),
+                        self.quantity,
+                        self.unit_price,
+                    ]
+                )
+            self._state.adding = False
+            self.refresh_from_db()
+        else:
+            super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"

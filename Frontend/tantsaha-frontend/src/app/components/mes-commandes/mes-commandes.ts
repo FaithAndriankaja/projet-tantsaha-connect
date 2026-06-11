@@ -79,8 +79,8 @@ export class MesCommandes implements OnInit {
       pending_payment: 'En attente de paiement',
       payment_submitted: 'Paiement soumis',
       confirmed: 'Confirmée',
-      ready_for_pickup: 'Prête à récupérer',
-      delivered: 'Livrée',
+      ready: 'Prête à récupérer',
+      picked_up: 'Récupérée',
       cancelled: 'Annulée',
     };
     return map[status] || status;
@@ -91,8 +91,8 @@ export class MesCommandes implements OnInit {
       pending_payment: 'schedule',
       payment_submitted: 'upload',
       confirmed: 'check_circle',
-      ready_for_pickup: 'store',
-      delivered: 'verified',
+      ready: 'store',
+      picked_up: 'verified',
       cancelled: 'cancel',
     };
     return map[status] || 'help';
@@ -103,8 +103,8 @@ export class MesCommandes implements OnInit {
       pending_payment: 'text-amber-600 bg-amber-50',
       payment_submitted: 'text-blue-600 bg-blue-50',
       confirmed: 'text-green-600 bg-green-50',
-      ready_for_pickup: 'text-purple-600 bg-purple-50',
-      delivered: 'text-primary bg-primary/10',
+      ready: 'text-purple-600 bg-purple-50',
+      picked_up: 'text-primary bg-primary/10',
       cancelled: 'text-red-600 bg-red-50',
     };
     return map[status] || 'text-gray-600 bg-gray-50';
@@ -115,8 +115,8 @@ export class MesCommandes implements OnInit {
       pending_payment: 1,
       payment_submitted: 2,
       confirmed: 3,
-      ready_for_pickup: 4,
-      delivered: 5,
+      ready: 4,
+      picked_up: 5,
       cancelled: 0,
     };
     return steps[status] ?? 0;

@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Subject, catchError, exhaustMap, filter, map, of, timeout } from 'rxjs';
 import { AuthService, User } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
 import { OrderSummary } from '../../models/shop.models';
@@ -19,16 +21,52 @@ export class MesCommandes implements OnInit {
   error = '';
   expandedOrderId: string | null = null;
 
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly reload$ = new Subject<void>();
+
   constructor(
     private authService: AuthService,
-    private api: ApiService
+    private api: ApiService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.authService.currentUser.subscribe((user) => {
-      this.currentUser = user;
+    this.authService.syncSession();
+
+    this.reload$.pipe(
+      exhaustMap(() => this.fetchOrders()),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(({ orders, error }) => {
+      this.orders = orders;
+      this.error = error;
+      this.loading = false;
+      this.cdr.markForCheck();
     });
-    this.loadOrders();
+
+    this.authService.currentUser.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((user) => {
+      this.currentUser = user;
+      if (user && this.authService.isLoggedIn()) {
+        this.requestLoad();
+      } else {
+        this.orders = [];
+        this.loading = false;
+        this.error = '';
+        this.cdr.markForCheck();
+      }
+    });
+
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      filter(() => this.router.url.includes('/mes-commandes')),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => {
+      if (this.authService.isLoggedIn()) {
+        this.requestLoad();
+      }
+    });
   }
 
   get profileRoute(): string {
@@ -41,21 +79,32 @@ export class MesCommandes implements OnInit {
 
   logout() {
     this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
   loadOrders() {
+    this.requestLoad();
+  }
+
+  private requestLoad() {
+    if (!this.authService.isLoggedIn()) {
+      this.loading = false;
+      this.orders = [];
+      this.cdr.markForCheck();
+      return;
+    }
     this.loading = true;
     this.error = '';
-    this.api.getOrders().subscribe({
-      next: (orders) => {
-        this.orders = orders;
-        this.loading = false;
-      },
-      error: () => {
-        this.error = 'Impossible de charger vos commandes.';
-        this.loading = false;
-      },
-    });
+    this.cdr.markForCheck();
+    this.reload$.next();
+  }
+
+  private fetchOrders() {
+    return this.api.getOrders().pipe(
+      timeout(15000),
+      map((orders) => ({ orders: orders ?? [], error: '' })),
+      catchError(() => of({ orders: [] as OrderSummary[], error: 'Impossible de charger vos commandes.' }))
+    );
   }
 
   toggleOrder(orderId: string) {

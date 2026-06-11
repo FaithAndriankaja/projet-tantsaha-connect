@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, map, of, tap, throwError } from 'rxjs';
 import { ApiService } from './api.service';
 
 export interface User {
@@ -18,9 +18,9 @@ export class AuthService {
   public currentUser: Observable<User | null>;
 
   constructor(private api: ApiService) {
-    const savedUser = localStorage.getItem('currentUser');
-    this.currentUserSubject = new BehaviorSubject<User | null>(savedUser ? JSON.parse(savedUser) : null);
+    this.currentUserSubject = new BehaviorSubject<User | null>(this.readStoredUser());
     this.currentUser = this.currentUserSubject.asObservable();
+    this.syncSession();
   }
 
   public get currentUserValue(): User | null {
@@ -44,14 +44,55 @@ export class AuthService {
   }
 
   logout() {
+    this.clearSession();
+  }
+
+  clearSession(): void {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
   }
 
+  syncSession(): void {
+    const hasToken = this.isLoggedIn();
+    const user = this.currentUserSubject.value;
+    if (user && !hasToken) {
+      this.clearSession();
+    }
+  }
+
   isLoggedIn(): boolean {
     return !!localStorage.getItem('access_token');
+  }
+
+  ensureValidToken(): Observable<void> {
+    const token = this.getAccessToken();
+    if (!token) {
+      this.clearSession();
+      return throwError(() => new Error('NO_TOKEN'));
+    }
+
+    const payload = this.decodeToken(token);
+    const expiresAt = payload.exp ? payload.exp * 1000 : 0;
+    if (!expiresAt || Date.now() < expiresAt - 30_000) {
+      return of(undefined);
+    }
+
+    const refresh = localStorage.getItem('refresh_token');
+    if (!refresh) {
+      this.clearSession();
+      return throwError(() => new Error('NO_REFRESH'));
+    }
+
+    return this.api.refreshToken(refresh).pipe(
+      tap((res) => localStorage.setItem('access_token', res.access)),
+      map(() => undefined),
+      catchError((err) => {
+        this.clearSession();
+        return throwError(() => err);
+      })
+    );
   }
 
   getAccessToken(): string | null {
@@ -112,8 +153,13 @@ export class AuthService {
 
   private decodeToken(token: string): any {
     try {
-      const payload = token.split('.')[1];
-      return JSON.parse(atob(payload));
+      const base64Url = token.split('.')[1];
+      if (!base64Url) {
+        return {};
+      }
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+      return JSON.parse(atob(padded));
     } catch {
       return {};
     }
@@ -124,5 +170,17 @@ export class AuthService {
     if (role === 'manager') return 'mpandrindra';
     if (role === 'consumer') return 'mpanjifa';
     return role;
+  }
+
+  private readStoredUser(): User | null {
+    const savedUser = localStorage.getItem('currentUser');
+    if (!savedUser) {
+      return null;
+    }
+    try {
+      return JSON.parse(savedUser) as User;
+    } catch {
+      return null;
+    }
   }
 }

@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Subject, catchError, exhaustMap, map, of, timeout } from 'rxjs';
 import { AuthService, User } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
 import { CartService } from '../../services/cart.service';
@@ -20,20 +22,46 @@ export class ProfilAcheteur implements OnInit {
   error = '';
   cartCount = 0;
 
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly reload$ = new Subject<void>();
+
   constructor(
     private authService: AuthService,
     private api: ApiService,
-    private cart: CartService
+    private cart: CartService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.authService.currentUser.subscribe((user) => {
-      this.currentUser = user;
+    this.authService.syncSession();
+
+    this.reload$.pipe(
+      exhaustMap(() => this.fetchOrders()),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(({ orders, error }) => {
+      this.orders = orders;
+      this.error = error;
+      this.loading = false;
+      this.cdr.markForCheck();
     });
+
+    this.authService.currentUser.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((user) => {
+      this.currentUser = user;
+      if (user && this.authService.isLoggedIn()) {
+        this.requestLoad();
+      } else {
+        this.orders = [];
+        this.loading = false;
+        this.error = '';
+        this.cdr.markForCheck();
+      }
+    });
+
     this.cart.items$.subscribe((items) => {
       this.cartCount = items.reduce((sum, i) => sum + i.quantity, 0);
     });
-    this.loadOrders();
   }
 
   get profileRoute(): string {
@@ -45,18 +73,28 @@ export class ProfilAcheteur implements OnInit {
   }
 
   loadOrders() {
+    this.requestLoad();
+  }
+
+  private requestLoad() {
+    if (!this.authService.isLoggedIn()) {
+      this.loading = false;
+      this.orders = [];
+      this.cdr.markForCheck();
+      return;
+    }
     this.loading = true;
     this.error = '';
-    this.api.getOrders().subscribe({
-      next: (orders) => {
-        this.orders = orders;
-        this.loading = false;
-      },
-      error: () => {
-        this.error = 'Impossible de charger vos commandes.';
-        this.loading = false;
-      },
-    });
+    this.cdr.markForCheck();
+    this.reload$.next();
+  }
+
+  private fetchOrders() {
+    return this.api.getOrders().pipe(
+      timeout(15000),
+      map((orders) => ({ orders: orders ?? [], error: '' })),
+      catchError(() => of({ orders: [] as OrderSummary[], error: 'Impossible de charger vos commandes.' }))
+    );
   }
 
   logout() {

@@ -37,10 +37,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         return OrderResponseSerializer
 
     def get_queryset(self):
-        # Consommateur ne voit que ses commandes
+        qs = Order.objects.select_related('pickup_point').prefetch_related('items__product')
         if self.request.user.role == 'consumer':
-            return Order.objects.filter(consumer_user=self.request.user)
-        return super().get_queryset()
+            return qs.filter(consumer_user=self.request.user)
+        return qs
 
     @transaction.atomic
     def create(self, request, *args, **kwargs):

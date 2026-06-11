@@ -15,7 +15,7 @@
           routerLink="/boutique-desktop" routerLinkActive="text-primary border-b-2 border-primary pb-1">Catalogue</a>
         <a *ngIf="currentUser"
           class="font-body-md text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
-          routerLink="/panier-recap" routerLinkActive="text-primary border-b-2 border-primary pb-1">Commandes</a>
+          [routerLink]="ordersRoute" routerLinkActive="text-primary border-b-2 border-primary pb-1">Commandes</a>
       </div>
 
       <!-- Action Cluster -->
@@ -39,13 +39,13 @@
               routerLink="/panier-recap" title="Mon panier">
               <span class="material-symbols-outlined text-2xl">shopping_cart</span>
               <span
-                class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">2</span>
+                class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">{{ cartCount }}</span>
             </button>
 
             <!-- Icon: Mon Profil -->
             <button
               class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold hover:shadow-md transition-all"
-              [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'"
+              [routerLink]="profileRoute"
               title="Mon profil">
               {{ userInitial }}
             </button>
@@ -153,120 +153,47 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Product Card 1 -->
-        <div class="glass-card rounded-3xl overflow-hidden card-hover group shadow-sm">
-          <div class="relative aspect-square overflow-hidden bg-surface-dim">
-            <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyM1SuAyPAVRHhdixcdhBWfhvVQTpl-x241FToGetOVt1a1Vh5YghM8bkFwqPbLEEHZZ25x1AQ6L3gaSxd4LAViWH-OHcSTRwm_WRssAzdXzFZCY2YC1xF2cpcuJGyHhq3VLbLL3tnEjdgHt_FXlIIl8Y_EW3ylE-rQHu17nFXnGM5Vd7rTAo69FqWmGBvqR0cnCAjTahtJAhXlq3ikZVZUQl0rhSUbef_3QjONUtSO3Zdqze8DrgdltwZRRQRJx01_JeuDhFcao3Z" />
-            <span
-              class="absolute top-4 left-4 bg-secondary text-white px-3 py-1 text-[10px] font-bold rounded-lg uppercase tracking-widest shadow-md">Premium</span>
-          </div>
-          <div class="p-6">
-            <h3 class="text-lg font-bold text-primary mb-1">Gousses de Vanille Bio</h3>
-            <p class="text-base font-bold text-secondary mb-4">125,000 Ar / kg</p>
-            <div class="flex items-center gap-2 mb-6">
-              <span class="material-symbols-outlined text-primary text-lg">verified</span>
-              <span class="text-xs font-semibold text-on-surface-variant">Producteur Jean-Claude</span>
-            </div>
-            <button
-              class="w-full h-12 bg-surface-container text-primary border border-primary/20 rounded-xl font-bold hover:bg-primary hover:text-on-primary hover:border-transparent transition-all active:scale-95">Ajouter
-              au panier</button>
-          </div>
-        </div>
+      <div *ngIf="loading" class="py-20 text-center text-on-surface-variant">Chargement du catalogue...</div>
+      <div *ngIf="error" class="py-20 text-center text-error">{{ error }}</div>
 
-        <!-- Product Card 2 -->
-        <div class="glass-card rounded-3xl overflow-hidden card-hover group shadow-sm">
-          <div class="relative aspect-square overflow-hidden bg-surface-dim">
-            <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCs8oiy4csMnWjjbMPNP74IhqYjzeB75i5ECRXyE0PLuSQN-MPNzDjY1i-9PLOmnkyjywjwLHGKLTKbioZOGjCqcq20VvIpGgbiBI78oQFGNVQMe8PjqsobOjl3-DwqFxiKav3IFEK1bHnYLSKMTG3G2Mi_klGEf5IyN3uYmMz6_zwQQ6b505NnVHt1Ip7vzw9uvbJD7nDIj4c2u-MsbaQLldFzvnbvPDBE2tlO4h_v-RqdcJ9KhufYpKODtnVWHjdpQAU98Ovog5um" />
-          </div>
-          <div class="p-6">
-            <h3 class="text-lg font-bold text-primary mb-1">Pommes de Terre de Terre</h3>
-            <p class="text-base font-bold text-secondary mb-4">4,500 Ar / kg</p>
-            <div class="flex items-center gap-2 mb-6">
-              <span class="material-symbols-outlined text-primary text-lg">verified</span>
-              <span class="text-xs font-semibold text-on-surface-variant">Producteur Miora</span>
-            </div>
-            <button
-              class="w-full h-12 bg-surface-container text-primary border border-primary/20 rounded-xl font-bold hover:bg-primary hover:text-on-primary hover:border-transparent transition-all active:scale-95">Ajouter
-              au panier</button>
-          </div>
-        </div>
+      <div *ngIf="!loading && !error && products.length === 0" class="py-20 text-center text-on-surface-variant">
+        Aucun produit disponible pour le moment.
+      </div>
 
-        <!-- Product Card 3 -->
-        <div class="glass-card rounded-3xl overflow-hidden card-hover group shadow-sm">
-          <div class="relative aspect-square overflow-hidden bg-surface-dim">
-            <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJI3J3vKCTOha2mIIQv_Id8v3L1WPKtUQMYPncOI5DW-TApIX5W6f6SaWu43FGnwoLYOQqSmB52_x7LTHe9nZxW9aU9iOHGFwNPJbx-5WCfpZ0G2IHOWAaKKD8_3F_2NjOvggY3dEUIKhrGr6g9k3wJ_maYfs-Fsdrd73IWqxTfC81ensxSN4RowRkjN77Mh6I26--NVT6ujgEggyaw09rPCBZ6df93bozN6EtAmLvK6sAaFQdvINgqQZNVxRHd3UQfRiNXf3UrbSA" />
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" *ngIf="!loading && products.length">
+        <div *ngFor="let product of products"
+          class="glass-card rounded-3xl overflow-hidden card-hover group shadow-sm">
+          <div class="relative aspect-square overflow-hidden bg-surface-dim flex items-center justify-center">
+            <span class="material-symbols-outlined text-6xl text-primary/30">eco</span>
+            <span *ngIf="isOutOfStock(product)"
+              class="absolute top-4 left-4 bg-error text-white px-3 py-1 text-[10px] font-bold rounded-lg uppercase tracking-widest shadow-md">Rupture</span>
+            <span *ngIf="!isOutOfStock(product)"
+              class="absolute top-4 left-4 bg-secondary text-white px-3 py-1 text-[10px] font-bold rounded-lg uppercase tracking-widest shadow-md">{{ product.category_name }}</span>
           </div>
           <div class="p-6">
-            <h3 class="text-lg font-bold text-primary mb-1">Poivre Sauvage</h3>
-            <p class="text-base font-bold text-secondary mb-4">18,000 Ar / 250g</p>
-            <div class="flex items-center gap-2 mb-6">
+            <h3 class="text-lg font-bold text-primary mb-1">{{ product.product_name }}</h3>
+            <p class="text-base font-bold text-secondary mb-4">{{ formatPrice(product.unit_price) }} Ar / {{ product.unit }}</p>
+            <div class="flex items-center gap-2 mb-2">
               <span class="material-symbols-outlined text-primary text-lg">verified</span>
-              <span class="text-xs font-semibold text-on-surface-variant">Producteur Solo</span>
+              <span class="text-xs font-semibold text-on-surface-variant">{{ product.farm_name }}</span>
             </div>
+            <p class="text-xs text-on-surface-variant mb-4">{{ product.pickup_point_name }} · Stock: {{ product.remaining_quantity }} {{ product.unit }}</p>
             <button
-              class="w-full h-12 bg-surface-container text-primary border border-primary/20 rounded-xl font-bold hover:bg-primary hover:text-on-primary hover:border-transparent transition-all active:scale-95">Ajouter
-              au panier</button>
-          </div>
-        </div>
-
-        <!-- Product Card 4 -->
-        <div class="glass-card rounded-3xl overflow-hidden card-hover group shadow-sm">
-          <div class="relative aspect-square overflow-hidden bg-surface-dim">
-            <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfWWNZibTHeE2uCJ-iXlM8bTOPvCl4Vr1DTFZZ6AsP0aPaymllbcYPo9j7o43Yf4MOu2tTG9QfZMgvVzO9GPMmyFvAhhKJTwrlwhqeKBcRTtCECXtzQp8clklMHqAQw7o-AptIvzV6chL6UD3nTADOTQ3ihslsdSlfNE7sHUGPYnX0dnxUs-5EKAMpL3M6U81anSWZu4pu5Qm2CzkOCm4BU1Fv7Rzfp5EYl-G7-6g0OHY3zxJLVcyz2ABP2L05k9dEzrJncFKrvySQ" />
-          </div>
-          <div class="p-6">
-            <h3 class="text-lg font-bold text-primary mb-1">Carottes Sucrées d'Antsirabe</h3>
-            <p class="text-base font-bold text-secondary mb-4">3,200 Ar / botte</p>
-            <div class="flex items-center gap-2 mb-6">
-              <span class="material-symbols-outlined text-primary text-lg">verified</span>
-              <span class="text-xs font-semibold text-on-surface-variant">Producteur Rabary</span>
-            </div>
-            <button
-              class="w-full h-12 bg-surface-container text-primary border border-primary/20 rounded-xl font-bold hover:bg-primary hover:text-on-primary hover:border-transparent transition-all active:scale-95">Ajouter
-              au panier</button>
-          </div>
-        </div>
-
-        <!-- Product Card 5 -->
-        <div class="glass-card rounded-3xl overflow-hidden card-hover group shadow-sm">
-          <div class="relative aspect-square overflow-hidden bg-surface-dim">
-            <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiHsC74Bnosiz_C1V7kZsrmGXRJb2hww_fWQkJ0miB_a9liMYERbFUtT8vl1VXHHGTMqn5xvId1pilyldXuOvfC4jxQb8FYaU9h8L-bAq2Nh4RbYk3opnW9A3quxY_c0PCuVFzr0BQz57KqJtDz2ZGFmNcJ9gYHirk_zLx0lsXdK3QzzuJPD2GH9l1XTKU2dP4XIl1R7dEaiuW8CXF9Q7VaBhOONjovnWTTwqeO7_gE-D04iTVmLeMEODjy1a2eMvNc4NZlWkY-qdq" />
-          </div>
-          <div class="p-6">
-            <h3 class="text-lg font-bold text-primary mb-1">Vary Gasy (Riz Rouge)</h3>
-            <p class="text-base font-bold text-secondary mb-4">2,800 Ar / kapoaka</p>
-            <div class="flex items-center gap-2 mb-6">
-              <span class="material-symbols-outlined text-primary text-lg">verified</span>
-              <span class="text-xs font-semibold text-on-surface-variant">Producteur Fanilo</span>
-            </div>
-            <button
-              class="w-full h-12 bg-surface-container text-primary border border-primary/20 rounded-xl font-bold hover:bg-primary hover:text-on-primary hover:border-transparent transition-all active:scale-95">Ajouter
-              au panier</button>
-          </div>
-        </div>
-
-        <!-- Product Card 6 -->
-        <div class="glass-card rounded-3xl overflow-hidden card-hover group shadow-sm">
-          <div class="relative aspect-square overflow-hidden bg-surface-dim">
-            <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzM0_xX8mB1owFOeRPYPPi5cztPskHfyuQVOeDEcLohFsB3qP5uzBL6uFlD34kbttKc-hmGONh-WbPo0UESdz7oY0mGA5XRBJY6b8ER8rqMoAKC2Q4Z0Zvr0W-wDUMTrh1VhKshQraLrS4ueZ-ex4UB7qweJ36czQBkoNleReSsvFyaLhURL9l3V8qQJqCjCN8rvt4c1jOQeyyW1Z_zG168MBNMxgx6I-tPOJDl_8xj4CH7G9HfOLt2kVohkC9HhvVm3fxohhXGs_-" />
-          </div>
-          <div class="p-6">
-            <h3 class="text-lg font-bold text-primary mb-1">Clous de Girofle</h3>
-            <p class="text-base font-bold text-secondary mb-4">45,000 Ar / 500g</p>
-            <div class="flex items-center gap-2 mb-6">
-              <span class="material-symbols-outlined text-primary text-lg">verified</span>
-              <span class="text-xs font-semibold text-on-surface-variant">Producteur Lalao</span>
-            </div>
-            <button
-              class="w-full h-12 bg-surface-container text-primary border border-primary/20 rounded-xl font-bold hover:bg-primary hover:text-on-primary hover:border-transparent transition-all active:scale-95">Ajouter
-              au panier</button>
+              (click)="addToCart(product)"
+              [disabled]="isOutOfStock(product)"
+              class="w-full h-12 rounded-xl font-bold transition-all active:scale-95"
+              [class.bg-surface-container]="addedProductId !== product.product_id && !isOutOfStock(product)"
+              [class.text-primary]="addedProductId !== product.product_id && !isOutOfStock(product)"
+              [class.border]="addedProductId !== product.product_id && !isOutOfStock(product)"
+              [class.border-primary/20]="addedProductId !== product.product_id && !isOutOfStock(product)"
+              [class.hover:bg-primary]="addedProductId !== product.product_id && !isOutOfStock(product)"
+              [class.hover:text-on-primary]="addedProductId !== product.product_id && !isOutOfStock(product)"
+              [class.bg-primary]="addedProductId === product.product_id"
+              [class.text-on-primary]="addedProductId === product.product_id"
+              [class.opacity-50]="isOutOfStock(product)"
+              [class.cursor-not-allowed]="isOutOfStock(product)">
+              {{ isOutOfStock(product) ? 'Stock épuisé' : (addedProductId === product.product_id ? 'Ajouté !' : 'Ajouter au panier') }}
+            </button>
           </div>
         </div>
       </div>
@@ -311,11 +238,11 @@
       <span class="material-symbols-outlined">storefront</span>
       <span class="text-[10px] font-bold uppercase mt-1">Market</span>
     </a>
-    <a routerLink="/panier-recap" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a [routerLink]="ordersRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">receipt_long</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Orders</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Commandes</span>
     </a>
-    <a [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a [routerLink]="profileRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">person</span>
       <span class="text-[10px] font-bold uppercase mt-1">Profile</span>
     </a>

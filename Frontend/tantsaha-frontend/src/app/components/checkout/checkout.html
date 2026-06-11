@@ -13,7 +13,7 @@
         <a class="font-body-md text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
           routerLink="/boutique-desktop">Catalogue</a>
         <a *ngIf="currentUser" class="font-body-md text-primary border-b-2 border-primary pb-1 cursor-pointer"
-          routerLink="/panier-recap">Commandes</a>
+          [routerLink]="ordersRoute">Commandes</a>
       </div>
 
       <!-- Action Cluster -->
@@ -37,13 +37,13 @@
               <span class="material-symbols-outlined text-2xl"
                 style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
               <span
-                class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">3</span>
+                class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">{{ cartCount }}</span>
             </button>
 
             <!-- Icon: Mon Profil -->
             <button
               class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold hover:shadow-md transition-all"
-              [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'"
+              [routerLink]="profileRoute"
               title="Mon profil">
               {{ currentUser?.name?.charAt(0)?.toUpperCase() }}
             </button>
@@ -81,75 +81,55 @@
       <!-- Main Content (Items & Delivery) -->
       <div class="lg:col-span-8 space-y-6">
         <!-- Cart Items -->
-        <div class="glass-card rounded-3xl overflow-hidden shadow-sm">
+        <div class="glass-card rounded-3xl overflow-hidden shadow-sm" *ngIf="cartItems.length; else emptyCart">
           <div class="p-6 border-b border-outline-variant/30 flex items-center justify-between bg-primary/5">
             <div class="flex items-center gap-3">
               <span class="material-symbols-outlined text-primary">agriculture</span>
-              <span class="font-bold text-on-surface">Ferme d'Imerintsiatosika</span>
+              <span class="font-bold text-on-surface">{{ farmName }}</span>
             </div>
-            <span class="text-xs font-bold text-primary uppercase tracking-tighter">Récolte du jour</span>
+            <span class="text-xs font-bold text-primary uppercase tracking-tighter">{{ pickupPointName }}</span>
           </div>
 
           <div class="divide-y divide-outline-variant/20">
-            <!-- Item 1 -->
-            <div class="p-6 product-row-hover flex flex-col sm:flex-row gap-6">
-              <img class="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-2xl shadow-sm"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_DnJ6W4b7VszqiyzcrRnBSaHSjJxzPlOmOlt5RVVwiKXYPL9BBOX873usiyOu9dqKL9tNQIXE-FbtVNBNeBT__Nh8urbaONgWi4skbvoOgyKdIFRO0O-8VqXMhKYz7qRvdDzFmj36-xbhK_QDb3jbprPZfVl40A85tSrOxOqLKfCSaKHpsNJUp8LWPoiDV48PNrzqok-PkgrmXkueM3zHJwTAxR-yvYi9-3qwHhQoBfiDz9slzioqF34EW9C8JK46eCGQmA_2CVI4" />
-              <div class="flex-1 flex flex-col justify-between">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <h3 class="text-xl font-bold text-primary">Fraises d'altitude (1kg)</h3>
-                    <p class="text-sm font-semibold text-on-surface-variant">Ar 12,000 / unité</p>
-                  </div>
-                  <button class="text-outline hover:text-error transition-colors"><span
-                      class="material-symbols-outlined">delete</span></button>
-                </div>
-                <div class="flex items-center justify-between mt-4">
-                  <div
-                    class="quantity-selector flex items-center bg-surface-container-low rounded-xl p-1 border border-outline-variant/30">
-                    <button
-                      class="minus-btn w-8 h-8 flex items-center justify-center text-primary hover:bg-white rounded-lg transition-all"><span
-                        class="material-symbols-outlined text-lg">remove</span></button>
-                    <span class="px-4 font-bold text-sm">2</span>
-                    <button
-                      class="plus-btn w-8 h-8 flex items-center justify-center text-primary hover:bg-white rounded-lg transition-all"><span
-                        class="material-symbols-outlined text-lg">add</span></button>
-                  </div>
-                  <span class="text-xl font-bold text-secondary">Ar 24,000</span>
-                </div>
+            <div *ngFor="let item of cartItems" class="p-6 product-row-hover flex flex-col sm:flex-row gap-6">
+              <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl shadow-sm bg-primary/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl text-primary/40">eco</span>
               </div>
-            </div>
-
-            <!-- Item 2 -->
-            <div class="p-6 product-row-hover flex flex-col sm:flex-row gap-6">
-              <img class="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-2xl shadow-sm"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBk50VS7EBFYGxY5Wf1-GzEWyVabiByqTKKha4CuIiYsOEaYupCj5lkIAA77Hk9NxKGqAnxzgz2aUpaR1zXBjvTv3rFktSGyj8Fqe8ALKoQCjRUSb5o06mO4I6jtFv0kuA6MvfQI8POBx-TbMxIsRXz_CiTEQSliqXnCdOGu8JObqMU329EIFFZawHnNfT5_lea8wchEhEdKJLo_orl64KDHuo8Ce7vchCf-y0HrLbHpH20HjMBoAbUFF0qmDYWqEzDYZYcUuy69Zhm" />
               <div class="flex-1 flex flex-col justify-between">
                 <div class="flex justify-between items-start">
                   <div>
-                    <h3 class="text-xl font-bold text-primary">Vary Gasy Premium (5kg)</h3>
-                    <p class="text-sm font-semibold text-on-surface-variant">Ar 18,500 / unité</p>
+                    <h3 class="text-xl font-bold text-primary">{{ item.product_name }}</h3>
+                    <p class="text-sm font-semibold text-on-surface-variant">Ar {{ formatPrice(item.unit_price) }} / {{ item.unit }}</p>
                   </div>
-                  <button class="text-outline hover:text-error transition-colors"><span
-                      class="material-symbols-outlined">delete</span></button>
+                  <button type="button" (click)="removeItem(item)" class="text-outline hover:text-error transition-colors">
+                    <span class="material-symbols-outlined">delete</span>
+                  </button>
                 </div>
                 <div class="flex items-center justify-between mt-4">
-                  <div
-                    class="quantity-selector flex items-center bg-surface-container-low rounded-xl p-1 border border-outline-variant/30">
-                    <button
-                      class="minus-btn w-8 h-8 flex items-center justify-center text-primary hover:bg-white rounded-lg transition-all"><span
-                        class="material-symbols-outlined text-lg">remove</span></button>
-                    <span class="px-4 font-bold text-sm">1</span>
-                    <button
-                      class="plus-btn w-8 h-8 flex items-center justify-center text-primary hover:bg-white rounded-lg transition-all"><span
-                        class="material-symbols-outlined text-lg">add</span></button>
+                  <div class="flex items-center bg-surface-container-low rounded-xl p-1 border border-outline-variant/30">
+                    <button type="button" (click)="decreaseQty(item)"
+                      class="w-8 h-8 flex items-center justify-center text-primary hover:bg-white rounded-lg transition-all">
+                      <span class="material-symbols-outlined text-lg">remove</span>
+                    </button>
+                    <span class="px-4 font-bold text-sm">{{ item.quantity }}</span>
+                    <button type="button" (click)="increaseQty(item)"
+                      class="w-8 h-8 flex items-center justify-center text-primary hover:bg-white rounded-lg transition-all">
+                      <span class="material-symbols-outlined text-lg">add</span>
+                    </button>
                   </div>
-                  <span class="text-xl font-bold text-secondary">Ar 18,500</span>
+                  <span class="text-xl font-bold text-secondary">Ar {{ formatPrice(lineTotal(item)) }}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <ng-template #emptyCart>
+          <div class="glass-card rounded-3xl p-10 text-center shadow-sm">
+            <p class="text-on-surface-variant mb-4">Votre panier est vide.</p>
+            <a routerLink="/boutique-desktop" class="text-primary font-bold hover:underline">Parcourir le catalogue</a>
+          </div>
+        </ng-template>
 
         <!-- Delivery Form -->
         <div class="glass-card rounded-3xl p-8 shadow-sm">
@@ -194,34 +174,20 @@
           <div class="space-y-4 mb-8">
             <div class="flex justify-between items-center text-on-surface-variant">
               <span class="font-semibold">Sous-total</span>
-              <span class="font-bold">Ar 42,500</span>
-            </div>
-            <div class="flex justify-between items-center text-on-surface-variant">
-              <span class="font-semibold">Frais de livraison</span>
-              <span class="font-bold">Ar 5,000</span>
+              <span class="font-bold">Ar {{ formatPrice(subtotal) }}</span>
             </div>
             <div class="pt-4 border-t border-outline-variant/30 flex justify-between items-center">
               <span class="text-xl font-bold">Total</span>
-              <span class="text-2xl font-black text-secondary">Ar 47,500</span>
+              <span class="text-2xl font-black text-secondary">Ar {{ formatPrice(subtotal) }}</span>
             </div>
           </div>
 
-          <div class="space-y-4 mb-8">
-            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Méthode de Paiement</p>
-            <label
-              class="flex items-center gap-4 p-4 border border-outline-variant/30 rounded-2xl cursor-pointer hover:bg-primary/5 transition-all group has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-              <input checked="" class="accent-primary w-5 h-5" name="payment" type="radio" value="mobile" />
-              <div class="flex flex-col">
-                <span class="font-bold text-primary group-hover:text-primary transition-colors">Mobile Money</span>
-                <span class="text-[10px] uppercase font-bold text-on-surface-variant">MVola, Orange, Airtel</span>
-              </div>
-            </label>
-          </div>
+          <p *ngIf="error" class="text-error text-sm mb-4">{{ error }}</p>
 
-          <button
-            class="confirm-btn w-full h-14 bg-primary text-on-primary rounded-xl font-bold shadow-lg hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2">
-            CONFIRMER LA COMMANDE
-            <span class="material-symbols-outlined">arrow_forward</span>
+          <button type="button" (click)="confirmOrder()" [disabled]="submitting || cartItems.length === 0"
+            class="confirm-btn w-full h-14 bg-primary text-on-primary rounded-xl font-bold shadow-lg hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+            {{ submitting ? 'Traitement...' : 'CONFIRMER LA COMMANDE' }}
+            <span class="material-symbols-outlined" *ngIf="!submitting">arrow_forward</span>
           </button>
 
           <div class="mt-6 flex flex-col items-center gap-2">
@@ -261,13 +227,13 @@
       <span class="material-symbols-outlined">storefront</span>
       <span class="text-[10px] font-bold uppercase mt-1">Market</span>
     </a>
-    <a routerLink="/panier-recap"
+    <a [routerLink]="ordersRoute"
       routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
       class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">receipt_long</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Orders</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Commandes</span>
     </a>
-    <a [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'"
+    <a [routerLink]="profileRoute"
       routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
       class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">person</span>

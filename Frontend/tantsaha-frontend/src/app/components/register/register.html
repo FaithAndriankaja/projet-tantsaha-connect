@@ -6,7 +6,7 @@
 
       <a class="text-2xl font-bold text-primary tracking-tight" routerLink="/">Tantsaha Connect</a>
       <a class="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors duration-200 cursor-pointer"
-        routerLink="/login">Login</a>
+        routerLink="/login">Connexion</a>
     </div>
   </header>
 
@@ -110,52 +110,28 @@
 
         <!-- STEP 2: Conditional Forms -->
         <div class="hidden flex-grow flex flex-col gap-4" id="step-2-content">
-          <!-- Buyer Fields -->
-          <div class="hidden space-y-4" id="mpanjifa-fields">
-            <div class="flex flex-col gap-1">
-              <label class="text-xs font-semibold text-on-surface-variant">Nom Complet</label>
-              <input
-                class="h-14 px-4 rounded-xl bg-surface-container-low border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
-                placeholder="Ex: Jean Rakoto" type="text" />
-            </div>
-            <div class="flex flex-col gap-1">
-              <label class="text-xs font-semibold text-on-surface-variant">Téléphone</label>
-              <input
-                class="h-14 px-4 rounded-xl bg-surface-container-low border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
-                placeholder="+261" type="tel" />
-            </div>
-            <button
-              class="flex items-center justify-center gap-2 h-14 w-full border border-primary text-primary rounded-xl font-bold active:scale-95 transition-transform"
-              type="button">
-              <span class="material-symbols-outlined">my_location</span>
-              Détecter ma position
-            </button>
-          </div>
-
           <!-- Producer Fields -->
           <div class="hidden space-y-4" id="tantsaha-fields">
             <div class="flex flex-col gap-1">
-              <label class="text-xs font-semibold text-on-surface-variant">Prénom et Nom</label>
-              <input
+              <label class="text-xs font-semibold text-on-surface-variant" for="producerName">Nom de la ferme</label>
+              <input id="producerName"
                 class="h-14 px-4 rounded-xl bg-surface-container-low border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
-                type="text" />
+                placeholder="Ex: Ferme Rakoto" type="text" />
             </div>
             <div class="flex flex-col gap-1">
-              <label class="text-xs font-semibold text-on-surface-variant">Type de Production</label>
-              <select
+              <label class="text-xs font-semibold text-on-surface-variant" for="producerLocation">Type de Production</label>
+              <select id="producerLocation"
                 class="h-14 px-4 rounded-xl bg-surface-container-low border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none">
-                <option>Maraîchage (Légumes)</option>
-                <option>Verger (Fruits)</option>
-                <option>Élevage</option>
-                <option>Riziculture</option>
+                <option value="Maraîchage (Légumes)">Maraîchage (Légumes)</option>
+                <option value="Verger (Fruits)">Verger (Fruits)</option>
+                <option value="Élevage">Élevage</option>
+                <option value="Riziculture">Riziculture</option>
               </select>
             </div>
             <div
-              class="border-2 border-dashed border-outline-variant p-4 rounded-xl text-center hover:border-primary transition-colors cursor-pointer">
+              class="border-2 border-dashed border-outline-variant p-4 rounded-xl text-center opacity-60 cursor-not-allowed">
               <span class="material-symbols-outlined text-4xl text-outline mb-2">upload_file</span>
-              <p class="text-sm font-semibold">
-                Charger vos certifications (BIO, etc.)
-              </p>
+              <p class="text-sm font-semibold">Certifications (BIO, etc.) — bientôt disponible</p>
             </div>
           </div>
 
@@ -184,16 +160,28 @@
           <!-- Shared Auth -->
           <div class="space-y-4 pt-2">
             <div class="flex flex-col gap-1">
-              <label class="text-xs font-semibold text-on-surface-variant">Email</label>
-              <input
+              <label class="text-xs font-semibold text-on-surface-variant" for="registerFullName">Nom complet</label>
+              <input id="registerFullName"
+                class="h-14 px-4 rounded-xl bg-surface-container-low border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                placeholder="Ex: Jean Rakoto" type="text" required />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-semibold text-on-surface-variant" for="registerPhone">Téléphone</label>
+              <input id="registerPhone"
+                class="h-14 px-4 rounded-xl bg-surface-container-low border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                placeholder="0341234567" type="tel" required />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-semibold text-on-surface-variant" for="registerEmail">Email (optionnel)</label>
+              <input id="registerEmail"
                 class="h-14 px-4 rounded-xl bg-surface-container-low border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
                 placeholder="contact@tantsaha.mg" type="email" />
             </div>
             <div class="flex flex-col gap-1">
-              <label class="text-xs font-semibold text-on-surface-variant">Mot de passe</label>
-              <input
+              <label class="text-xs font-semibold text-on-surface-variant" for="registerPassword">Mot de passe</label>
+              <input id="registerPassword"
                 class="h-14 px-4 rounded-xl bg-surface-container-low border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
-                placeholder="••••••••" type="password" />
+                placeholder="••••••••" type="password" required />
             </div>
           </div>
         </div>
@@ -248,11 +236,11 @@
       <span class="material-symbols-outlined">storefront</span>
       <span class="text-[10px] font-bold uppercase mt-1">Market</span>
     </a>
-    <a routerLink="/panier-recap" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a [routerLink]="ordersRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">receipt_long</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Orders</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Commandes</span>
     </a>
-    <a [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a [routerLink]="profileRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">person</span>
       <span class="text-[10px] font-bold uppercase mt-1">Profile</span>
     </a>

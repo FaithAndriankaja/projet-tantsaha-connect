@@ -5,10 +5,10 @@
 <span class="font-headline-md text-headline-md text-primary font-bold">Tantsaha Connect</span>
 </div>
 <div class="hidden md:flex items-center gap-lg">
-<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" routerLink="/">Home</a>
-<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" routerLink="/boutique-desktop">Market</a>
-<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" routerLink="/panier-recap">Orders</a>
-<a class="text-primary font-bold border-b-2 border-primary pb-1" routerLink="/tantsaha-ferme">Profile</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" routerLink="/">Accueil</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" routerLink="/boutique-desktop">Catalogue</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" [routerLink]="ordersRoute">Commandes</a>
+<a class="text-primary font-bold border-b-2 border-primary pb-1" [routerLink]="profileRoute">Profil</a>
 </div>
 <div class="flex items-center gap-md">
 <span class="material-symbols-outlined text-on-surface-variant cursor-pointer">shopping_cart</span>
@@ -32,10 +32,10 @@
 <div class="flex-grow text-center md:text-left">
 <div class="flex flex-col md:flex-row md:items-center justify-between gap-md mb-md">
 <div>
-<h1 class="font-headline-lg-mobile md:text-headline-lg font-bold text-on-surface">Rakoto's Farm</h1>
+<h1 class="font-headline-lg-mobile md:text-headline-lg font-bold text-on-surface">{{ farmName }}</h1>
 <div class="flex items-center justify-center md:justify-start gap-xs text-on-surface-variant mt-xs">
 <span class="material-symbols-outlined text-primary">location_on</span>
-<span class="font-body-md text-body-md">Antsirabe, Madagascar</span>
+<span class="font-body-md text-body-md">{{ location }}</span>
 </div>
 </div>
 <div class="flex gap-md justify-center">
@@ -236,11 +236,11 @@
       <span class="material-symbols-outlined">storefront</span>
       <span class="text-[10px] font-bold uppercase mt-1">Market</span>
     </a>
-    <a routerLink="/panier-recap" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a [routerLink]="ordersRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">receipt_long</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Orders</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Commandes</span>
     </a>
-    <a [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a [routerLink]="profileRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">person</span>
       <span class="text-[10px] font-bold uppercase mt-1">Profile</span>
     </a>

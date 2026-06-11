@@ -1,0 +1,84 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable, map } from 'rxjs';
+import { CreatedOrder, HarvestLine, ManagerDelivery, OrderSummary, PickupPoint, ProducerProfile, ShopProduct } from '../models/shop.models';
+
+@Injectable({ providedIn: 'root' })
+export class ApiService {
+  private base = (window as any).__APP_CONFIG?.API_BASE_URL || '/api';
+
+  constructor(private http: HttpClient) {}
+
+  getShop(params?: Record<string, string>): Observable<ShopProduct[]> {
+    return this.http.get<ShopProduct[] | { results: ShopProduct[] }>(`${this.base}/shop/unified/`, { params }).pipe(
+      map((res) => (Array.isArray(res) ? res : res.results ?? []))
+    );
+  }
+
+  createOrder(payload: unknown): Observable<CreatedOrder> {
+    return this.http.post<CreatedOrder>(`${this.base}/orders/`, payload);
+  }
+
+  uploadPayment(orderId: string, payload: { method: string; proof_file_path: string }) {
+    return this.http.post(`${this.base}/orders/${orderId}/payment/`, payload);
+  }
+
+  loginPhone(phone: string, password: string) {
+    return this.http.post(`${this.base}/auth/login/`, { phone, password });
+  }
+
+  register(payload: {
+    phone: string;
+    password: string;
+    full_name: string;
+    email?: string;
+    role: string;
+    farm_name?: string;
+    location?: string;
+  }) {
+    return this.http.post(`${this.base}/auth/register/`, payload);
+  }
+
+  refreshToken(refresh: string) {
+    return this.http.post<{ access: string }>(`${this.base}/auth/token/refresh/`, { refresh });
+  }
+
+  uploadProof(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ proof_file_path: string }>(`${this.base}/media/proof/`, formData);
+  }
+
+  getOrders(): Observable<OrderSummary[]> {
+    return this.http.get<OrderSummary[] | { results: OrderSummary[] }>(`${this.base}/orders/`).pipe(
+      map((res) => (Array.isArray(res) ? res : res.results ?? []))
+    );
+  }
+
+  getHarvestSheet(): Observable<HarvestLine[]> {
+    return this.http.get<HarvestLine[] | { results: HarvestLine[] }>(`${this.base}/harvest-sheet/`).pipe(
+      map((res) => (Array.isArray(res) ? res : res.results ?? []))
+    );
+  }
+
+  getProducerProfile(): Observable<ProducerProfile> {
+    return this.http.get<ProducerProfile>(`${this.base}/producers/me/`);
+  }
+
+  getPickupPoints(): Observable<PickupPoint[]> {
+    return this.http.get<PickupPoint[] | { results: PickupPoint[] }>(`${this.base}/pickup-points/`).pipe(
+      map((res) => (Array.isArray(res) ? res : res.results ?? []))
+    );
+  }
+
+  getManagerDeliveries(): Observable<ManagerDelivery[]> {
+    return this.http.get<ManagerDelivery[]>(`${this.base}/manager/deliveries/`);
+  }
+
+  confirmHandover(orderId: string): Observable<{ status: string; transaction_code: string }> {
+    return this.http.post<{ status: string; transaction_code: string }>(
+      `${this.base}/orders/${orderId}/handover/`,
+      {}
+    );
+  }
+}

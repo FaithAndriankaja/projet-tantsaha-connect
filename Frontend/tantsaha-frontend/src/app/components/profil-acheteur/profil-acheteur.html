@@ -42,8 +42,8 @@
             <div>
               <h1 class="font-display text-3xl md:text-4xl font-bold text-on-surface">Bonjour, {{ currentUser?.name || 'Acheteur' }} !</h1>
               <p class="font-body-md text-on-surface-variant flex items-center justify-center md:justify-start gap-1">
-                <span class="material-symbols-outlined text-sm">mail</span>
-                {{ currentUser?.email }}
+                <span class="material-symbols-outlined text-sm">phone</span>
+                {{ currentUser?.phone || '—' }}
               </p>
             </div>
             <div class="flex gap-3 justify-center">
@@ -133,7 +133,7 @@
             </div>
             <div class="space-y-1">
               <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">Téléphone</p>
-              <p class="font-body-md font-medium">+261 34 00 000 00</p>
+              <p class="font-body-md font-medium">{{ currentUser?.phone || '—' }}</p>
             </div>
             <div class="space-y-1">
               <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">Langue</p>
@@ -146,41 +146,35 @@
         <div class="bg-white p-6 md:p-8 rounded-3xl border border-outline-variant/30 shadow-sm">
           <div class="flex items-center justify-between mb-6">
             <h2 class="font-headline-md text-on-surface font-bold">Dernières Commandes</h2>
-            <button class="text-primary font-label-md hover:underline" routerLink="/panier-recap">Voir tout</button>
+            <button class="text-primary font-label-md hover:underline" routerLink="/profil-acheteur">Voir tout</button>
           </div>
           
-          <div class="space-y-4">
-            <!-- Mock Order Item -->
-            <div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-2xl border border-outline-variant/20">
+          <div *ngIf="loading" class="py-8 text-center text-on-surface-variant">Chargement...</div>
+          <div *ngIf="error" class="py-8 text-center text-error">{{ error }}</div>
+          <div *ngIf="!loading && !error && orders.length === 0" class="py-8 text-center text-on-surface-variant">
+            Aucune commande pour le moment.
+            <a routerLink="/boutique-desktop" class="block text-primary font-bold mt-2 hover:underline">Parcourir le catalogue</a>
+          </div>
+
+          <div class="space-y-4" *ngIf="!loading && orders.length">
+            <div *ngFor="let order of orders"
+              class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-2xl border border-outline-variant/20">
               <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-secondary-container/20 text-secondary rounded-xl flex items-center justify-center">
                   <span class="material-symbols-outlined">shopping_basket</span>
                 </div>
                 <div>
-                  <p class="font-label-md">Commande #TC-8892</p>
-                  <p class="text-xs text-on-surface-variant">12 Octobre 2024 • 3 articles</p>
+                  <p class="font-label-md">{{ order.transaction_code }}</p>
+                  <p class="text-xs text-on-surface-variant">
+                    {{ formatDate(order.created_at) }} • {{ order.items?.length || 0 }} article(s)
+                  </p>
                 </div>
               </div>
               <div class="text-right">
-                <p class="font-label-md font-bold">45,000 Ar</p>
-                <span class="px-2 py-0.5 bg-success/10 text-success rounded text-[10px] font-bold uppercase">Livré</span>
-              </div>
-            </div>
-
-            <!-- Mock Order Item 2 -->
-            <div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-2xl border border-outline-variant/20">
-              <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-primary-container/20 text-primary rounded-xl flex items-center justify-center">
-                  <span class="material-symbols-outlined">local_shipping</span>
-                </div>
-                <div>
-                  <p class="font-label-md">Commande #TC-8871</p>
-                  <p class="text-xs text-on-surface-variant">5 Octobre 2024 • 1 article</p>
-                </div>
-              </div>
-              <div class="text-right">
-                <p class="font-label-md font-bold">12,500 Ar</p>
-                <span class="px-2 py-0.5 bg-warning/10 text-warning rounded text-[10px] font-bold uppercase">En cours</span>
+                <p class="font-label-md font-bold">{{ formatPrice(order.total_amount) }} Ar</p>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase" [ngClass]="statusClass(order.status)">
+                  {{ statusLabel(order.status) }}
+                </span>
               </div>
             </div>
           </div>
@@ -200,11 +194,11 @@
       <span class="material-symbols-outlined">storefront</span>
       <span class="text-[10px] font-bold uppercase mt-1">Market</span>
     </a>
-    <a routerLink="/panier-recap" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a [routerLink]="ordersRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">receipt_long</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Orders</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Commandes</span>
     </a>
-    <a [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a [routerLink]="profileRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">person</span>
       <span class="text-[10px] font-bold uppercase mt-1">Profile</span>
     </a>

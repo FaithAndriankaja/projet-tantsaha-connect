@@ -5,10 +5,10 @@
 <h1 class="font-headline-md text-headline-md text-primary font-bold">Tantsaha Connect</h1>
 </div>
 <div class="hidden md:flex items-center gap-lg">
-<a class="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md" routerLink="/">Home</a>
-<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" routerLink="/boutique-desktop">Market</a>
-<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" routerLink="/panier-recap">Orders</a>
-<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" routerLink="/tantsaha-ferme">Profile</a>
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md" routerLink="/">Accueil</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" routerLink="/boutique-desktop">Catalogue</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" [routerLink]="ordersRoute">Commandes</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" [routerLink]="profileRoute">Profil</a>
 </div>
 <div class="flex items-center gap-md">
 <span class="material-symbols-outlined text-primary cursor-pointer">shopping_cart</span>
@@ -21,7 +21,7 @@
 <section class="w-full mb-lg">
 <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-sm border-b-2 border-primary pb-sm">
 <h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">
-                    Bonjour Thomas <span class="text-primary-container font-medium text-body-lg">(Maraîcher Antsirabe)</span>
+                    Bonjour {{ currentUser?.name || 'Producteur' }} <span class="text-primary-container font-medium text-body-lg">({{ farmName }})</span>
 </h2>
 <div class="flex items-center gap-xs text-primary font-bold bg-primary-fixed/20 px-sm py-xs rounded">
 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified</span>
@@ -37,30 +37,25 @@
 </div>
 <!-- Responsive Table Container -->
 <div class="overflow-x-auto w-full mb-xl">
-<table class="w-full border-collapse border border-outline-variant text-left">
+<p *ngIf="loading" class="py-8 text-center text-on-surface-variant">Chargement...</p>
+<p *ngIf="error" class="py-8 text-center text-error">{{ error }}</p>
+<p *ngIf="!loading && !error && harvestLines.length === 0" class="py-8 text-center text-on-surface-variant">Aucune récolte à préparer pour le moment.</p>
+<table *ngIf="!loading && harvestLines.length" class="w-full border-collapse border border-outline-variant text-left">
 <thead class="bg-surface-container-low">
 <tr>
 <th class="p-md border border-outline-variant font-label-md text-label-md text-on-surface-variant">Produit</th>
 <th class="p-md border border-outline-variant font-label-md text-label-md text-on-surface-variant">Quantité Totale à Récolter</th>
 <th class="p-md border border-outline-variant font-label-md text-label-md text-on-surface-variant">Unité</th>
-<th class="p-md border border-outline-variant font-label-md text-label-md text-on-surface-variant">Statut de Validation</th>
+<th class="p-md border border-outline-variant font-label-md text-label-md text-on-surface-variant">Commandes</th>
 </tr>
 </thead>
 <tbody class="bg-white">
-<tr class="hover:bg-surface-container-lowest transition-colors">
-<td class="p-md border border-outline-variant font-body-md text-body-md font-semibold text-primary">Tomates</td>
-<td class="p-md border border-outline-variant font-body-md text-body-md">25</td>
-<td class="p-md border border-outline-variant font-body-md text-body-md">kg</td>
+<tr *ngFor="let line of harvestLines" class="hover:bg-surface-container-lowest transition-colors">
+<td class="p-md border border-outline-variant font-body-md text-body-md font-semibold text-primary">{{ line.product_name }}</td>
+<td class="p-md border border-outline-variant font-body-md text-body-md">{{ formatQty(line.total_quantity_to_prepare) }}</td>
+<td class="p-md border border-outline-variant font-body-md text-body-md">{{ line.unit }}</td>
 <td class="p-md border border-outline-variant">
-<span class="inline-block px-sm py-xs bg-primary-container text-on-primary font-label-sm text-label-sm rounded uppercase">Payé</span>
-</td>
-</tr>
-<tr class="hover:bg-surface-container-lowest transition-colors">
-<td class="p-md border border-outline-variant font-body-md text-body-md font-semibold text-primary">Carottes</td>
-<td class="p-md border border-outline-variant font-body-md text-body-md">12</td>
-<td class="p-md border border-outline-variant font-body-md text-body-md">kg</td>
-<td class="p-md border border-outline-variant">
-<span class="inline-block px-sm py-xs bg-primary-container text-on-primary font-label-sm text-label-sm rounded uppercase">Payé</span>
+<span class="inline-block px-sm py-xs bg-primary-container text-on-primary font-label-sm text-label-sm rounded uppercase">{{ line.order_count }}</span>
 </td>
 </tr>
 </tbody>
@@ -68,9 +63,9 @@
 </div>
 <!-- Action Button -->
 <div class="flex justify-center">
-<button class="w-full max-w-lg bg-primary text-on-primary hover:opacity-90 active:scale-95 transition-all py-md px-lg rounded-xl flex items-center justify-center gap-sm shadow-sm">
+<button disabled class="w-full max-w-lg bg-outline-variant text-on-surface-variant cursor-not-allowed py-md px-lg rounded-xl flex items-center justify-center gap-sm shadow-sm opacity-60">
 <span class="material-symbols-outlined">picture_as_pdf</span>
-<span class="font-label-md text-label-md">Télécharger le Bon de Récolte en PDF</span>
+<span class="font-label-md text-label-md">Export PDF (bientôt disponible)</span>
 </button>
 </div>
 </section>
@@ -78,7 +73,7 @@
 <section class="grid grid-cols-2 md:grid-cols-4 gap-md w-full mt-lg">
 <div class="bg-white border border-outline-variant p-md rounded-xl text-center">
 <div class="text-on-surface-variant font-label-sm text-label-sm mb-xs uppercase">Commandes</div>
-<div class="text-primary font-headline-md text-headline-md">14</div>
+<div class="text-primary font-headline-md text-headline-md">{{ totalOrders }}</div>
 </div>
 <div class="bg-white border border-outline-variant p-md rounded-xl text-center">
 <div class="text-on-surface-variant font-label-sm text-label-sm mb-xs uppercase">Total kg</div>
@@ -104,11 +99,11 @@
       <span class="material-symbols-outlined">storefront</span>
       <span class="text-[10px] font-bold uppercase mt-1">Market</span>
     </a>
-    <a routerLink="/panier-recap" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a [routerLink]="ordersRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">receipt_long</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Orders</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Commandes</span>
     </a>
-    <a [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a [routerLink]="profileRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">person</span>
       <span class="text-[10px] font-bold uppercase mt-1">Profile</span>
     </a>

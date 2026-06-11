@@ -1,6 +1,9 @@
 import { Component, AfterViewInit, ElementRef, OnInit } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService, User } from '../../services/auth.service';
+import { ApiService } from '../../services/api.service';
+import { CartService } from '../../services/cart.service';
+import { PickupPoint } from '../../models/shop.models';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -12,13 +15,36 @@ import { CommonModule } from '@angular/common';
 })
 export class Home implements OnInit, AfterViewInit {
   currentUser: User | null = null;
+  pickupPoints: PickupPoint[] = [];
+  cartCount = 0;
 
-  constructor(private el: ElementRef, private authService: AuthService) {}
+  constructor(
+    private el: ElementRef,
+    private authService: AuthService,
+    private api: ApiService,
+    private cart: CartService
+  ) {}
 
   ngOnInit() {
-    this.authService.currentUser.subscribe(user => {
+    this.authService.currentUser.subscribe((user) => {
       this.currentUser = user;
     });
+    this.cart.items$.subscribe((items) => {
+      this.cartCount = items.reduce((sum, i) => sum + i.quantity, 0);
+    });
+    this.api.getPickupPoints().subscribe({
+      next: (points) => {
+        this.pickupPoints = points;
+      },
+    });
+  }
+
+  get profileRoute(): string {
+    return this.authService.getProfileRoute();
+  }
+
+  get ordersRoute(): string {
+    return this.authService.getOrdersRoute();
   }
 
   logout() {
@@ -26,10 +52,9 @@ export class Home implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // 1. Countdown Timer Logic
     const timerElement = this.el.nativeElement.querySelector('#countdown');
     if (timerElement) {
-      let timeLeft = 24 * 60 * 60; // 24 hours in seconds
+      let timeLeft = 24 * 60 * 60;
       const updateTimer = () => {
         const hours = Math.floor(timeLeft / 3600);
         const minutes = Math.floor((timeLeft % 3600) / 60);
@@ -41,14 +66,13 @@ export class Home implements OnInit, AfterViewInit {
       updateTimer();
     }
 
-    // 2. Scroll Animation Observer
     const observerOptions = {
       threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
+      rootMargin: '0px 0px -50px 0px',
     };
 
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
+      entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
           observer.unobserve(entry.target);

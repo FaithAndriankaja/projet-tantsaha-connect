@@ -15,7 +15,7 @@
           routerLink="/boutique-desktop" routerLinkActive="text-primary border-b-2 border-primary pb-1">Catalogue</a>
         <a *ngIf="currentUser"
           class="font-body-md text-on-surface-variant hover:text-primary transition-colors transition-all"
-          routerLink="/panier-recap" routerLinkActive="text-primary border-b-2 border-primary pb-1">Commandes</a>
+          [routerLink]="ordersRoute" routerLinkActive="text-primary border-b-2 border-primary pb-1">Commandes</a>
       </div>
 
       <!-- Action Cluster -->
@@ -38,14 +38,14 @@
             <button class="relative p-2 text-on-surface-variant hover:text-primary transition-colors"
               routerLink="/panier-recap" title="Mon panier">
               <span class="material-symbols-outlined text-2xl">shopping_cart</span>
-              <span
-                class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">2</span>
+              <span *ngIf="cartCount > 0"
+                class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">{{ cartCount }}</span>
             </button>
 
             <!-- Icon: Mon Profil -->
             <button
               class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold hover:shadow-md transition-all"
-              [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'"
+              [routerLink]="profileRoute"
               title="Mon profil">
               {{ currentUser?.name?.charAt(0)?.toUpperCase() }}
             </button>
@@ -146,27 +146,19 @@
             éco-responsables où récupérer vos commandes en toute simplicité.
           </p>
           <div class="space-y-4">
-            <div class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border-l-4 border-primary">
-              <span class="material-symbols-outlined text-primary">location_on</span>
+            <div *ngFor="let point of pickupPoints; let i = index"
+              class="flex items-center gap-4 p-4 rounded-xl border-l-4 transition-colors"
+              [class.bg-surface-container-low]="i === 0"
+              [class.border-primary]="i === 0"
+              [class.bg-white]="i !== 0"
+              [class.border-outline-variant]="i !== 0">
+              <span class="material-symbols-outlined" [class.text-primary]="i === 0" [class.text-outline]="i !== 0">location_on</span>
               <div>
-                <p class="font-label-md text-on-surface">
-                  Boulangerie du Village
-                </p>
-                <p class="text-xs text-on-surface-variant">
-                  A 500m de chez vous
-                </p>
+                <p class="font-label-md text-on-surface">{{ point.name }}</p>
+                <p class="text-xs text-on-surface-variant">{{ point.address }}, {{ point.city }}</p>
               </div>
             </div>
-            <div
-              class="flex items-center gap-4 p-4 bg-white rounded-xl hover:bg-surface-container-low transition-colors cursor-pointer border border-outline-variant/30">
-              <span class="material-symbols-outlined text-outline">location_on</span>
-              <div>
-                <p class="font-label-md text-on-surface">L'Épicerie Fine</p>
-                <p class="text-xs text-on-surface-variant">
-                  A 1.2km de chez vous
-                </p>
-              </div>
-            </div>
+            <p *ngIf="pickupPoints.length === 0" class="text-sm text-on-surface-variant">Chargement des points de retrait...</p>
           </div>
         </div>
         <!-- Mock Map -->
@@ -260,25 +252,25 @@
       [routerLinkActiveOptions]="{exact: true}"
       class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Home</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Accueil</span>
     </a>
     <a routerLink="/boutique-desktop"
       routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
       class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">storefront</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Market</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Catalogue</span>
     </a>
-    <a routerLink="/panier-recap"
+    <a [routerLink]="ordersRoute"
       routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
       class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">receipt_long</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Orders</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Commandes</span>
     </a>
-    <a [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'"
+    <a [routerLink]="profileRoute"
       routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
       class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">person</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Profile</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Profil</span>
     </a>
   </nav>
 </div>

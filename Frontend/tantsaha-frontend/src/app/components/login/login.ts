@@ -3,6 +3,8 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService, User } from '../../services/auth.service';
 
+import { CartService } from '../../services/cart.service';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -12,17 +14,30 @@ import { AuthService, User } from '../../services/auth.service';
 })
 export class Login implements OnInit, AfterViewInit {
   currentUser: User | null = null;
+  cartCount = 0;
 
   constructor(
     private el: ElementRef, 
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private cart: CartService
   ) {}
 
   ngOnInit() {
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
     });
+    this.cart.items$.subscribe((items) => {
+      this.cartCount = items.reduce((sum, i) => sum + i.quantity, 0);
+    });
+  }
+
+  get profileRoute(): string {
+    return this.authService.getProfileRoute();
+  }
+
+  get ordersRoute(): string {
+    return this.authService.getOrdersRoute();
   }
 
 
@@ -58,7 +73,7 @@ export class Login implements OnInit, AfterViewInit {
     if (loginForm) {
       loginForm.addEventListener('submit', (e: Event) => {
         e.preventDefault();
-        const email = (loginForm.querySelector('#email') as HTMLInputElement).value;
+        const phone = (loginForm.querySelector('#phone') as HTMLInputElement).value.trim();
         const password = (loginForm.querySelector('#password') as HTMLInputElement).value;
         
         const button = loginForm.querySelector('button[type="submit"]');
@@ -66,9 +81,9 @@ export class Login implements OnInit, AfterViewInit {
           button.disabled = true;
           button.innerHTML = '<span class="animate-spin mr-2">◌</span> Connexion...';
           
-          this.authService.login(email, password).subscribe({
+          this.authService.login(phone, password).subscribe({
             next: () => {
-              this.router.navigate(['/']);
+              this.router.navigate([this.authService.getDefaultRouteAfterAuth()]);
             },
             error: () => {
               button.disabled = false;

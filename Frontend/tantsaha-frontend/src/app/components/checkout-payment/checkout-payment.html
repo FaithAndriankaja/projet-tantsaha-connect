@@ -14,7 +14,7 @@
           routerLink="/boutique-desktop">Catalogue</a>
         <a *ngIf="currentUser"
           class="font-body-md text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
-          routerLink="/panier-recap">Commandes</a>
+          [routerLink]="ordersRoute">Commandes</a>
       </div>
 
       <!-- Action Cluster -->
@@ -36,12 +36,12 @@
             <button class="relative p-2 text-on-surface-variant hover:text-primary transition-colors"
               routerLink="/panier-recap">
               <span class="material-symbols-outlined text-2xl">shopping_cart</span>
-              <span
-                class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">2</span>
+              <span *ngIf="cartCount > 0"
+                class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">{{ cartCount }}</span>
             </button>
             <button
               class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold hover:shadow-md transition-all"
-              [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'"
+              [routerLink]="profileRoute"
               title="Mon profil">
               {{ currentUser?.name?.charAt(0)?.toUpperCase() }}
             </button>
@@ -82,59 +82,32 @@
           </div>
 
           <div class="divide-y divide-outline-variant/20">
-            <!-- Item 1 -->
-            <div class="p-6 flex gap-6">
-              <img class="w-20 h-20 md:w-24 md:h-24 object-cover rounded-2xl shadow-sm"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCslCIO6VEb1k_vssGN0boRdr4aeYeF3oroQnayeTM1-9JCYTXfrsc6Cf8sROnuM-9HBmpWonLrxl10dxS48F0l-z_nBm5bpZ56Hqb_FxANWl0TbO5tOjCiWn1BPvx0x6Sk0PEbYznKD39UDM2X-bsf6hlON-EDcURuW7KrvEjui_LySzAcywUjHAme8xIVYn6_NnInxfJ9UWaGi07jA6Ke_Y-kR2KIDwZEvcMN7_xXocpU2jIaJDcaRdo8eoXMbSYERdHABaXi2JdX" />
+            <div *ngFor="let item of items" class="p-6 flex gap-6">
+              <div class="w-20 h-20 md:w-24 md:h-24 rounded-2xl shadow-sm bg-primary/10 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-primary text-3xl">shopping_basket</span>
+              </div>
               <div class="flex-grow flex flex-col justify-between py-1">
                 <div class="flex justify-between items-start">
                   <div>
-                    <h3 class="text-lg font-bold text-on-surface">Vanille Bourbon (Gousses)</h3>
-                    <p class="text-xs text-on-surface-variant font-semibold">Ferme de Rakoto</p>
+                    <h3 class="text-lg font-bold text-on-surface">{{ item.product_name || 'Article' }}</h3>
                   </div>
-                  <p class="font-bold text-primary">50,000 Ar</p>
+                  <p class="font-bold text-primary">{{ formatPrice(lineTotal(item)) }} Ar</p>
                 </div>
                 <div
                   class="text-xs font-bold text-on-surface-variant bg-surface-container-low w-fit px-3 py-1 rounded-full">
-                  Quantité: 2
+                  Quantité: {{ item.quantity }} {{ item.unit || '' }}
                 </div>
               </div>
             </div>
-
-            <!-- Item 2 -->
-            <div class="p-6 flex gap-6">
-              <img class="w-20 h-20 md:w-24 md:h-24 object-cover rounded-2xl shadow-sm"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBebJjoaFTQ2rI22GHUPjmRBDw6Xd1ZAjNXua0VHejKXgODQlTqUEY3mkorurGdOTlwRt1L1Eqi_nD0Co901n6wZUAUIgpiluVTuwPY0NgOPG2iaiQHLHbWaJtz24Cz5GkLTsas53B8RylWKLQo76xEMAOcqNU1s2Z4hEEvtNV18PbT64gjBUIOiyCcldZKSfMYJrZtQRRFmfIn3mc-X7MSdQaWEIlKCDRJhbhqeW2CpH1aIPtsoAua8GUJVKLuQstN9G714WtbT6Ic" />
-              <div class="flex-grow flex flex-col justify-between py-1">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <h3 class="text-lg font-bold text-on-surface">Poivre Noir de Madagascar</h3>
-                    <p class="text-xs text-on-surface-variant font-semibold">Coopérative Miary</p>
-                  </div>
-                  <p class="font-bold text-primary">12,000 Ar</p>
-                </div>
-                <div
-                  class="text-xs font-bold text-on-surface-variant bg-surface-container-low w-fit px-3 py-1 rounded-full">
-                  Quantité: 1
-                </div>
-              </div>
-            </div>
+            <p *ngIf="items.length === 0" class="p-6 text-on-surface-variant">Aucun article dans cette commande.</p>
           </div>
         </div>
 
         <!-- Totals Card -->
         <div class="glass-card rounded-3xl p-6 shadow-sm border border-outline-variant/30 space-y-4">
-          <div class="flex justify-between items-center text-on-surface-variant font-semibold">
-            <span>Sous-total</span>
-            <span class="text-on-surface font-bold">62,000 Ar</span>
-          </div>
-          <div class="flex justify-between items-center text-on-surface-variant font-semibold">
-            <span>Frais Logistiques (Points de Collecte)</span>
-            <span class="text-on-surface font-bold">5,000 Ar</span>
-          </div>
           <div class="pt-4 border-t border-outline-variant/30 flex justify-between items-center">
             <span class="text-xl font-bold text-on-surface">Total à payer</span>
-            <span class="text-3xl font-black text-secondary">67,000 Ar</span>
+            <span class="text-3xl font-black text-secondary">{{ formatPrice(order?.total_amount ?? 0) }} Ar</span>
           </div>
         </div>
       </div>
@@ -152,12 +125,12 @@
           <div class="p-6 bg-primary/5 rounded-2xl border-l-4 border-primary mb-8 space-y-2">
             <p class="text-sm font-bold text-primary uppercase tracking-widest">Instruction</p>
             <p class="text-on-surface leading-relaxed">
-              Transférez le montant exact de <span class="font-bold text-secondary">67,000 Ar</span> par
+              Transférez le montant exact de <span class="font-bold text-secondary">{{ order?.total_amount }} Ar</span> par
               <strong>Mvola</strong> au numéro suivant :
             </p>
             <div
               class="text-2xl font-black text-primary font-mono bg-white p-3 rounded-xl border border-primary/10 text-center mt-2">
-              034 11 222 33
+              {{ mvolaNumber }}
             </div>
           </div>
 
@@ -165,37 +138,30 @@
           <div class="space-y-4">
             <label class="text-sm font-bold text-on-surface-variant">Preuve de paiement</label>
 
-            <div id="dropzone"
-              class="border-2 border-dashed border-outline-variant/50 rounded-2xl p-8 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group">
-              <div
-                class="w-16 h-16 bg-surface-container-low rounded-full flex items-center justify-center text-outline group-hover:text-primary transition-colors">
+            <label class="border-2 border-dashed border-outline-variant/50 rounded-2xl p-8 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group">
+              <div class="w-16 h-16 bg-surface-container-low rounded-full flex items-center justify-center text-outline group-hover:text-primary transition-colors">
                 <span class="material-symbols-outlined text-4xl">add_a_photo</span>
               </div>
               <div class="text-center">
-                <p class="font-bold text-on-surface group-hover:text-primary transition-colors">Téléversez la capture
-                  d'écran SMS</p>
-                <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter mt-1">PNG, JPG • Max
-                  5MB</p>
+                <p class="font-bold text-on-surface group-hover:text-primary transition-colors">Téléversez la capture d'écran SMS</p>
+                <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter mt-1">PNG, JPG • Max 5MB</p>
               </div>
-              <input type="file" id="fileInput" class="hidden" accept="image/*">
-            </div>
+              <input type="file" class="sr-only" accept="image/*" (change)="onFileSelected($event)" #fileInput>
+            </label>
 
-            <!-- File Preview Area -->
-            <div id="file-preview"
-              class="hidden p-4 bg-primary/5 rounded-2xl border border-primary/20 items-center gap-4">
+            <div *ngIf="selectedFile" class="p-4 bg-primary/5 rounded-2xl border border-primary/20 flex items-center gap-4">
               <span class="material-symbols-outlined text-primary">check_circle</span>
-              <span id="file-name" class="flex-grow text-sm font-bold truncate">mon_paiement_sms.jpg</span>
-              <button id="remove-file" class="p-2 text-error hover:bg-error/10 rounded-full transition-colors">
-                <span class="material-symbols-outlined">delete</span>
-              </button>
+              <span class="flex-grow text-sm font-bold truncate">{{ selectedFile.name }}</span>
             </div>
           </div>
 
+          <p *ngIf="error" class="text-error text-sm mt-4">{{ error }}</p>
+
           <div class="mt-10 space-y-4">
-            <button (click)="confirmOrder()"
-              class="w-full h-14 bg-primary text-on-primary rounded-xl font-bold shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2">
-              CONFIRMER MA COMMANDE
-              <span class="material-symbols-outlined">verified</span>
+            <button type="button" (click)="confirmOrder()" [disabled]="submitting"
+              class="w-full h-14 bg-primary text-on-primary rounded-xl font-bold shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+              {{ submitting ? 'Envoi...' : 'CONFIRMER MA COMMANDE' }}
+              <span class="material-symbols-outlined" *ngIf="!submitting">verified</span>
             </button>
             <p class="text-[10px] text-center text-on-surface-variant font-medium">
               En confirmant, vous acceptez nos <a routerLink="/register" class="text-primary hover:underline">Conditions
@@ -241,13 +207,13 @@
       <span class="material-symbols-outlined">storefront</span>
       <span class="text-[10px] font-bold uppercase mt-1">Market</span>
     </a>
-    <a routerLink="/panier-recap"
+    <a [routerLink]="ordersRoute"
       routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
       class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">receipt_long</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Orders</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Commandes</span>
     </a>
-    <a [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'"
+    <a [routerLink]="profileRoute"
       routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
       class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">person</span>

@@ -11,6 +11,7 @@ import { FarmerProfile } from './components/farmer-profile/farmer-profile';
 import { Emargement } from './components/emargement/emargement';
 import { ProfilAcheteur } from './components/profil-acheteur/profil-acheteur';
 import { SuccessOrder } from './components/success-order/success-order';
+import { authGuard, producerGuard, managerGuard, consumerGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -18,13 +19,12 @@ export const routes: Routes = [
   { path: 'register', component: Register },
   { path: 'boutique-desktop', component: MarketplaceProduce },
   { path: 'boutique-mobile', component: MarketplaceMobile },
-  { path: 'panier-recap', component: Checkout },
-  { path: 'panier-paiement', component: CheckoutPayment },
-  { path: 'commande-succes', component: SuccessOrder },
-  { path: 'tantsaha-recolte', component: FarmerDashboard },
-  { path: 'tantsaha-ferme', component: FarmerProfile },
-  { path: 'profil-acheteur', component: ProfilAcheteur },
-  { path: 'mpandrindra-livraison', component: Emargement },
+  { path: 'panier-recap', component: Checkout, canActivate: [authGuard] },
+  { path: 'panier-paiement', component: CheckoutPayment, canActivate: [authGuard] },
+  { path: 'commande-succes', component: SuccessOrder, canActivate: [authGuard] },
+  { path: 'tantsaha-recolte', component: FarmerDashboard, canActivate: [producerGuard] },
+  { path: 'tantsaha-ferme', component: FarmerProfile, canActivate: [producerGuard] },
+  { path: 'profil-acheteur', component: ProfilAcheteur, canActivate: [authGuard, consumerGuard] },
+  { path: 'mpandrindra-livraison', component: Emargement, canActivate: [authGuard, managerGuard] },
   { path: '**', redirectTo: '' },
 ];
-

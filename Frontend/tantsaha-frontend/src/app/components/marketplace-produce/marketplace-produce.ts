@@ -1,6 +1,9 @@
-import { Component, AfterViewInit, ElementRef, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService, User } from '../../services/auth.service';
+import { ApiService } from '../../services/api.service';
+import { CartService } from '../../services/cart.service';
+import { ShopProduct } from '../../models/shop.models';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -10,59 +13,77 @@ import { CommonModule } from '@angular/common';
   templateUrl: './marketplace-produce.html',
   styleUrl: './marketplace-produce.css',
 })
-export class MarketplaceProduce implements OnInit, AfterViewInit {
+export class MarketplaceProduce implements OnInit {
   currentUser: User | null = null;
+  products: ShopProduct[] = [];
+  loading = true;
+  error = '';
+  addedProductId: string | null = null;
+  cartCount = 0;
 
-  constructor(private el: ElementRef, private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private api: ApiService,
+    private cart: CartService
+  ) {}
 
   ngOnInit() {
-    this.authService.currentUser.subscribe(user => {
+    this.authService.currentUser.subscribe((user) => {
       this.currentUser = user;
     });
+    this.cart.items$.subscribe((items) => {
+      this.cartCount = items.reduce((sum, i) => sum + i.quantity, 0);
+    });
+    this.loadProducts();
   }
 
   get userInitial(): string {
     return this.currentUser?.name?.charAt(0).toUpperCase() ?? '';
   }
 
+  get profileRoute(): string {
+    return this.authService.getProfileRoute();
+  }
+
+  get ordersRoute(): string {
+    return this.authService.getOrdersRoute();
+  }
+
   logout() {
     this.authService.logout();
   }
 
-  ngAfterViewInit() {
-    // Micro-interaction for filter category buttons
-    const categoryButtons = this.el.nativeElement.querySelectorAll('.glass-card .flex.flex-wrap button');
-    categoryButtons.forEach((btn: HTMLButtonElement) => {
-      btn.addEventListener('click', () => {
-        // Toggle selection state
-        if (btn.textContent === 'Tout') return; 
-        
-        const isActive = btn.classList.contains('bg-primary');
-        if (isActive) {
-          btn.classList.remove('bg-primary', 'text-on-primary');
-          btn.classList.add('bg-white', 'text-on-surface-variant', 'border-outline-variant/30');
-        } else {
-          btn.classList.add('bg-primary', 'text-on-primary');
-          btn.classList.remove('bg-white', 'text-on-surface-variant', 'border-outline-variant/30');
-        }
-      });
+  loadProducts() {
+    this.loading = true;
+    this.error = '';
+    this.api.getShop().subscribe({
+      next: (products) => {
+        this.products = products;
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Impossible de charger le catalogue. Vérifiez que le backend est démarré.';
+        this.loading = false;
+      },
     });
+  }
 
-    // Add to cart toast simulation
-    const addToCartButtons = this.el.nativeElement.querySelectorAll('section .grid button');
-    addToCartButtons.forEach((btn: HTMLButtonElement) => {
-      btn.addEventListener('click', () => {
-        const originalText = btn.textContent || '';
-        btn.innerHTML = '<span class="material-symbols-outlined text-lg mr-2">check_circle</span>Ajouté !';
-        btn.classList.add('bg-primary', 'text-on-primary');
-        btn.classList.remove('bg-surface-container', 'text-primary');
-        
-        setTimeout(() => {
-          btn.innerHTML = originalText;
-          btn.classList.remove('bg-primary', 'text-on-primary');
-          btn.classList.add('bg-surface-container', 'text-primary');
-        }, 2000);
-      });
-    });
+  formatPrice(value: string | number): string {
+    const n = typeof value === 'string' ? parseFloat(value) : value;
+    return new Intl.NumberFormat('fr-MG').format(n);
+  }
+
+  addToCart(product: ShopProduct) {
+    this.cart.addProduct(product);
+    this.addedProductId = product.product_id;
+    setTimeout(() => {
+      if (this.addedProductId === product.product_id) {
+        this.addedProductId = null;
+      }
+    }, 2000);
+  }
+
+  isOutOfStock(product: ShopProduct): boolean {
+    return parseFloat(product.remaining_quantity) <= 0;
   }
 }

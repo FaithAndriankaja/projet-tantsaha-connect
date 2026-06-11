@@ -2,18 +2,13 @@
 <!-- TopNavBar -->
 <nav class="sticky top-0 z-50 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-md bg-surface border-b border-outline-variant">
 <div class="flex items-center gap-md">
-<span class="font-headline-md text-headline-md text-primary font-bold">Tantsaha Connect</span>
+<a class="font-headline-md text-headline-md text-primary font-bold" routerLink="/">Tantsaha Connect</a>
 </div>
 <div class="hidden md:flex gap-lg">
-<a class="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md" routerLink="/">Home</a>
-<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" routerLink="/boutique-desktop">Market</a>
-<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" routerLink="/panier-recap">Orders</a>
-<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" routerLink="/tantsaha-ferme">Profile</a>
-</div>
-<div class="flex items-center gap-md">
-<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">shopping_cart</span>
-<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">notifications</span>
-<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">person</span>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" routerLink="/">Accueil</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" routerLink="/boutique-desktop">Catalogue</a>
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md" [routerLink]="ordersRoute">Commandes</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" [routerLink]="profileRoute">Profil</a>
 </div>
 </nav>
 <!-- Main Canvas -->
@@ -24,61 +19,35 @@
 <p class="font-body-md text-body-md text-on-surface-variant mb-lg">Suivez et validez les remises de colis en temps réel.</p>
 <div class="relative w-full">
 <span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">search</span>
-<input class="w-full pl-[48px] pr-md py-md bg-surface-container-lowest border border-outline rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none font-body-md text-body-md transition-all" placeholder="Rechercher un client (Nom ou N° Commande)" type="text"/>
+<input class="w-full pl-[48px] pr-md py-md bg-surface-container-lowest border border-outline rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none font-body-md text-body-md transition-all" placeholder="Rechercher un client (Nom ou N° Commande)" type="text" (input)="onSearchChange($event)"/>
 </div>
 </div>
+
+<p *ngIf="loading" class="text-on-surface-variant font-body-md">Chargement...</p>
+<p *ngIf="error" class="text-error font-body-md">{{ error }}</p>
+
 <!-- Client Delivery List -->
-<div class="flex flex-col gap-md mb-xl">
-<!-- Client Card 1 -->
-<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-row justify-between items-start transition-all hover:border-primary/30">
+<div class="flex flex-col gap-md mb-xl" *ngIf="!loading">
+<div *ngIf="filteredDeliveries.length === 0" class="text-center py-12 text-on-surface-variant">
+  Aucune commande à remettre pour le moment.
+</div>
+<div *ngFor="let delivery of filteredDeliveries" class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-row justify-between items-start transition-all hover:border-primary/30">
 <div class="flex-1">
-<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">Mamy Rakoto</h3>
-<p class="font-body-md text-body-md text-secondary font-semibold mb-sm">034 11 222 33</p>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">{{ delivery.consumer_name }}</h3>
+<p class="font-body-md text-body-md text-secondary font-semibold mb-sm">{{ delivery.consumer_phone }}</p>
 <ul class="font-body-md text-body-md text-on-surface-variant space-y-xs">
-<li class="flex items-center gap-xs"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>3 kg Tomates</li>
-<li class="flex items-center gap-xs"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>1 pc Chèvre</li>
+<li *ngFor="let item of delivery.items" class="flex items-center gap-xs">
+  <span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+  {{ formatItem(item) }}
+</li>
 </ul>
 </div>
 <div class="flex flex-col items-end gap-sm ml-md">
-<span class="font-label-sm text-label-sm text-outline-variant">CMD #1289</span>
-<button class="status-toggle group relative flex items-center justify-center gap-sm min-w-[120px] px-lg py-sm rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md transition-all active:scale-95">
-<span class="material-symbols-outlined text-[20px] hidden group-[.is-delivered]:inline">check_circle</span>
-<span class="status-text">À livrer</span>
-</button>
-</div>
-</div>
-<!-- Client Card 2 -->
-<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-row justify-between items-start transition-all hover:border-primary/30">
-<div class="flex-1">
-<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">Sahondra Volatiana</h3>
-<p class="font-body-md text-body-md text-secondary font-semibold mb-sm">032 55 666 77</p>
-<ul class="font-body-md text-body-md text-on-surface-variant space-y-xs">
-<li class="flex items-center gap-xs"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>5 kg Riz Rouge</li>
-<li class="flex items-center gap-xs"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>2 L Miel de l'Imerina</li>
-</ul>
-</div>
-<div class="flex flex-col items-end gap-sm ml-md">
-<span class="font-label-sm text-label-sm text-outline-variant">CMD #1302</span>
-<button class="status-toggle group relative flex items-center justify-center gap-sm min-w-[120px] px-lg py-sm rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md transition-all active:scale-95">
-<span class="material-symbols-outlined text-[20px] hidden group-[.is-delivered]:inline">check_circle</span>
-<span class="status-text">À livrer</span>
-</button>
-</div>
-</div>
-<!-- Client Card 3 (Pre-filled as delivered for demo) -->
-<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-row justify-between items-start transition-all hover:border-primary/30">
-<div class="flex-1">
-<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">Jean-Luc Andria</h3>
-<p class="font-body-md text-body-md text-secondary font-semibold mb-sm">033 88 999 00</p>
-<ul class="font-body-md text-body-md text-on-surface-variant space-y-xs">
-<li class="flex items-center gap-xs"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>10 kg Charbon</li>
-</ul>
-</div>
-<div class="flex flex-col items-end gap-sm ml-md">
-<span class="font-label-sm text-label-sm text-outline-variant">CMD #1244</span>
-<button class="status-toggle is-delivered group relative flex items-center justify-center gap-sm min-w-[120px] px-lg py-sm rounded-full bg-primary-container text-on-primary-container font-label-md text-label-md transition-all active:scale-95">
-<span class="material-symbols-outlined text-[20px]">check_circle</span>
-<span class="status-text">Livré</span>
+<span class="font-label-sm text-label-sm text-outline-variant">{{ delivery.transaction_code }}</span>
+<button type="button" (click)="confirmHandover(delivery)" [disabled]="confirmingId === delivery.id"
+  class="group relative flex items-center justify-center gap-sm min-w-[120px] px-lg py-sm rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md transition-all active:scale-95 disabled:opacity-50">
+<span class="material-symbols-outlined text-[20px]" *ngIf="confirmingId === delivery.id">hourglass_empty</span>
+<span>{{ confirmingId === delivery.id ? 'Confirmation...' : 'Livré' }}</span>
 </button>
 </div>
 </div>
@@ -91,31 +60,25 @@
 <span class="font-headline-md text-primary font-bold">Tantsaha Connect</span>
 <p class="font-body-md text-body-md text-on-surface-variant">© 2024 Tantsaha Connect. Pride of Madagascar.</p>
 </div>
-<div class="flex gap-lg">
-<a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary transition-colors" routerLink="/">About Us</a>
-<a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary transition-colors" routerLink="/tantsaha-recolte">Farmer Program</a>
-<a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary transition-colors" routerLink="/mpandrindra-livraison">Shipping Policy</a>
-<a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary transition-colors" routerLink="/register">Terms of Service</a>
-</div>
 </div>
 </footer>
   <!-- Bottom Navigation (Mobile Only) -->
   <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center py-2 bg-primary z-50 shadow-lg">
     <a routerLink="/" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Home</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Accueil</span>
     </a>
     <a routerLink="/boutique-desktop" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">storefront</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Market</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Catalogue</span>
     </a>
-    <a routerLink="/panier-recap" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a [routerLink]="ordersRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">receipt_long</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Orders</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Commandes</span>
     </a>
-    <a [routerLink]="currentUser?.role === 'tantsaha' ? '/tantsaha-ferme' : '/profil-acheteur'" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a [routerLink]="profileRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">person</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Profile</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Profil</span>
     </a>
   </nav>
 

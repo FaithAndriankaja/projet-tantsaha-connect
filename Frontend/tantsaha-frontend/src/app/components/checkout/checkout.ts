@@ -1,6 +1,9 @@
-import { Component, AfterViewInit, ElementRef, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService, User } from '../../services/auth.service';
+import { ApiService } from '../../services/api.service';
+import { CartService } from '../../services/cart.service';
+import { CartItem } from '../../models/shop.models';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -10,19 +13,48 @@ import { CommonModule } from '@angular/common';
   templateUrl: './checkout.html',
   styleUrl: './checkout.css',
 })
-export class Checkout implements OnInit, AfterViewInit {
+export class Checkout implements OnInit {
   currentUser: User | null = null;
+  cartItems: CartItem[] = [];
+  cartCount = 0;
+  submitting = false;
+  error = '';
 
   constructor(
-    private el: ElementRef, 
     private authService: AuthService,
+    private api: ApiService,
+    private cart: CartService,
     private router: Router
   ) {}
 
   ngOnInit() {
-    this.authService.currentUser.subscribe(user => {
+    this.authService.currentUser.subscribe((user) => {
       this.currentUser = user;
     });
+    this.cart.items$.subscribe((items) => {
+      this.cartItems = items;
+      this.cartCount = items.reduce((sum, i) => sum + i.quantity, 0);
+    });
+  }
+
+  get subtotal(): number {
+    return this.cart.subtotal;
+  }
+
+  get pickupPointName(): string {
+    return this.cartItems[0]?.pickup_point_name ?? 'Point de collecte';
+  }
+
+  get profileRoute(): string {
+    return this.authService.getProfileRoute();
+  }
+
+  get ordersRoute(): string {
+    return this.authService.getOrdersRoute();
+  }
+
+  get farmName(): string {
+    return this.cartItems[0]?.farm_name ?? 'Producteur local';
   }
 
   logout() {
@@ -30,43 +62,56 @@ export class Checkout implements OnInit, AfterViewInit {
     this.router.navigate(['/']);
   }
 
-  ngAfterViewInit() {
-    // Back button logic for mobile
-    const mobileBackBtn = this.el.nativeElement.querySelector('.mobile-back-btn');
-    if (mobileBackBtn) {
-      mobileBackBtn.addEventListener('click', () => window.history.back());
+  formatPrice(value: number): string {
+    return new Intl.NumberFormat('fr-MG').format(value);
+  }
+
+  lineTotal(item: CartItem): number {
+    return item.unit_price * item.quantity;
+  }
+
+  decreaseQty(item: CartItem) {
+    this.cart.updateQuantity(item.product_id, item.quantity - 1);
+  }
+
+  increaseQty(item: CartItem) {
+    this.cart.updateQuantity(item.product_id, item.quantity + 1);
+  }
+
+  removeItem(item: CartItem) {
+    this.cart.removeItem(item.product_id);
+  }
+
+  confirmOrder() {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    if (this.cartItems.length === 0) {
+      this.error = 'Votre panier est vide.';
+      return;
     }
 
-    // Simple micro-interaction for item quantity
-    const quantityContainers = this.el.nativeElement.querySelectorAll('.quantity-selector');
-    quantityContainers.forEach((container: HTMLElement) => {
-      const span = container.querySelector('span');
-      const minusBtn = container.querySelector('.minus-btn') as HTMLButtonElement;
-      const plusBtn = container.querySelector('.plus-btn') as HTMLButtonElement;
+    const payload = this.cart.buildOrderPayload();
+    if (!payload) return;
 
-      if (span && minusBtn && plusBtn) {
-        minusBtn.addEventListener('click', () => {
-          let val = parseInt(span.textContent || '0');
-          if (val > 1) span.textContent = (val - 1).toString();
-        });
+    this.submitting = true;
+    this.error = '';
 
-        plusBtn.addEventListener('click', () => {
-          let val = parseInt(span.textContent || '0');
-          span.textContent = (val + 1).toString();
+    this.api.createOrder(payload).subscribe({
+      next: (order) => {
+        this.cart.saveLastOrder({
+          ...order,
+          pickup_point_name: order.pickup_point_name ?? this.pickupPointName,
         });
-      }
+        this.cart.clear();
+        this.submitting = false;
+        this.router.navigate(['/panier-paiement']);
+      },
+      error: (err) => {
+        this.submitting = false;
+        this.error = err?.error?.detail || err?.error?.message || 'Erreur lors de la création de la commande.';
+      },
     });
-
-    // Form logic for neighborhood selection and address
-    const confirmBtn = this.el.nativeElement.querySelector('.confirm-btn');
-    if (confirmBtn) {
-      confirmBtn.addEventListener('click', () => {
-        confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<span class="animate-spin mr-2">◌</span> Traitement...';
-        setTimeout(() => {
-          this.router.navigate(['/panier-paiement']);
-        }, 1500);
-      });
-    }
   }
 }

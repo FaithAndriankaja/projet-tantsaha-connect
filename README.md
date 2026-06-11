@@ -128,8 +128,8 @@ docker-compose up --build
 ### 5.4 Accès à l'Application
 
 * **Frontend** : <http://localhost:4200>
-* **API Backend** : <http://localhost:8000>
-* **Documentation Swagger** : <http://localhost:8000/api/docs/>
+* **API Backend (Docker)** : <http://localhost:18080>
+* **Documentation Swagger** : <http://localhost:18080/api/docs/>
 
 ---
 
@@ -144,3 +144,55 @@ docker-compose up --build
 ## 7. Licence
 
 Ce projet est réalisé dans le cadre du module **Technologies Web Avancées (TWA)** de la filière Informatique à l'Université d'Antananarivo. Tous droits réservés.
+
+---
+
+## 8. Developer Quickstart (updated)
+
+<!-- Documentation explicite pour les développeurs : commandes, fichiers ajoutés et notes importantes -->
+
+- Démarrage complet (Postgres + Backend Django + Frontend dev container) :
+
+```bash
+# depuis la racine du projet
+docker compose up --build
+```
+
+- Lancer le backend localement (sans Docker) :
+
+```bash
+cd backend
+python -m venv .venv
+.venv\\Scripts\\activate
+pip install -r requirements.txt
+python manage.py migrate   # n'exécutez que si vous savez que la base est compatible
+python manage.py seed_db   # insère un jeu de données de test (password: password123)
+python manage.py runserver 0.0.0.0:8000
+```
+
+- Lancer le frontend localement (dev proxy vers `backend`):
+
+```bash
+cd Frontend/tantsaha-frontend
+npm install
+npm start -- --proxy-config proxy.conf.json
+```
+
+Notes explicites importantes:
+- Le backend expose maintenant un endpoint d'authentification par téléphone : `POST /api/auth/login/` attend `{ "phone": "0343333333", "password": "password123" }` et retourne `{ "access": "...", "refresh": "..." }`.
+- Les mots de passe dans la base doivent être hachés avec les utilitaires Django (`make_password`/`check_password`) — le script `seed_db` utilise `make_password`.
+- Beaucoup de modèles ont `managed = False` et la logique métier est implémentée côté base (triggers). Ne pas écraser la base en réappliquant des migrations s'il existe un schema SQL fourni (`database/schema.sql`).
+
+Fichiers ajoutés / modifiés:
+- Backend:
+   - `backend/api/auth_views.py` : vue `PhoneTokenObtainView` pour obtenir JWT via `phone`.
+   - `backend/core/authentication.py` : `CustomJWTAuthentication` pour résoudre `access` tokens vers `api.User`.
+   - `backend/core/urls.py` : route `api/auth/login/` pointe vers la vue phone-based.
+- Frontend:
+   - `Frontend/tantsaha-frontend/proxy.conf.json` : configuration de proxy utilisée en dev.
+   - `Frontend/tantsaha-frontend/src/app/services/api.service.ts` : service HTTP centralisé.
+   - `Frontend/tantsaha-frontend/src/app/interceptors/auth.interceptor.ts` : attache le token JWT aux requêtes.
+
+Besoin futur / recommandations:
+- En production, construire le frontend (ng build) et servir `dist/` via `nginx` dans un conteneur séparé (multi-stage Dockerfile). Définir `API_BASE_URL` côté nginx ou via un fichier `config.json` chargé au runtime.
+- Restreindre `CORS_ALLOW_ALL_ORIGINS` et renforcer les permissions sur `AdminPaymentViewSet`.

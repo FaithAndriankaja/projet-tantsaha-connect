@@ -5,11 +5,13 @@ from rest_framework.decorators import action
 from django.db import transaction
 
 from .models import (
-    UnifiedShopView, Order, OrderItem, Payment, HarvestSheetView, SaleSession
+    UnifiedShopView, Order, OrderItem, Payment, HarvestSheetView, SaleSession,
+    PickupPoint, Producer, HandoverConfirmation
 )
 from .serializers import (
     UnifiedShopSerializer, OrderCreateSerializer, OrderResponseSerializer,
-    PaymentUploadSerializer, PaymentValidateSerializer, HarvestSheetSerializer
+    PaymentUploadSerializer, PaymentValidateSerializer, HarvestSheetSerializer,
+    PickupPointSerializer, ProducerProfileSerializer, ManagerDeliverySerializer,
 )
 
 class ShopViewSet(viewsets.ReadOnlyModelViewSet):
@@ -89,6 +91,78 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         return Response({"message": "Preuve envoyée avec succès."}, status=status.HTTP_201_CREATED)
 
+    @action(detail=True, methods=['post'], url_path='handover')
+    def confirm_handover(self, request, pk=None):
+        order = self.get_object()
+        if request.user.role != 'manager':
+            return Response({'detail': 'Accès réservé aux managers.'}, status=status.HTTP_403_FORBIDDEN)
+
+        managed = PickupPoint.objects.filter(id=order.pickup_point_id, manager_user=request.user).exists()
+        if not managed:
+            return Response({'detail': 'Commande hors de votre point de retrait.'}, status=status.HTTP_403_FORBIDDEN)
+
+        if order.status not in ('ready', 'confirmed'):
+            return Response({'detail': 'Statut incompatible pour la remise.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if HandoverConfirmation.objects.filter(order=order).exists():
+            return Response({'detail': 'Commande déjà remise.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        HandoverConfirmation.objects.create(order=order, manager_user=request.user)
+        order.refresh_from_db()
+        return Response({'status': order.status, 'transaction_code': order.transaction_code})
+
+class PickupPointViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = PickupPoint.objects.all()
+    serializer_class = PickupPointSerializer
+    permission_classes = [AllowAny]
+
+class ProducerMeView(views.APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != 'producer':
+            return Response({'detail': 'Accès réservé aux producteurs.'}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            producer = request.user.producer
+        except Exception:
+            return Response({'detail': 'Profil producteur introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(ProducerProfileSerializer(producer).data)
+
+class ManagerDeliveriesView(views.APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != 'manager':
+            return Response({'detail': 'Accès réservé aux managers.'}, status=status.HTTP_403_FORBIDDEN)
+
+        pickup_points = PickupPoint.objects.filter(manager_user=request.user)
+        orders = Order.objects.filter(
+            pickup_point__in=pickup_points,
+            status__in=['ready', 'confirmed'],
+        ).select_related('consumer_user').prefetch_related('items__product')
+
+        data = []
+        for order in orders:
+            items = [
+                {
+                    'product_name': item.product.name,
+                    'quantity': item.quantity,
+                    'unit': item.product.unit,
+                }
+                for item in order.items.all()
+            ]
+            data.append({
+                'id': order.id,
+                'transaction_code': order.transaction_code,
+                'status': order.status,
+                'consumer_name': order.consumer_user.full_name,
+                'consumer_phone': order.consumer_user.phone,
+                'items': items,
+            })
+
+        serializer = ManagerDeliverySerializer(data, many=True)
+        return Response(serializer.data)
+
 class AdminPaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
     serializer_class = PaymentValidateSerializer
@@ -116,8 +190,10 @@ class HarvestSheetViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Producteur ne voit que ses récoltes
         if self.request.user.role == 'producer':
-            # On suppose qu'il a un profil producer
-            return super().get_queryset().filter(producer_id=self.request.user.producer.id)
+            try:
+                producer = self.request.user.producer
+            except Exception:
+                return HarvestSheetView.objects.none()
+            return super().get_queryset().filter(producer_id=producer.id)
         return super().get_queryset()

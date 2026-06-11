@@ -20,13 +20,26 @@ services:
     volumes:
       - ./backend:/app
     ports:
-      - "8000:8000"
+      - "18080:8000"
     environment:
       - DEBUG=1
       - SECRET_KEY=django-insecure-tantsaha-connect-dev-key
       - DATABASE_URL=postgres://tantsaha_user:tantsaha_password@db:5432/tantsaha_db
     depends_on:
       - db
+
+  frontend:
+    image: node:20
+    working_dir: /app
+    volumes:
+      - ./Frontend/tantsaha-frontend:/app
+    command: sh -c "npm install && npm start -- --host 0.0.0.0 --port 4200 --proxy-config proxy.conf.json"
+    environment:
+      - API_BASE_URL=http://backend:8000/api/
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:

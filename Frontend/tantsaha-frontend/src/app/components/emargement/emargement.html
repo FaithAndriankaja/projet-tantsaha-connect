@@ -1,85 +1,371 @@
-<div class="bg-surface">
-<!-- TopNavBar -->
-<nav class="sticky top-0 z-50 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-md bg-surface border-b border-outline-variant">
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EdenSource | Espace Gestionnaire</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#00210b",
+                        "surface-variant": "#d5e3fd",
+                        "on-secondary-fixed": "#3a0a00",
+                        "tertiary": "#5d3900",
+                        "on-surface": "#0d1c2f",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#842503",
+                        "secondary": "#a53c19",
+                        "on-tertiary-fixed": "#2a1700",
+                        "tertiary-fixed": "#ffddb8",
+                        "secondary-container": "#fb7b54",
+                        "background": "#f8f9ff",
+                        "inverse-surface": "#233144",
+                        "surface-container-low": "#eff4ff",
+                        "primary-fixed-dim": "#8bd79b",
+                        "inverse-on-surface": "#ebf1ff",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#707a6f",
+                        "surface-container-highest": "#d5e3fd",
+                        "on-surface-variant": "#404940",
+                        "on-secondary-container": "#6b1a00",
+                        "surface-dim": "#ccdbf4",
+                        "on-primary-fixed-variant": "#005226",
+                        "tertiary-container": "#7d4e00",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#ffc47d",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#f8f9ff",
+                        "surface": "#f8f9ff",
+                        "primary": "#004c22",
+                        "primary-container": "#166534",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#e6eeff",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#ffdbd1",
+                        "surface-tint": "#1f6c3a",
+                        "on-primary-container": "#93e0a2",
+                        "secondary-fixed-dim": "#ffb59f",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#dde9ff",
+                        "primary-fixed": "#a6f4b5",
+                        "outline-variant": "#bfc9bd",
+                        "inverse-primary": "#8bd79b",
+                        "on-background": "#0d1c2f",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "error": "#ba1a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "md": "16px",
+                        "xl": "40px",
+                        "base": "4px",
+                        "margin-desktop": "32px",
+                        "xs": "4px",
+                        "margin-mobile": "16px",
+                        "lg": "24px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Public Sans"],
+                        "label-sm": ["Public Sans"],
+                        "body-md": ["Public Sans"],
+                        "headline-lg": ["Public Sans"],
+                        "headline-md": ["Public Sans"],
+                        "headline-lg-mobile": ["Public Sans"],
+                        "body-lg": ["Public Sans"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; background-color: #f8f9ff; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .active-scan-ring { animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse-ring { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 0.8; } }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- Top Sticky Header Navbar (Based on Shared Components JSON) -->
+<header class="sticky top-0 z-50 flex justify-between items-center px-4 md:px-margin-desktop w-full h-16 bg-surface border-b border-outline-variant shadow-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-2xl">eco</span>
+<span class="font-headline-md text-headline-md font-bold text-primary">EdenSource - Espace Gestionnaire</span>
+</div>
+<div class="hidden md:flex items-center px-4 py-1 bg-surface-container rounded-full border border-outline-variant">
+<span class="w-2 h-2 bg-primary rounded-full mr-2 animate-pulse"></span>
+<span class="font-label-md text-label-md text-on-surface-variant">Session active - Point de retrait Analakely</span>
+</div>
 <div class="flex items-center gap-md">
-<a class="font-headline-md text-headline-md text-primary font-bold" routerLink="/">Tantsaha Connect</a>
-</div>
-<div class="hidden md:flex gap-lg">
-<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" routerLink="/">Accueil</a>
-<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" routerLink="/boutique-desktop">Catalogue</a>
-<a class="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md" [routerLink]="ordersRoute">Commandes</a>
-<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" [routerLink]="profileRoute">Profil</a>
-</div>
-</nav>
-<!-- Main Canvas -->
-<main class="max-w-[1200px] mx-auto px-margin-mobile md:px-margin-desktop py-lg min-h-[calc(100vh-160px)]">
-<!-- Search Section -->
-<div class="mb-xl">
-<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-sm">Gestion du Point Relais</h1>
-<p class="font-body-md text-body-md text-on-surface-variant mb-lg">Suivez et validez les remises de colis en temps réel.</p>
-<div class="relative w-full">
-<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">search</span>
-<input class="w-full pl-[48px] pr-md py-md bg-surface-container-lowest border border-outline rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none font-body-md text-body-md transition-all" placeholder="Rechercher un client (Nom ou N° Commande)" type="text" (input)="onSearchChange($event)"/>
-</div>
-</div>
-
-<p *ngIf="loading" class="text-on-surface-variant font-body-md">Chargement...</p>
-<p *ngIf="error" class="text-error font-body-md">{{ error }}</p>
-
-<!-- Client Delivery List -->
-<div class="flex flex-col gap-md mb-xl" *ngIf="!loading">
-<div *ngIf="filteredDeliveries.length === 0" class="text-center py-12 text-on-surface-variant">
-  Aucune commande à remettre pour le moment.
-</div>
-<div *ngFor="let delivery of filteredDeliveries" class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-row justify-between items-start transition-all hover:border-primary/30">
-<div class="flex-1">
-<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">{{ delivery.consumer_name }}</h3>
-<p class="font-body-md text-body-md text-secondary font-semibold mb-sm">{{ delivery.consumer_phone }}</p>
-<ul class="font-body-md text-body-md text-on-surface-variant space-y-xs">
-<li *ngFor="let item of delivery.items" class="flex items-center gap-xs">
-  <span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
-  {{ formatItem(item) }}
-</li>
-</ul>
-</div>
-<div class="flex flex-col items-end gap-sm ml-md">
-<span class="font-label-sm text-label-sm text-outline-variant">{{ delivery.transaction_code }}</span>
-<button type="button" (click)="confirmHandover(delivery)" [disabled]="confirmingId === delivery.id"
-  class="group relative flex items-center justify-center gap-sm min-w-[120px] px-lg py-sm rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md transition-all active:scale-95 disabled:opacity-50">
-<span class="material-symbols-outlined text-[20px]" *ngIf="confirmingId === delivery.id">hourglass_empty</span>
-<span>{{ confirmingId === delivery.id ? 'Confirmation...' : 'Livré' }}</span>
+<button class="hidden md:flex material-symbols-outlined text-on-surface-variant hover:bg-surface-container p-2 rounded-full transition-colors">notifications</button>
+<button class="hidden md:flex material-symbols-outlined text-on-surface-variant hover:bg-surface-container p-2 rounded-full transition-colors">settings</button>
+<button class="flex items-center gap-2 px-md py-2 bg-error text-on-error rounded-xl font-label-md transition-transform active:scale-95">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+<span class="hidden sm:inline">Déconnexion</span>
 </button>
 </div>
+</header>
+<main class="max-w-[1200px] mx-auto px-4 md:px-margin-desktop py-xl space-y-xl">
+<!-- Main Section 1: Tableau de Bord -->
+<section class="animate-in fade-in slide-in-from-bottom-4 duration-700" id="dashboard">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-lg gap-sm">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-xs">Suivi de la journée logistique</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Vue d'ensemble des opérations du 24 Mai 2024</p>
+</div>
+<div class="flex gap-sm">
+<span class="inline-flex items-center px-3 py-1 bg-primary-fixed text-on-primary-fixed rounded-full font-label-sm text-label-sm">
+                        Matin : Réception active
+                    </span>
 </div>
 </div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex flex-col justify-between h-32 hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-surface-variant">Acheteurs attendus</span>
+<span class="material-symbols-outlined text-primary">groups</span>
+</div>
+<div class="font-headline-lg text-headline-lg text-on-surface">42</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex flex-col justify-between h-32 hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-surface-variant">Producteurs arrivés</span>
+<span class="material-symbols-outlined text-primary">agriculture</span>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg text-on-surface mb-2">8 / 12</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[66%]"></div>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex flex-col justify-between h-32 hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-surface-variant">Colis distribués</span>
+<span class="material-symbols-outlined text-primary">inventory_2</span>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg text-on-surface">15%</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Début de l'après-midi</p>
+</div>
+</div>
+</div>
+<hr class="mt-xl border-outline-variant opacity-50"/>
+</section>
+<!-- Main Section 2: Réception des Marchandises -->
+<section class="py-lg" id="reception">
+<div class="mb-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface">1. Réception des Producteurs (Le Matin)</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-xs">Vérifiez les quantités déposées par les tantsaha et validez leur arrivée.</p>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant">
+<th class="px-md py-4 font-label-md text-label-md text-on-surface">Producteur</th>
+<th class="px-md py-4 font-label-md text-label-md text-on-surface">Volume attendu</th>
+<th class="px-md py-4 font-label-md text-label-md text-on-surface text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-md py-md">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">J</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Ferme de Jean</div>
+<div class="text-label-sm text-on-surface-variant">ID: T-4029</div>
+</div>
+</div>
+</td>
+<td class="px-md py-md">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-body-md text-body-md">50 kg - Tomates locales</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-body-md text-body-md">20 kg - Carottes</span>
+</div>
+</div>
+</td>
+<td class="px-md py-md text-right">
+<button class="px-lg py-2 bg-primary text-on-primary rounded-xl font-label-md hover:bg-primary-container hover:text-on-primary-container transition-all active:scale-95">
+                                    Valider la réception
+                                </button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-lowest transition-colors bg-surface-container-low/30">
+<td class="px-md py-md opacity-75">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">M</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Ferme de Marie</div>
+<div class="text-label-sm text-on-surface-variant">ID: T-5112</div>
+</div>
+</div>
+</td>
+<td class="px-md py-md opacity-75">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-body-md text-body-md">15 Litres - Miel pur</span>
+</div>
+</td>
+<td class="px-md py-md text-right">
+<span class="inline-flex items-center px-4 py-2 bg-surface-container-high text-on-surface-variant border border-outline-variant rounded-xl font-label-md">
+                                    Marchandise reçue ✓
+                                </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="mt-xl border-outline-variant opacity-50"/>
+</section>
+<!-- Main Section 3: Distribution aux Acheteurs -->
+<section class="py-lg pb-32" id="distribution">
+<div class="mb-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface">2. Remise des Colis aux Clients (Saisie Manuelle)</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-xs">Demandez le code de retrait à 4 chiffres à l'acheteur pour afficher sa commande.</p>
+</div>
+<div class="flex flex-col md:flex-row items-center gap-md p-lg bg-surface-container border border-outline-variant rounded-3xl mb-lg"><div class="relative flex-grow w-full"><span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span><input class="w-full pl-12 pr-4 py-4 bg-surface-container-lowest border border-outline-variant rounded-2xl focus:ring-primary focus:border-primary font-body-md" placeholder="Entrez le code de retrait (ex: 4829)..." type="text"/></div><button class="w-full md:w-auto px-xl py-4 bg-primary text-on-primary rounded-2xl font-label-md hover:bg-primary-container hover:text-on-primary-container transition-all active:scale-95 shadow-sm">Rechercher</button></div>
+<!-- Active Scanned Result Box -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-3xl p-xl shadow-2xl relative overflow-hidden">
+<div class="absolute top-0 left-0 w-2 h-full bg-primary"></div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+<div class="space-y-md">
+<div class="flex items-center gap-md">
+<img alt="Client Portrait" class="w-20 h-20 rounded-2xl object-cover border border-outline-variant" data-alt="A professional close-up portrait of Rabe Malagasy, a middle-aged Malagasy man with a warm and friendly expression, wearing a clean linen shirt. The background is softly blurred showing a hint of a vibrant outdoor market in Madagascar. The lighting is warm and golden-hour inspired, creating a trustworthy and modern portrait aesthetic that matches the professional yet organic brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCehL2kdHyAjCd7N6hPmGrswLkvaCwx_Yay5H9ZHXFRl6O5lFpYJ9ZxTyCrxuj5qeFlYdQx2eYuYtI7uLMJV3NpyKFFCdH_Yi0BKGRmSjw7fe-YeC44NkO9M9M8JcZUWxPFkjAHK5nqEyWmf3AV7pBdbsQJoG-S1XTXpS08AsMzeqYkNBoFkk9dWbYc9EQsQwV-31ZRBhsjrHKuaq0CXm4sSwnOZcu-ZhV_y8xoysuenZDrj7KX5qHjXyEiHgGnYbwmG-sm7gV0COa4"/>
+<div>
+<span class="text-label-sm text-on-surface-variant font-label-sm uppercase tracking-widest">Client Authentifié</span>
+<h3 class="font-headline-lg text-headline-lg text-on-surface">Acheteur : Rabe Malagasy</h3>
+<div class="inline-flex items-center text-primary font-label-md">
+<span class="material-symbols-outlined mr-1 text-[16px]">verified</span>
+                                    Compte EdenSource Premium
+                                </div>
+</div>
+</div>
+<div class="bg-surface-container-low p-md rounded-xl">
+<div class="flex justify-between items-center mb-sm">
+<span class="font-label-md text-label-md text-on-surface-variant"></span>
+<span class="font-bold text-on-surface">Statut du paiement : Validé</span>
+</div>
+<div class="space-y-sm"><label class="flex items-center p-3 bg-surface-container-lowest border border-outline-variant rounded-lg cursor-pointer hover:bg-primary/5 transition-colors"><input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary mr-md" type="checkbox"/><span class="font-body-md text-on-surface">2 kg - Tomates locales <span class="text-on-surface-variant">(Ferme de Jean)</span></span></label><label class="flex items-center p-3 bg-surface-container-lowest border border-outline-variant rounded-lg cursor-pointer hover:bg-primary/5 transition-colors"><input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary mr-md" type="checkbox"/><span class="font-body-md text-on-surface">1 kg - Fraises fraîches <span class="text-on-surface-variant">(Ferme de Marie)</span></span></label></div>
+</div>
+</div>
+<div class="flex flex-col justify-end gap-md">
+<div class="p-md bg-secondary/5 border border-secondary/20 rounded-xl">
+<div class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-secondary">info</span>
+<p class="font-label-sm text-label-sm text-secondary">
+                                    En confirmant, vous débloquez immédiatement les fonds pour les producteurs concernés. Assurez-vous que le client a bien vérifié la qualité.
+                                </p>
+</div>
+</div>
+<button class="w-full py-xl bg-primary text-on-primary rounded-2xl font-headline-md text-headline-md flex items-center justify-center gap-sm hover:bg-primary-container transition-all active:scale-[0.98] shadow-lg"><span class="material-symbols-outlined text-[28px]">handshake</span>Confirmer la remise du colis</button>
+</div>
+</div>
+</div>
+</section>
 </main>
-<!-- Footer (Desktop Only) -->
-<footer class="hidden md:block w-full py-xl px-margin-desktop bg-surface-container-lowest border-t border-outline-variant">
-<div class="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-lg">
-<div class="flex flex-col gap-sm">
-<span class="font-headline-md text-primary font-bold">Tantsaha Connect</span>
-<p class="font-body-md text-body-md text-on-surface-variant">© 2024 Tantsaha Connect. Pride of Madagascar.</p>
+<!-- BottomNavBar (Shared Component JSON Integration) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex lg:hidden justify-around items-center px-4 py-2 bg-primary shadow-lg h-16">
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full w-12 h-12 transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-primary/70 transition-all active:scale-90" href="#reception">
+<span class="material-symbols-outlined">input</span>
+<span class="text-[10px] font-label-sm">Receive</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-primary/70 transition-all active:scale-90" href="#distribution">
+<span class="material-symbols-outlined">qr_code</span>
+<span class="text-[10px] font-label-sm">Distribute</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-primary/70 transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-label-sm">Profile</span>
+</a>
+</nav>
+<!-- SideNavBar (Hidden on Mobile, Visible on LG+ - Based on Shared Components JSON) -->
+<aside class="hidden lg:flex flex-col fixed left-0 top-0 h-full w-64 bg-surface-container-low border-r border-outline-variant p-md gap-sm z-[60]">
+<div class="mb-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">eco</span>
+<span class="font-headline-md text-headline-md text-primary font-bold">EdenSource</span>
+</div>
+<div class="flex items-center gap-md p-md bg-surface-container-high rounded-xl mb-md">
+<div class="w-10 h-10 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold">M</div>
+<div class="overflow-hidden">
+<p class="font-label-md text-label-md text-on-surface truncate">Collection Point</p>
+<p class="text-[12px] text-on-surface-variant truncate">Antananarivo North</p>
 </div>
 </div>
-</footer>
-  <!-- Bottom Navigation (Mobile Only) -->
-  <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center py-2 bg-primary z-50 shadow-lg">
-    <a routerLink="/" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
-      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Accueil</span>
-    </a>
-    <a routerLink="/boutique-desktop" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
-      <span class="material-symbols-outlined">storefront</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Catalogue</span>
-    </a>
-    <a [routerLink]="ordersRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
-      <span class="material-symbols-outlined">receipt_long</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Commandes</span>
-    </a>
-    <a [routerLink]="profileRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
-      <span class="material-symbols-outlined">person</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Profil</span>
-    </a>
-  </nav>
-
-</div>
+<nav class="space-y-base flex-grow">
+<a class="flex items-center gap-md px-md py-3 bg-primary-container text-on-primary-container font-bold rounded-lg transition-transform active:translate-x-1" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-md py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="font-label-md">Deliveries</span>
+</a>
+<a class="flex items-center gap-md px-md py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">qr_code_scanner</span>
+<span class="font-label-md">Distributions</span>
+</a>
+<a class="flex items-center gap-md px-md py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-md">Inventory</span>
+</a>
+<a class="flex items-center gap-md px-md py-3 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-md">Reports</span>
+</a>
+</nav>
+<button class="mt-auto py-3 bg-primary text-on-primary rounded-xl font-label-md flex items-center justify-center gap-2 hover:bg-primary-container transition-all">
+<span class="material-symbols-outlined">add</span>
+            New Entry
+        </button>
+</aside>
+<script>
+        // Simple micro-interaction for checkboxes to simulate "Checking"
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if(this.checked) {
+                    this.parentElement.classList.add('bg-primary/5', 'border-primary/20');
+                } else {
+                    this.parentElement.classList.remove('bg-primary/5', 'border-primary/20');
+                }
+            });
+        });
+    </script>
+</body></html>

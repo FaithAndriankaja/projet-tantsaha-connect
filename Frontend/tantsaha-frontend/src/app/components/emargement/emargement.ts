@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService, User } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
@@ -9,7 +9,7 @@ import { ManagerDelivery } from '../../models/shop.models';
 @Component({
   selector: 'app-emargement',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterLink, CommonModule],
   templateUrl: './emargement.html',
   styleUrl: './emargement.css',
 })
@@ -24,10 +24,11 @@ export class Emargement implements OnInit {
   cartCount = 0;
 
   constructor(
-    private authService: AuthService,
+    public authService: AuthService,
     private api: ApiService,
-    private cart: CartService
-  ) {}
+    private cart: CartService,
+    private router: Router
+  ) { }
 
   ngOnInit() {
     this.authService.currentUser.subscribe((user) => {
@@ -98,5 +99,10 @@ export class Emargement implements OnInit {
 
   formatItem(item: ManagerDelivery['items'][0]): string {
     return `${item.quantity} ${item.unit} ${item.product_name}`;
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/']);
   }
 }

@@ -22,7 +22,7 @@
         <button
           class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold hover:shadow-md transition-all"
           [routerLink]="profileRoute" title="Mon profil">
-          {{ currentUser?.name?.charAt(0)?.toUpperCase() }}
+          {{ currentUser ? currentUser.name.charAt(0).toUpperCase() : '' }}
         </button>
         <button (click)="logout()" class="p-2 text-on-surface-variant hover:text-error transition-colors"
           title="Déconnexion">

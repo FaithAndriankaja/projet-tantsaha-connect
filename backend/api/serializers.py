@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (
     User, UnifiedShopView, Order, OrderItem, Payment, HarvestSheetView, SaleSession,
-    PickupPoint, Producer, Product
+    PickupPoint, Producer, Product, Category
 )
 from django.utils import timezone
 
@@ -10,6 +10,11 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'full_name', 'phone', 'email', 'role', 'default_pickup_point']
         read_only_fields = ['id', 'role']
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'name']
 
 class UnifiedShopSerializer(serializers.ModelSerializer):
     class Meta:

@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     ShopViewSet, OrderViewSet, AdminPaymentViewSet, HarvestSheetViewSet,
-    PickupPointViewSet, ProducerMeView, ManagerDeliveriesView,
+    PickupPointViewSet, ProducerMeView, ManagerDeliveriesView, CategoryViewSet,
 )
 
 router = DefaultRouter()
@@ -11,6 +11,7 @@ router.register(r'orders', OrderViewSet, basename='orders')
 router.register(r'admin/payments', AdminPaymentViewSet, basename='admin-payments')
 router.register(r'harvest-sheet', HarvestSheetViewSet, basename='harvest-sheet')
 router.register(r'pickup-points', PickupPointViewSet, basename='pickup-points')
+router.register(r'categories', CategoryViewSet, basename='categories')
 
 urlpatterns = [
     path('producers/me/', ProducerMeView.as_view(), name='producer-me'),

@@ -6,12 +6,13 @@ from django.db import transaction
 
 from .models import (
     UnifiedShopView, Order, OrderItem, Payment, HarvestSheetView, SaleSession,
-    PickupPoint, Producer, HandoverConfirmation
+    PickupPoint, Producer, HandoverConfirmation, Category
 )
 from .serializers import (
     UnifiedShopSerializer, OrderCreateSerializer, OrderResponseSerializer,
     PaymentUploadSerializer, PaymentValidateSerializer, HarvestSheetSerializer,
     PickupPointSerializer, ProducerProfileSerializer, ManagerDeliverySerializer,
+    CategorySerializer,
 )
 
 class ShopViewSet(viewsets.ReadOnlyModelViewSet):
@@ -25,7 +26,24 @@ class ShopViewSet(viewsets.ReadOnlyModelViewSet):
         pickup_point = self.request.query_params.get('pickup_point_id')
         if pickup_point:
             qs = qs.filter(pickup_point_id=pickup_point)
+        search = self.request.query_params.get('search')
+        if search:
+            qs = qs.filter(product_name__icontains=search)
+        category_name = self.request.query_params.get('category_name')
+        if category_name:
+            qs = qs.filter(category_name__iexact=category_name)
+        max_price = self.request.query_params.get('max_price')
+        if max_price:
+            try:
+                qs = qs.filter(unit_price__lte=float(max_price))
+            except ValueError:
+                pass
         return qs
+
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Category.objects.all().order_by('name')
+    serializer_class = CategorySerializer
+    permission_classes = [AllowAny]
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()

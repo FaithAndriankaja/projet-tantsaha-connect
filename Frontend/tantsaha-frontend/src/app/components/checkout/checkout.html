@@ -135,37 +135,27 @@
           </div>
         </ng-template>
 
-        <!-- Delivery Form -->
+        <!-- Delivery Info (read-only) -->
         <div class="glass-card rounded-3xl p-8 shadow-sm">
           <h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-3">
-            <span class="material-symbols-outlined">local_shipping</span>
-            Choix du Point de Collecte
+            <span class="material-symbols-outlined">location_on</span>
+            Point de Collecte
           </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-2">
-              <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest px-2">Quartier
-                (Antananarivo)</label>
-              <select
-                class="w-full h-14 px-4 bg-surface-container-low rounded-xl border-none text-sm focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none appearance-none cursor-pointer">
-                <option>Sélectionnez un quartier...</option>
-                <option>Analakely (Avenue)</option>
-                <option>Ankorondrano (Cité)</option>
-                <option>Ivato (Aéroport)</option>
-                <option>Tanjombato (Forello)</option>
-              </select>
-            </div>
-            <div class="space-y-2">
-              <label class="text-xs font-bold text-on-surface-variant uppercase tracking-widest px-2">Précisions (Rue /
-                Lot)</label>
-              <input
-                class="w-full h-14 px-4 bg-surface-container-low rounded-xl border-none text-sm focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none"
-                placeholder="Ex: Près de la poste" type="text" />
+          <div class="p-5 bg-primary/5 rounded-2xl flex items-start gap-4">
+            <span class="material-symbols-outlined text-primary text-3xl mt-0.5">storefront</span>
+            <div>
+              <p class="font-bold text-on-surface text-lg">{{ pickupPointName }}</p>
+              <p class="text-sm text-on-surface-variant mt-1">
+                Votre commande sera disponible à ce point de retrait. Présentez votre code de transaction lors de la
+                récupération.
+              </p>
             </div>
           </div>
-          <div class="mt-8 p-4 bg-primary/5 rounded-2xl flex items-start gap-3">
+          <div class="mt-4 p-4 bg-surface-container-low rounded-2xl flex items-start gap-3">
             <span class="material-symbols-outlined text-primary mt-0.5">info</span>
             <p class="text-sm text-on-surface-variant">Les livraisons se font exclusivement dans les points de collecte
-              **Tantsaha** pour garantir la fraîcheur et réduire l'empreinte carbone.</p>
+              <strong>Tantsaha</strong> pour garantir la fraîcheur et réduire l'empreinte carbone.
+            </p>
           </div>
         </div>
       </div>

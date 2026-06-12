@@ -1,13 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, map, tap } from 'rxjs';
-import { CreatedOrder, HarvestLine, ManagerDelivery, OrderSummary, PickupPoint, ProducerProfile, ShopProduct } from '../models/shop.models';
+import { CreatedOrder, HarvestLine, ManagerDelivery, OrderSummary, PickupPoint, ProducerProfile, ShopProduct, Category } from '../models/shop.models';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private base = (window as any).__APP_CONFIG?.API_BASE_URL || '/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getShop(params?: Record<string, string>): Observable<ShopProduct[]> {
     console.log('ApiService: loading shop with params:', params);
@@ -74,6 +74,12 @@ export class ApiService {
 
   getPickupPoints(): Observable<PickupPoint[]> {
     return this.http.get<PickupPoint[] | { results: PickupPoint[] }>(`${this.base}/pickup-points/`).pipe(
+      map((res) => (Array.isArray(res) ? res : res.results ?? []))
+    );
+  }
+
+  getCategories(): Observable<Category[]> {
+    return this.http.get<Category[] | { results: Category[] }>(`${this.base}/categories/`).pipe(
       map((res) => (Array.isArray(res) ? res : res.results ?? []))
     );
   }

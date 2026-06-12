@@ -76,13 +76,13 @@
           Filtres
         </h2>
 
-        <!-- Search (Moved into sidebar for cleaner header) -->
+        <!-- Search -->
         <div class="mb-8">
           <p class="text-xs font-bold mb-3 text-on-surface-variant uppercase tracking-widest">Recherche</p>
           <div class="relative">
             <span
               class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-xl">search</span>
-            <input type="text" placeholder="Fruits, légumes..."
+            <input type="text" placeholder="Fruits, légumes..." [(ngModel)]="searchTerm"
               class="w-full h-12 pl-10 pr-4 bg-surface-container-low border-none rounded-xl text-sm focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none">
           </div>
         </div>
@@ -91,25 +91,32 @@
         <div class="mb-8">
           <p class="text-xs font-bold mb-3 text-on-surface-variant uppercase tracking-widest">Catégories</p>
           <div class="flex flex-wrap gap-2">
-            <button class="px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold shadow-sm">Tout</button>
-            <button
-              class="px-4 py-2 rounded-xl bg-white text-on-surface-variant text-xs font-semibold hover:bg-primary/5 transition-colors border border-outline-variant/30">Grains</button>
-            <button
-              class="px-4 py-2 rounded-xl bg-white text-on-surface-variant text-xs font-semibold hover:bg-primary/5 transition-colors border border-outline-variant/30">Fruits</button>
-            <button
-              class="px-4 py-2 rounded-xl bg-white text-on-surface-variant text-xs font-semibold hover:bg-primary/5 transition-colors border border-outline-variant/30">Légumes</button>
+            <button (click)="selectCategory('')"
+              class="px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition-colors"
+              [class.bg-primary]="selectedCategory === ''" [class.text-on-primary]="selectedCategory === ''"
+              [class.bg-white]="selectedCategory !== ''" [class.text-on-surface-variant]="selectedCategory !== ''"
+              [class.border]="selectedCategory !== ''" [class.border-outline-variant]="selectedCategory !== ''">
+              Tout
+            </button>
+            <button *ngFor="let cat of categories" (click)="selectCategory(cat.name)"
+              class="px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition-colors"
+              [class.bg-primary]="selectedCategory === cat.name" [class.text-on-primary]="selectedCategory === cat.name"
+              [class.bg-white]="selectedCategory !== cat.name"
+              [class.text-on-surface-variant]="selectedCategory !== cat.name"
+              [class.border]="selectedCategory !== cat.name"
+              [class.border-outline-variant]="selectedCategory !== cat.name">
+              {{ cat.name }}
+            </button>
           </div>
         </div>
 
-        <!-- Region -->
+        <!-- Point de retrait -->
         <div class="mb-8">
-          <p class="text-xs font-bold mb-3 text-on-surface-variant uppercase tracking-widest">Région</p>
-          <select
+          <p class="text-xs font-bold mb-3 text-on-surface-variant uppercase tracking-widest">Point de Retrait</p>
+          <select [(ngModel)]="selectedPickupPoint"
             class="w-full h-12 px-4 rounded-xl bg-surface-container-low border-none text-sm focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none appearance-none cursor-pointer">
-            <option>Madagascar entier</option>
-            <option>Analamanga</option>
-            <option>Vakinankaratra</option>
-            <option>Sava</option>
+            <option value="">Tous les points</option>
+            <option *ngFor="let pp of pickupPoints" [value]="pp.id">{{ pp.name }} — {{ pp.city }}</option>
           </select>
         </div>
 
@@ -117,17 +124,24 @@
         <div class="mb-8">
           <p class="text-xs font-bold mb-3 text-on-surface-variant uppercase tracking-widest">Prix max (Ar)</p>
           <input class="w-full accent-primary h-1.5 bg-surface-container-high rounded-lg appearance-none cursor-pointer"
-            type="range" min="0" max="500000" />
+            type="range" min="0" max="500000" step="1000" [(ngModel)]="maxPrice" />
           <div class="flex justify-between mt-3 text-xs font-bold text-on-surface-variant">
             <span>0 Ar</span>
-            <span>500,000 Ar</span>
+            <span class="text-primary">{{ formatPrice(maxPrice) }} Ar</span>
           </div>
         </div>
 
-        <button
-          class="w-full h-12 bg-primary text-on-primary rounded-xl font-bold hover:opacity-90 transition-opacity shadow-sm">
-          Appliquer les filtres
-        </button>
+        <div class="flex gap-3">
+          <button (click)="loadProducts()"
+            class="flex-1 h-12 bg-primary text-on-primary rounded-xl font-bold hover:opacity-90 transition-opacity shadow-sm">
+            Appliquer
+          </button>
+          <button (click)="resetFilters()"
+            class="h-12 px-4 border border-outline-variant rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors text-sm font-semibold"
+            title="Réinitialiser">
+            <span class="material-symbols-outlined text-lg">refresh</span>
+          </button>
+        </div>
       </div>
 
       <!-- Promo Banner -->
@@ -141,6 +155,7 @@
         </div>
       </div>
     </aside>
+
 
     <!-- Product Grid -->
     <section class="flex-1">

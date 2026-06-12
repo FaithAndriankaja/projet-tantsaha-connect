@@ -78,6 +78,11 @@ export interface PickupPoint {
   city: string;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+}
+
 export interface ProducerProfile {
   id: string;
   farm_name: string;

@@ -1,129 +1,333 @@
-<div class="bg-surface text-on-surface min-h-screen flex flex-col">
-<!-- TopNavBar -->
-<header class="sticky top-0 z-50 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-md bg-surface border-b border-outline-variant">
-<div class="flex items-center gap-sm">
-<h1 class="font-headline-md text-headline-md text-primary font-bold">Tantsaha Connect</h1>
-</div>
-<div class="hidden md:flex items-center gap-lg">
-<a class="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md" routerLink="/">Accueil</a>
-<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" routerLink="/boutique-desktop">Catalogue</a>
-<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" [routerLink]="ordersRoute">Commandes</a>
-<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" [routerLink]="profileRoute">Profil</a>
-</div>
-<div class="flex items-center gap-md">
-<span class="material-symbols-outlined text-primary cursor-pointer">shopping_cart</span>
-<span class="material-symbols-outlined text-primary cursor-pointer">notifications</span>
-<span class="material-symbols-outlined text-primary cursor-pointer">person</span>
-</div>
-</header>
-<main class="flex-grow flex flex-col items-center px-margin-mobile md:px-margin-desktop py-lg max-w-[1200px] mx-auto w-full">
-<!-- Farmer Identity Strip -->
-<section class="w-full mb-lg">
-<div class="flex flex-col md:flex-row md:justify-between md:items-end gap-sm border-b-2 border-primary pb-sm">
-<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">
-                    Bonjour {{ currentUser?.name || 'Producteur' }} <span class="text-primary-container font-medium text-body-lg">({{ farmName }})</span>
-</h2>
-<div class="flex items-center gap-xs text-primary font-bold bg-primary-fixed/20 px-sm py-xs rounded">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified</span>
-<span class="font-label-md text-label-md uppercase tracking-wider">Compte Validé</span>
-</div>
-</div>
-</section>
-<!-- Main Data Container -->
-<section class="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-md md:p-lg">
-<div class="flex items-center gap-sm mb-lg">
-<span class="material-symbols-outlined text-primary">agriculture</span>
-<h3 class="font-headline-md text-headline-md text-on-surface">Ma Récolte de la Semaine</h3>
-</div>
-<!-- Responsive Table Container -->
-<div class="overflow-x-auto w-full mb-xl">
-<p *ngIf="loading" class="py-8 text-center text-on-surface-variant">Chargement...</p>
-<p *ngIf="error" class="py-8 text-center text-error">{{ error }}</p>
-<p *ngIf="!loading && !error && harvestLines.length === 0" class="py-8 text-center text-on-surface-variant">Aucune récolte à préparer pour le moment.</p>
-<table *ngIf="!loading && harvestLines.length" class="w-full border-collapse border border-outline-variant text-left">
-<thead class="bg-surface-container-low">
-<tr>
-<th class="p-md border border-outline-variant font-label-md text-label-md text-on-surface-variant">Produit</th>
-<th class="p-md border border-outline-variant font-label-md text-label-md text-on-surface-variant">Quantité Totale à Récolter</th>
-<th class="p-md border border-outline-variant font-label-md text-label-md text-on-surface-variant">Unité</th>
-<th class="p-md border border-outline-variant font-label-md text-label-md text-on-surface-variant">Commandes</th>
-</tr>
-</thead>
-<tbody class="bg-white">
-<tr *ngFor="let line of harvestLines" class="hover:bg-surface-container-lowest transition-colors">
-<td class="p-md border border-outline-variant font-body-md text-body-md font-semibold text-primary">{{ line.product_name }}</td>
-<td class="p-md border border-outline-variant font-body-md text-body-md">{{ formatQty(line.total_quantity_to_prepare) }}</td>
-<td class="p-md border border-outline-variant font-body-md text-body-md">{{ line.unit }}</td>
-<td class="p-md border border-outline-variant">
-<span class="inline-block px-sm py-xs bg-primary-container text-on-primary font-label-sm text-label-sm rounded uppercase">{{ line.order_count }}</span>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<!-- Action Button -->
-<div class="flex justify-center">
-<button disabled class="w-full max-w-lg bg-outline-variant text-on-surface-variant cursor-not-allowed py-md px-lg rounded-xl flex items-center justify-center gap-sm shadow-sm opacity-60">
-<span class="material-symbols-outlined">picture_as_pdf</span>
-<span class="font-label-md text-label-md">Export PDF (bientôt disponible)</span>
-</button>
-</div>
-</section>
-<!-- Stats Grid (Visual Interest without Images) -->
-<section class="grid grid-cols-2 md:grid-cols-4 gap-md w-full mt-lg">
-<div class="bg-white border border-outline-variant p-md rounded-xl text-center">
-<div class="text-on-surface-variant font-label-sm text-label-sm mb-xs uppercase">Commandes</div>
-<div class="text-primary font-headline-md text-headline-md">{{ totalOrders }}</div>
-</div>
-<div class="bg-white border border-outline-variant p-md rounded-xl text-center">
-<div class="text-on-surface-variant font-label-sm text-label-sm mb-xs uppercase">Total kg</div>
-<div class="text-primary font-headline-md text-headline-md">37</div>
-</div>
-<div class="bg-white border border-outline-variant p-md rounded-xl text-center">
-<div class="text-on-surface-variant font-label-sm text-label-sm mb-xs uppercase">Date de ramassage</div>
-<div class="text-secondary font-headline-md text-headline-md">24 Mai</div>
-</div>
-<div class="bg-white border border-outline-variant p-md rounded-xl text-center">
-<div class="text-on-surface-variant font-label-sm text-label-sm mb-xs uppercase">Progression</div>
-<div class="text-primary font-headline-md text-headline-md">100%</div>
-</div>
-</section>
-</main>
-  <!-- Bottom Navigation (Mobile Only) -->
-  <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center py-2 bg-primary z-50 shadow-lg">
-    <a routerLink="/" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
-      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Home</span>
-    </a>
-    <a routerLink="/boutique-desktop" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
-      <span class="material-symbols-outlined">storefront</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Market</span>
-    </a>
-    <a [routerLink]="ordersRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
-      <span class="material-symbols-outlined">receipt_long</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Commandes</span>
-    </a>
-    <a [routerLink]="profileRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
-      <span class="material-symbols-outlined">person</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Profile</span>
-    </a>
-  </nav>
-<!-- Footer (Desktop Only) -->
-<footer class="hidden md:block w-full py-xl px-margin-desktop bg-surface-container-lowest border-t border-outline-variant mt-xl">
-<div class="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-lg">
-<div class="flex flex-col gap-xs">
-<span class="font-headline-md text-primary">Tantsaha Connect</span>
-<span class="font-body-md text-body-md text-on-surface-variant">© 2024 Tantsaha Connect. Pride of Madagascar.</span>
-</div>
-<div class="flex gap-lg">
-<a class="text-on-surface-variant hover:text-secondary transition-colors font-body-md text-body-md" routerLink="/">About Us</a>
-<a class="text-on-surface-variant hover:text-secondary transition-colors font-body-md text-body-md" routerLink="/tantsaha-recolte">Farmer Program</a>
-<a class="text-on-surface-variant hover:text-secondary transition-colors font-body-md text-body-md" routerLink="/mpandrindra-livraison">Shipping Policy</a>
-<a class="text-on-surface-variant hover:text-secondary transition-colors font-body-md text-body-md" routerLink="/register">Terms of Service</a>
-</div>
-</div>
-</footer>
-<!-- Spacer for mobile nav -->
-<div class="h-20 md:hidden"></div>
+<div class="bg-surface font-body-md text-on-surface flex overflow-hidden min-h-screen">
+  <!-- SideNavBar Shell -->
+  <aside
+    class="fixed h-full w-72 left-0 top-0 bg-surface-container-low shadow-sm border-r border-outline-variant/30 flex flex-col p-4 z-50 hidden md:flex">
+    <!-- Brand Header -->
+    <div class="flex items-center gap-3 mb-10 px-2 mt-4">
+      <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">eco</span>
+      </div>
+      <div>
+        <h1 class="font-display text-headline-md text-primary leading-none">Tantsaha</h1>
+        <p class="text-label-sm text-on-surface-variant">EdenSource Admin</p>
+      </div>
+    </div>
+    <!-- Navigation Links -->
+    <nav class="flex-grow space-y-2">
+      <a class="flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold transition-transform duration-200 scale-[0.98]"
+        routerLink="/dashboard-tantsaha">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="font-label-md">Accueil</span>
+      </a>
+      <a
+        class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-colors cursor-not-allowed opacity-60">
+        <span class="material-symbols-outlined">bolt</span>
+        <span class="font-label-md">Campagnes <span
+            class="text-[10px] ml-1 bg-outline-variant text-white px-1 rounded">Bientôt</span></span>
+      </a>
+      <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-colors"
+        routerLink="/boutique-desktop">
+        <span class="material-symbols-outlined">storefront</span>
+        <span class="font-label-md">Catalogue</span>
+      </a>
+      <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-colors"
+        [routerLink]="ordersRoute">
+        <span class="material-symbols-outlined">receipt_long</span>
+        <span class="font-label-md">Vos Commandes</span>
+      </a>
+      <a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-colors"
+        [routerLink]="profileRoute">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="font-label-md">Paramètres</span>
+      </a>
+    </nav>
+    <!-- Profile Section -->
+    <div class="mt-auto pt-6 border-t border-outline-variant/20">
+      <div
+        class="flex items-center gap-3 p-2 rounded-xl hover:bg-surface-container-high transition-colors cursor-pointer"
+        [routerLink]="profileRoute">
+        <div
+          class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-lg border border-outline-variant">
+          {{ (currentUser?.name || 'V').charAt(0) | uppercase}}
+        </div>
+        <div class="overflow-hidden">
+          <p class="font-label-md text-on-surface truncate">{{ currentUser?.name || 'Manager' }}</p>
+          <p class="text-label-sm text-on-surface-variant truncate font-bold text-primary">{{ farmName }}</p>
+        </div>
+      </div>
+    </div>
+  </aside>
 
+  <!-- TopNavBar Shell -->
+  <header
+    class="fixed top-0 right-0 left-0 md:left-72 h-20 bg-surface/80 backdrop-blur-md border-b border-outline-variant/20 flex justify-between items-center px-4 md:px-10 z-40">
+    <div class="flex items-center gap-8 flex-1">
+      <h2 class="font-headline-md text-primary font-bold"><span
+          class="md:hidden inline-block mr-2 text-2xl material-symbols-outlined align-middle">menu</span>Espace
+        Producteur</h2>
+      <div class="relative w-full max-w-md hidden md:block">
+        <span
+          class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+        <input
+          class="w-full h-11 pl-12 pr-4 bg-surface-container-low border-none rounded-full focus:ring-2 focus:ring-primary text-body-md transition-all"
+          placeholder="Rechercher une opération..." type="text" />
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <button
+        class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant">
+        <span class="material-symbols-outlined">notifications</span>
+      </button>
+      <div class="h-8 w-px bg-outline-variant/30 hidden md:block mx-2"></div>
+      <div class="flex items-center gap-3 hidden md:flex">
+        <span class="font-label-md text-on-surface-variant hidden md:block">Livraison Active</span>
+        <div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container">
+          <span class="material-symbols-outlined text-[20px]">calendar_today</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="w-full pt-20 h-screen overflow-y-auto no-scrollbar bg-surface md:ml-72 p-4 md:p-8">
+    <div class="max-w-[1280px] mx-auto space-y-8 pb-32">
+      <!-- Dashboard Header -->
+      <div class="flex justify-between items-end">
+        <div>
+          <h3 class="font-headline-lg text-on-surface mb-1">Tableau de bord</h3>
+          <p class="text-body-md text-on-surface-variant">Bienvenue, {{ currentUser?.name }}. Voici un aperçu de vos
+            activités de la session.</p>
+        </div>
+        <div class="hidden md:flex gap-3">
+          <button disabled
+            class="h-11 px-6 rounded-xl border border-outline-variant font-label-md cursor-not-allowed opacity-60 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">download</span> Exporter
+          </button>
+          <button
+            class="h-11 px-6 rounded-xl bg-primary text-on-primary font-label-md hover:bg-primary-container transition-all flex items-center gap-2 shadow-sm"
+            (click)="toggleSidePanel()">
+            <span class="material-symbols-outlined text-[18px]">add</span> Nouveau Produit
+          </button>
+        </div>
+      </div>
+
+      <!-- Metrics Bar -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Metric Card 1 -->
+        <div
+          class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/10 group hover:border-primary/30 transition-colors">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-3 rounded-xl bg-primary/10 text-primary">
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">eco</span>
+            </div>
+            <div class="flex items-center gap-1 text-primary text-label-sm bg-primary/5 px-2 py-1 rounded-full">
+              <span class="material-symbols-outlined text-[14px]">check_circle</span> Actif
+            </div>
+          </div>
+          <p class="text-label-md text-on-surface-variant mb-1">Produits à récolter</p>
+          <div class="flex items-baseline gap-2">
+            <h4 class="font-display text-[28px] font-bold text-on-surface">{{ totalProducts }}</h4>
+          </div>
+          <div class="mt-4 h-8 flex items-end gap-1">
+            <div class="flex-1 bg-primary/10 rounded-t-sm h-1/2"></div>
+            <div class="flex-1 bg-primary/10 rounded-t-sm h-2/3"></div>
+            <div class="flex-1 bg-primary/20 rounded-t-sm h-3/4"></div>
+            <div class="flex-1 bg-primary/10 rounded-t-sm h-1/2"></div>
+            <div class="flex-1 bg-primary/30 rounded-t-sm h-full"></div>
+          </div>
+        </div>
+
+        <!-- Metric Card 2 -->
+        <div
+          class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/10 group hover:border-primary/30 transition-colors">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-3 rounded-xl bg-secondary/10 text-secondary">
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_bag</span>
+            </div>
+            <div class="flex items-center gap-1 text-primary text-label-sm bg-primary/5 px-2 py-1 rounded-full">
+              <span class="material-symbols-outlined text-[14px]">trending_up</span> Confirmés
+            </div>
+          </div>
+          <p class="text-label-md text-on-surface-variant mb-1">Commandes reçues</p>
+          <h4 class="font-display text-[28px] font-bold text-on-surface">{{ totalOrders }}</h4>
+          <div class="mt-4 h-8 flex items-end gap-1">
+            <div class="flex-1 bg-secondary/10 rounded-t-sm h-1/3"></div>
+            <div class="flex-1 bg-secondary/20 rounded-t-sm h-2/3"></div>
+            <div class="flex-1 bg-secondary/10 rounded-t-sm h-2/5"></div>
+            <div class="flex-1 bg-secondary/30 rounded-t-sm h-4/5"></div>
+            <div class="flex-1 bg-secondary/10 rounded-t-sm h-3/5"></div>
+          </div>
+        </div>
+
+        <!-- Metric Card 3 -->
+        <div
+          class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/10 group hover:border-primary/30 transition-colors">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-3 rounded-xl bg-tertiary/10 text-tertiary">
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+            </div>
+          </div>
+          <p class="text-label-md text-on-surface-variant mb-1">Total Ramassage Prévu</p>
+          <h4 class="font-display text-[28px] font-bold text-on-surface">{{ totalQuantity }} <span
+              class="text-lg">kg/unités</span></h4>
+          <div class="mt-4 h-8 flex items-end gap-1">
+            <div class="flex-1 bg-tertiary/10 rounded-t-sm h-1/2"></div>
+            <div class="flex-1 bg-tertiary/10 rounded-t-sm h-1/2"></div>
+            <div class="flex-1 bg-tertiary/10 rounded-t-sm h-1/2"></div>
+            <div class="flex-1 bg-tertiary/20 rounded-t-sm h-3/4"></div>
+            <div class="flex-1 bg-tertiary/30 rounded-t-sm h-full"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Inventory Section (Harvest Sheet) -->
+      <div class="bg-surface-container-lowest rounded-3xl shadow-sm border border-outline-variant/20 overflow-hidden">
+        <div
+          class="p-6 border-b border-outline-variant/20 flex justify-between items-center bg-surface-container-lowest">
+          <h3 class="font-headline-md text-on-surface flex items-center gap-2"><span
+              class="material-symbols-outlined text-primary">agriculture</span> Ma Récolte de la Semaine</h3>
+          <div class="flex gap-2">
+            <button class="p-2 rounded-lg hover:bg-surface-container-high transition-colors"><span
+                class="material-symbols-outlined">filter_list</span></button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto w-full">
+          <p *ngIf="loading" class="py-8 text-center text-on-surface-variant">Chargement...</p>
+          <p *ngIf="error" class="py-8 text-center text-error">{{ error }}</p>
+          <p *ngIf="!loading && !error && harvestLines.length === 0" class="py-8 text-center text-on-surface-variant">
+            Aucune récolte à préparer pour le moment.</p>
+
+          <table *ngIf="!loading && harvestLines.length" class="w-full border-collapse min-w-[700px]">
+            <thead>
+              <tr class="bg-surface-container-low/50">
+                <th class="text-left py-4 px-6 font-label-md text-on-surface-variant uppercase tracking-wider">Produit
+                </th>
+                <th class="text-left py-4 px-6 font-label-md text-on-surface-variant uppercase tracking-wider">Quantité
+                  à préparer</th>
+                <th class="text-left py-4 px-6 font-label-md text-on-surface-variant uppercase tracking-wider">Unité
+                </th>
+                <th class="text-left py-4 px-6 font-label-md text-on-surface-variant uppercase tracking-wider">Commandes
+                </th>
+                <th class="text-right py-4 px-6 font-label-md text-on-surface-variant uppercase tracking-wider">Statut
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/10 cursor-default">
+              <tr *ngFor="let line of harvestLines" class="hover:bg-surface-container-low/30 transition-colors">
+                <td class="py-4 px-6">
+                  <div class="flex items-center gap-4">
+                    <div
+                      class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-outline-variant/20 text-primary shrink-0">
+                      <span class="material-symbols-outlined">nutrition</span>
+                    </div>
+                    <div>
+                      <p class="font-label-md text-on-surface font-bold break-all">{{ line.product_name }}</p>
+                      <p class="text-label-sm text-on-surface-variant">{{ farmName }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 px-6 font-body-md text-primary font-bold">{{ formatQty(line.total_quantity_to_prepare)
+                  }}</td>
+                <td class="py-4 px-6 text-on-surface-variant font-bold uppercase text-[12px] opacity-80">{{ line.unit }}
+                </td>
+                <td class="py-4 px-6">
+                  <span
+                    class="inline-flex items-center justify-center px-3 py-1 bg-primary text-on-primary text-[12px] rounded-full font-bold">{{
+                    line.order_count }}</span>
+                </td>
+                <td class="py-4 px-6 text-right">
+                  <div class="flex items-center justify-end gap-3">
+                    <button
+                      class="relative inline-flex h-6 w-11 items-center rounded-full bg-primary focus:outline-none cursor-help"
+                      title="Activé pour la session">
+                      <span
+                        class="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition-transform"></span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="p-4 bg-surface-container-low/20 border-t border-outline-variant/20 flex justify-center">
+          <button
+            class="text-label-md text-primary font-bold transition-all hover:bg-primary-container px-4 py-2 rounded-lg">Voir
+            l'ensemble de l'inventaire</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Bottom Nav -->
+    <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center py-2 bg-primary z-50 shadow-lg">
+      <a routerLink="/" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+        [routerLinkActiveOptions]="{exact: true}"
+        class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
+        <span class="text-[10px] font-bold uppercase mt-1">Home</span>
+      </a>
+      <a routerLink="/boutique-desktop"
+        routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+        class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+        <span class="material-symbols-outlined">storefront</span>
+        <span class="text-[10px] font-bold uppercase mt-1">Market</span>
+      </a>
+      <a [routerLink]="ordersRoute"
+        routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+        class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+        <span class="material-symbols-outlined">receipt_long</span>
+        <span class="text-[10px] font-bold uppercase mt-1">Commandes</span>
+      </a>
+      <a [routerLink]="profileRoute"
+        routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+        class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-[10px] font-bold uppercase mt-1">Profile</span>
+      </a>
+    </nav>
+  </main>
 </div>
+
+<!-- Side-Panel Form (Add Product Fake) -->
+<div
+  class="fixed inset-y-0 right-0 w-full max-w-lg bg-surface-container-lowest shadow-2xl z-[60] transform transition-transform duration-300 ease-in-out border-l border-outline-variant/30 {{ isSidePanelOpen ? 'translate-x-0' : 'translate-x-[120%]' }}">
+  <div class="h-full flex flex-col">
+    <div class="p-6 border-b border-outline-variant/20 flex items-center justify-between bg-white shadow-sm">
+      <div>
+        <h3 class="font-headline-md text-on-surface">Ajouter un produit</h3>
+        <p class="text-label-sm text-on-surface-variant">Enregistrez un nouvel article</p>
+      </div>
+      <button
+        class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low text-on-surface-variant transition-colors"
+        (click)="toggleSidePanel()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar opacity-60 pointer-events-none">
+      <!-- Fake Upload -->
+      <div class="space-y-2">
+        <label class="font-label-md text-on-surface">Photo du produit</label>
+        <div
+          class="border-2 border-dashed border-outline-variant/50 rounded-2xl p-10 flex flex-col items-center justify-center bg-surface-container-low/30 cursor-pointer">
+          <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4"><span
+              class="material-symbols-outlined">cloud_upload</span></div>
+          <p class="font-label-md">Bientôt disponible</p>
+        </div>
+      </div>
+    </div>
+    <div class="p-6 border-t border-outline-variant/20 bg-white grid grid-cols-2 gap-4">
+      <button
+        class="h-14 rounded-xl border border-outline-variant font-label-md hover:bg-surface-container-low transition-colors"
+        (click)="toggleSidePanel()">Fermer</button>
+      <button
+        class="h-14 rounded-xl bg-outline-variant text-on-surface font-bold shadow-sm opacity-50 cursor-not-allowed">Prochainement</button>
+    </div>
+  </div>
+</div>
+<!-- Fab for Side Panel Trigger on Mobile -->
+<button
+  class="fixed bottom-24 right-4 w-14 h-14 rounded-full bg-primary text-on-primary shadow-lg hover:scale-105 transition-transform flex items-center justify-center z-50 md:hidden"
+  (click)="toggleSidePanel()">
+  <span class="material-symbols-outlined text-[28px]">add</span>
+</button>

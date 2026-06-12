@@ -23,7 +23,7 @@ export class FarmerDashboard implements OnInit {
     private authService: AuthService,
     private api: ApiService,
     private cart: CartService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.authService.currentUser.subscribe((user) => {
@@ -66,7 +66,25 @@ export class FarmerDashboard implements OnInit {
     return this.authService.getOrdersRoute();
   }
 
+  get currentDate(): Date {
+    return new Date();
+  }
+
+  isSidePanelOpen = false;
+
+  toggleSidePanel() {
+    this.isSidePanelOpen = !this.isSidePanelOpen;
+  }
+
   cartCount = 0;
+
+  get totalProducts(): number {
+    return this.harvestLines.length;
+  }
+
+  get totalQuantity(): number {
+    return this.harvestLines.reduce((sum, line) => sum + parseFloat(line.total_quantity_to_prepare as unknown as string), 0);
+  }
 
   formatQty(value: string): string {
     return parseFloat(value).toLocaleString('fr-FR');

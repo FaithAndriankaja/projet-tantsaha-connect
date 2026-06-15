@@ -25,7 +25,7 @@ export class Checkout implements OnInit {
     private api: ApiService,
     private cart: CartService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.authService.currentUser.subscribe((user) => {
@@ -87,13 +87,36 @@ export class Checkout implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
+
     if (this.cartItems.length === 0) {
       this.error = 'Votre panier est vide.';
       return;
     }
 
+    const hasClosedSession = this.cartItems.some((item) => {
+      const closesAt = new Date(item.closes_at);
+
+      return (
+        item.sale_session_status !== 'open' ||
+        closesAt <= new Date()
+      );
+    });
+
+    if (hasClosedSession) {
+      this.submitting = false;
+      this.error =
+        'Votre panier contient un produit dont la session de vente est terminée. Veuillez le retirer du panier.';
+      return;
+    }
+
     const payload = this.cart.buildOrderPayload();
-    if (!payload) return;
+
+    if (!payload) {
+      this.error = 'Impossible de préparer la commande.';
+      return;
+    }
+
+    console.log('Payload commande envoyé à Django:', payload);
 
     this.submitting = true;
     this.error = '';
@@ -104,14 +127,32 @@ export class Checkout implements OnInit {
           ...order,
           pickup_point_name: order.pickup_point_name ?? this.pickupPointName,
         });
+
         this.cart.clear();
         this.submitting = false;
         this.router.navigate(['/panier-paiement']);
       },
+
       error: (err) => {
         this.submitting = false;
-        this.error = err?.error?.detail || err?.error?.message || 'Erreur lors de la création de la commande.';
+
+        console.error('Erreur création commande complète:', err);
+        console.error(
+          'Erreur Django details:',
+          JSON.stringify(err?.error?.details, null, 2)
+        );
+
+        const apiError = err?.error;
+
+        this.error =
+          apiError?.details
+            ? JSON.stringify(apiError.details)
+            : apiError?.detail ||
+            apiError?.message ||
+            'Erreur lors de la création de la commande.';
       },
     });
   }
+
+
 }

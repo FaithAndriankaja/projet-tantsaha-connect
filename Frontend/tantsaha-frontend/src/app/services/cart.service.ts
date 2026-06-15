@@ -24,22 +24,43 @@ export class CartService {
 
   addProduct(product: ShopProduct, quantity = 1): void {
     const unitPrice = parseFloat(product.unit_price);
-    const existing = this.items.find((i) => i.product_id === product.product_id);
+
+    const now = new Date();
+    const closesAt = new Date(product.closes_at);
+
+    if (product.sale_session_status !== 'open' || closesAt <= now) {
+      alert('Cette session de vente est terminée.');
+      return;
+    }
+
+    // Une commande Django est liée à un seul point de retrait et une seule session de vente.
+    // Si l'utilisateur choisit un autre point/session, on démarre un nouveau panier
+    // afin d'éviter un POST /api/orders/ en 400 Bad Request.
+    const current = this.items[0];
+    if (current && (current.pickup_point_id !== product.pickup_point_id || current.sale_session_id !== product.sale_session_id)) {
+      this.itemsSubject.next([]);
+      localStorage.removeItem(CART_KEY);
+    }
+
+    const items = this.items;
+    const existing = items.find((i) => i.product_id === product.product_id);
 
     if (existing) {
       existing.quantity += quantity;
     } else {
-      this.items.push({
+      items.push({
         product_id: product.product_id,
         product_name: product.product_name,
         producer_id: product.producer_id,
         farm_name: product.farm_name,
-        unit_price: unitPrice,
+        unit_price: Number(product.unit_price),
         unit: product.unit,
-        quantity,
+        quantity: 1,
         pickup_point_id: product.pickup_point_id,
         pickup_point_name: product.pickup_point_name,
         sale_session_id: product.sale_session_id,
+        closes_at: product.closes_at,
+        sale_session_status: product.sale_session_status,
       });
     }
 
@@ -85,6 +106,7 @@ export class CartService {
     if (this.items.length === 0) return null;
 
     const first = this.items[0];
+
     return {
       pickup_point_id: first.pickup_point_id,
       sale_session_id: first.sale_session_id,

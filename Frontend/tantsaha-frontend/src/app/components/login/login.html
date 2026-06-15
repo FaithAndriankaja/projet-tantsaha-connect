@@ -1,17 +1,17 @@
 <div class="bg-surface font-body-md text-on-surface antialiased overflow-hidden">
   <main class="flex min-h-screen">
-    <!-- Left Side: Hero Image Section -->
+
+    <!-- Partie gauche : Section Image d'illustration -->
     <section class="hidden lg:block lg:w-1/2 relative overflow-hidden">
       <div class="absolute inset-0 bg-black/10 z-10"></div>
-      <div class="absolute inset-0 bg-cover bg-center transition-transform duration-[10000ms] hover:scale-110" style="
-          background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBPCwavCmJFaw4deKDTHmndqhYrPhgSe6-it7YajhaRaMrhtsBwUdMfqxaYZPGNhFnxPhEE9meOSxU5_fz7nocsy0r0bwCQiYtj6w092-FpuGJTkqjL1YrjqDbuST7MP1xA3boEOkJq33atRtiazD_GBIWsx7oepd5yqxmbksMGB3asiJbEd6ITbexVBi_7EKOu3pUbk8EG4oa1U066spK9SnOwbQ_zUzAiE4lrAiTqYBZMsPKKlkCgJF9P0ViV3PxHZWARmjDrxa4');
-        "></div>
-      <!-- Branding Overlay -->
+      <div class="absolute inset-0 bg-cover bg-center transition-transform duration-[10000ms] hover:scale-110"
+        style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBPCwavCmJFaw4deKDTHmndqhYrPhgSe6-it7YajhaRaMrhtsBwUdMfqxaYZPGNhFnxPhEE9meOSxU5_fz7nocsy0r0bwCQiYtj6w092-FpuGJTkqjL1YrjqDbuST7MP1xA3boEOkJq33atRtiazD_GBIWsx7oepd5yqxmbksMGB3asiJbEd6ITbexVBi_7EKOu3pUbk8EG4oa1U066spK9SnOwbQ_zUzAiE4lrAiTqYBZMsPKKlkCgJF9P0ViV3PxHZWARmjDrxa4');">
+      </div>
+      <!-- Logo de la marque -->
       <div class="absolute top-10 left-10 z-20">
-
         <a class="font-display text-2xl font-bold text-white drop-shadow-md" routerLink="/">Tantsaha Connect</a>
       </div>
-      <!-- Contextual Quote Overlay -->
+      <!-- Slogan contextuel -->
       <div class="absolute bottom-10 left-10 right-10 z-20 text-white">
         <div class="max-w-md">
           <p class="font-display text-4xl drop-shadow-lg mb-4 font-bold">
@@ -21,17 +21,20 @@
         </div>
       </div>
     </section>
-    <!-- Right Side: Login Form Section -->
+
+    <!-- Partie droite : Formulaire de connexion -->
     <section
       class="w-full lg:w-1/2 flex flex-col justify-center items-center px-6 md:px-24 bg-surface-container-lowest">
-      <!-- Mobile Logo -->
+
+      <!-- Logo affiché uniquement sur Mobile -->
       <div class="lg:hidden mb-8 w-full flex justify-center">
         <span class="font-display text-2xl font-bold text-primary">
           Tantsaha Connect
         </span>
       </div>
+
       <div class="w-full max-w-[440px]">
-        <!-- Header -->
+        <!-- En-tête du formulaire -->
         <header class="mb-8">
           <h1 class="font-headline-lg text-on-surface mb-2 mt-12 font-bold text-3xl">
             Bon retour
@@ -41,26 +44,35 @@
           </p>
         </header>
 
-        <!-- Form -->
-        <form class="space-y-6" id="loginForm">
-          <!-- Phone Field -->
+        <!-- Affichage dynamique des messages d'erreur de l'API Django -->
+        <div *ngIf="loginError"
+          class="mb-6 p-4 bg-error/10 border border-error/20 text-error text-sm font-bold rounded-xl flex items-center gap-2">
+          <span class="material-symbols-outlined text-xl">error</span>
+          <span>{{ loginError }}</span>
+        </div>
+
+        <!-- Formulaire natif Angular -->
+        <form class="space-y-6" (ngSubmit)="onSubmit()" #loginForm="ngForm">
+
+          <!-- Champ de saisie : Numéro de téléphone -->
           <div class="space-y-2">
             <label class="block font-label-md text-on-surface-variant" for="phone">Numéro de téléphone</label>
             <div class="relative">
               <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline">phone</span>
               <input
-                class="w-full h-14 pl-12 pr-4 bg-surface-container-low border-none rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:bg-white transition-all duration-300 placeholder:text-outline-variant outline-none"
-                id="phone" name="phone" placeholder="0343333333" required type="tel" />
+                class="w-full h-14 pl-12 pr-4 bg-surface-container-low border border-outline-variant/30 rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:bg-white transition-all duration-300 placeholder:text-outline-variant outline-none"
+                id="phone" name="phone" [(ngModel)]="phone" placeholder="0343333333" required type="tel" />
             </div>
           </div>
-          <!-- Password Field -->
+
+          <!-- Champ de saisie : Mot de passe -->
           <div class="space-y-2">
             <label class="block font-label-md text-on-surface-variant" for="password">Mot de passe</label>
             <div class="relative">
               <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline">lock</span>
               <input
-                class="w-full h-14 pl-12 pr-12 bg-surface-container-low border-none rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:bg-white transition-all duration-300 placeholder:text-outline-variant outline-none"
-                id="password" name="password" placeholder="••••••••" required type="password" />
+                class="w-full h-14 pl-12 pr-12 bg-surface-container-low border border-outline-variant/30 rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:bg-white transition-all duration-300 placeholder:text-outline-variant outline-none"
+                id="password" name="password" [(ngModel)]="password" placeholder="••••••••" required type="password" />
               <button
                 class="absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant hover:text-primary transition-colors"
                 id="togglePassword" type="button">
@@ -68,28 +80,30 @@
               </button>
             </div>
           </div>
-          <!-- Controls -->
+
+          <!-- Contrôles additionnels -->
           <div class="flex items-center justify-between py-2">
             <label class="flex items-center cursor-pointer group">
               <input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary transition-all"
                 type="checkbox" />
-              <span class="ml-3 font-label-md text-on-surface-variant group-hover:text-on-surface transition-colors">Se
-                souvenir de moi</span>
+              <span class="ml-3 font-label-md text-on-surface-variant group-hover:text-on-surface transition-colors">
+                Se souvenir de moi
+              </span>
             </label>
             <a class="font-label-md text-primary hover:underline transition-all cursor-pointer">Mot de passe oublié
               ?</a>
           </div>
-          <!-- Primary Action -->
-          <button
-            class="w-full h-14 bg-primary text-on-primary font-label-md rounded-xl shadow-sm hover:bg-secondary hover:shadow-md active:scale-[0.98] transition-all duration-200 font-bold"
+
+          <!-- Bouton d'action principal avec état de chargement -->
+          <button [disabled]="isSubmitting || !loginForm.form.valid"
+            class="w-full h-14 bg-primary text-on-primary font-label-md rounded-xl shadow-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-all duration-200 font-bold flex items-center justify-center gap-2"
             type="submit">
-            Se connecter
+            <span *ngIf="isSubmitting" class="animate-spin text-xl">◌</span>
+            <span>{{ isSubmitting ? 'Connexion en cours...' : 'Se connecter' }}</span>
           </button>
         </form>
 
-
-
-        <!-- Secondary Action -->
+        <!-- Redirection vers l'inscription -->
         <p class="mt-8 text-center font-body-md text-on-surface-variant">
           Nouveau ici ?
           <a class="text-primary font-bold hover:underline ml-1 cursor-pointer" routerLink="/register">Créer un
@@ -97,7 +111,7 @@
         </p>
       </div>
 
-      <!-- Footer Small Print -->
+      <!-- Mention de bas de page -->
       <footer class="mt-auto py-8 text-center">
         <p class="text-xs text-outline-variant font-medium">
           © 2024 Tantsaha Connect Marketplace. Provenance Garantie.
@@ -106,23 +120,32 @@
     </section>
   </main>
 
-  <!-- Bottom Navigation (Mobile Only) -->
-  <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center py-2 bg-primary z-50 shadow-lg">
-    <a routerLink="/" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+  <!-- BARRE DE NAVIGATION INFÉRIEURE : Filtrée pour les clients et visiteurs uniquement -->
+  <nav *ngIf="!currentUser || currentUser.role === 'consumer'"
+    class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center py-2 bg-primary z-50 shadow-lg">
+    <a routerLink="/" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      [routerLinkActiveOptions]="{exact: true}"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Home</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Accueil</span>
     </a>
-    <a routerLink="/boutique-desktop" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a routerLink="/boutique-desktop"
+      routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">storefront</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Market</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Marché</span>
     </a>
-    <a [routerLink]="ordersRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a *ngIf="currentUser" [routerLink]="ordersRoute"
+      routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">receipt_long</span>
       <span class="text-[10px] font-bold uppercase mt-1">Commandes</span>
     </a>
-    <a [routerLink]="profileRoute" routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1" class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
+    <a *ngIf="currentUser" [routerLink]="profileRoute"
+      routerLinkActive="bg-primary-container text-on-primary-container rounded-full px-4 py-1"
+      class="flex flex-col items-center justify-center text-on-primary/80 transition-all scale-95">
       <span class="material-symbols-outlined">person</span>
-      <span class="text-[10px] font-bold uppercase mt-1">Profile</span>
+      <span class="text-[10px] font-bold uppercase mt-1">Profil</span>
     </a>
   </nav>
 </div>

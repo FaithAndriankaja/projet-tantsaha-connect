@@ -1,27 +1,42 @@
 import { Component, AfterViewInit, ElementRef, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms'; //  AJOUT : Essentiel pour ngModel
 import { AuthService, User } from '../../services/auth.service';
+import { ApiService } from '../../services/api.service'; //  AJOUT : Pour appeler l'API d'inscription
 import { CartService } from '../../services/cart.service';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CommonModule],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
 export class Register implements OnInit, AfterViewInit {
-  private selectedRole: string = '';
   currentUser: User | null = null;
   cartCount = 0;
+
+  //  AJOUT : États et liaisons de données du formulaire natif Angular
+  currentStep = 1;
+  role = ''; // 'consumer' | 'producer' | 'manager'
+  fullName = '';
+  phone = '';
+  password = '';
+  farmName = '';
+  location = '';
+  pickupAddress = '';
+
+  isSubmitting = false;
+  registerError = '';
 
   constructor(
     private el: ElementRef,
     private router: Router,
     private authService: AuthService,
+    private apiService: ApiService, //  AJOUT : Injection de l'ApiService
     private cart: CartService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.authService.currentUser.subscribe((user) => {
@@ -40,126 +55,54 @@ export class Register implements OnInit, AfterViewInit {
     return this.authService.getOrdersRoute();
   }
 
+  //  AJOUT : Gestionnaire de soumission d'inscription 100% Angular
+  onRegisterSubmit() {
+    this.isSubmitting = true;
+    this.registerError = '';
+
+    // Construction du payload attendu par le backend Django REST Framework
+    const payload = {
+      phone: this.phone.trim(),
+      password: this.password,
+      full_name: this.fullName.trim(),
+      role: this.role,
+      ...(this.role === 'producer' && {
+        farm_name: this.farmName.trim(),
+        location: this.location.trim()
+      }),
+      ...(this.role === 'manager' && {
+        location: this.pickupAddress.trim() // Liaison de l'adresse du point pour le Mpandrindra
+      })
+    };
+
+    this.apiService.register(payload).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        alert('Compte créé avec succès ! Veuillez vous connecter.');
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        console.error("Erreur renvoyée par Django :", err);
+        this.registerError = err?.error?.detail || "Erreur lors de l'inscription. Vérifiez les informations saisies.";
+      }
+    });
+  }
+
   ngAfterViewInit() {
-    const onboardingForm = this.el.nativeElement.querySelector('#onboardingForm');
-    const roleInputs = this.el.nativeElement.querySelectorAll('input[name="role"]');
-    const nextBtn = this.el.nativeElement.querySelector('#nextBtn');
-    const backBtn = this.el.nativeElement.querySelector('#backBtn');
-    const submitBtn = this.el.nativeElement.querySelector('#submitBtn');
-    const step1Content = this.el.nativeElement.querySelector('#step-1-content');
-    const step2Content = this.el.nativeElement.querySelector('#step-2-content');
-    const stepTitle = this.el.nativeElement.querySelector('#step-title');
-    const step1Label = this.el.nativeElement.querySelector('#step-1-label');
-    const step2Label = this.el.nativeElement.querySelector('#step-2-label');
-    const timeGrid = this.el.nativeElement.querySelector('#timeGrid');
-
-    if (timeGrid) {
-      for (let i = 0; i < 49; i++) {
-        const div = document.createElement('div');
-        div.className = 'h-6 rounded bg-surface-container-high border border-outline-variant/10 flex items-center justify-center cursor-not-allowed opacity-50';
-        timeGrid.appendChild(div);
-      }
-    }
-
-    roleInputs.forEach((input: HTMLInputElement) => {
-      input.addEventListener('change', () => {
-        this.selectedRole = input.value;
-        nextBtn.disabled = false;
+    // Conserver uniquement l'effet visuel Material 3 sur les inputs s'ils existent dans le DOM
+    const inputs = this.el.nativeElement.querySelectorAll('input');
+    inputs.forEach((input: HTMLInputElement) => {
+      input.addEventListener('focus', () => {
+        const label = input.parentElement?.previousElementSibling;
+        label?.classList.add('text-primary');
+        label?.classList.remove('text-on-surface-variant');
+      });
+      input.addEventListener('blur', () => {
+        const label = input.parentElement?.previousElementSibling;
+        label?.classList.remove('text-primary');
+        label?.classList.add('text-on-surface-variant');
       });
     });
-
-    nextBtn.addEventListener('click', () => {
-      if (!this.selectedRole) return;
-
-      step1Label.classList.remove('text-primary');
-      step1Label.classList.add('text-on-surface-variant/50');
-      step1Label.querySelector('span').classList.remove('bg-primary');
-      step1Label.querySelector('span').classList.add('bg-surface-container');
-
-      step2Label.classList.remove('text-on-surface-variant/50');
-      step2Label.classList.add('text-primary');
-      step2Label.querySelector('span').classList.remove('bg-surface-container');
-      step2Label.querySelector('span').classList.add('bg-primary');
-
-      stepTitle.textContent = 'Complétez vos informations';
-
-      step1Content.classList.add('hidden');
-      step2Content.classList.remove('hidden');
-
-      this.el.nativeElement.querySelector('#tantsaha-fields').classList.add('hidden');
-      this.el.nativeElement.querySelector('#mpandrindra-fields').classList.add('hidden');
-      if (this.selectedRole !== 'mpanjifa') {
-        this.el.nativeElement.querySelector(`#${this.selectedRole}-fields`).classList.remove('hidden');
-      }
-
-      nextBtn.classList.add('hidden');
-      submitBtn.classList.remove('hidden');
-      backBtn.classList.remove('hidden');
-    });
-
-    backBtn.addEventListener('click', () => {
-      step2Label.classList.remove('text-primary');
-      step2Label.classList.add('text-on-surface-variant/50');
-      step2Label.querySelector('span').classList.remove('bg-primary');
-      step2Label.querySelector('span').classList.add('bg-surface-container');
-
-      step1Label.classList.remove('text-on-surface-variant/50');
-      step1Label.classList.add('text-primary');
-      step1Label.querySelector('span').classList.remove('bg-surface-container');
-      step1Label.querySelector('span').classList.add('bg-primary');
-
-      stepTitle.textContent = 'Choisissez votre profil';
-
-      step1Content.classList.remove('hidden');
-      step2Content.classList.add('hidden');
-
-      nextBtn.classList.remove('hidden');
-      submitBtn.classList.add('hidden');
-      backBtn.classList.add('hidden');
-    });
-
-    if (onboardingForm) {
-      onboardingForm.addEventListener('submit', (e: Event) => {
-        e.preventDefault();
-
-        const phone = (onboardingForm.querySelector('#registerPhone') as HTMLInputElement).value.trim();
-        const password = (onboardingForm.querySelector('#registerPassword') as HTMLInputElement).value;
-        const fullName = (onboardingForm.querySelector('#registerFullName') as HTMLInputElement).value.trim();
-        const email = (onboardingForm.querySelector('#registerEmail') as HTMLInputElement).value.trim();
-        const producerNameInput = onboardingForm.querySelector('#producerName') as HTMLInputElement | null;
-        const locationSelect = onboardingForm.querySelector('#producerLocation') as HTMLSelectElement | null;
-
-        const userData = {
-          phone,
-          password,
-          full_name: fullName,
-          email: email || undefined,
-          role: this.selectedRole,
-          farm_name:
-            this.selectedRole === 'tantsaha' && producerNameInput?.value
-              ? producerNameInput.value.trim()
-              : undefined,
-          location:
-            this.selectedRole === 'tantsaha' && locationSelect?.value
-              ? locationSelect.value
-              : undefined,
-        };
-
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="animate-spin mr-2">◌</span> Inscription...';
-
-        this.authService.register(userData).subscribe({
-          next: () => {
-            alert('Compte créé avec succès ! Bienvenue.');
-            this.router.navigate([this.authService.getDefaultRouteAfterAuth()]);
-          },
-          error: (err) => {
-            submitBtn.disabled = false;
-            submitBtn.textContent = "S'inscrire";
-            alert(err?.error?.detail || "Erreur lors de l'inscription.");
-          },
-        });
-      });
-    }
   }
 }

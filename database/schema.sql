@@ -468,8 +468,9 @@ LEFT JOIN categories c ON c.id = p.category_id
 WHERE p.is_active = TRUE;
 
 
-CREATE VIEW harvest_sheet_view AS
+CREATE OR REPLACE VIEW harvest_sheet_view AS
 SELECT
+    gen_random_uuid() AS id,
     o.sale_session_id,
     o.pickup_point_id,
     oi.producer_id,

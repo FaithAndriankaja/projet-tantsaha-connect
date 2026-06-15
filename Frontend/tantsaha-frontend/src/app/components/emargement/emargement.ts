@@ -1,108 +1,285 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AuthService, User } from '../../services/auth.service';
-import { CartService } from '../../services/cart.service';
 import { ApiService } from '../../services/api.service';
-import { ManagerDelivery } from '../../models/shop.models';
+import { ManagerDelivery, PickupPoint } from '../../models/shop.models';
 
 @Component({
   selector: 'app-emargement',
   standalone: true,
-  imports: [RouterLink, CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './emargement.html',
   styleUrl: './emargement.css',
 })
 export class Emargement implements OnInit {
   currentUser: User | null = null;
   deliveries: ManagerDelivery[] = [];
-  filteredDeliveries: ManagerDelivery[] = [];
-  searchQuery = '';
   loading = true;
   error = '';
-  confirmingId: string | null = null;
-  cartCount = 0;
+  successMessage = '';
+  validatingOrderId: string | null = null;
+  searchTerm = '';
 
   constructor(
-    public authService: AuthService,
+    private authService: AuthService,
     private api: ApiService,
-    private cart: CartService,
     private router: Router
   ) { }
+
+  pickupPoints: PickupPoint[] = [];
+
+  loadPickupPoints() {
+    this.api.getPickupPoints().subscribe({
+      next: (points) => {
+        this.pickupPoints = points ?? [];
+
+        if (!this.newSession.pickup_point && this.pickupPoints.length > 0) {
+          this.newSession.pickup_point = this.pickupPoints[0].id;
+        }
+      },
+      error: (err: any) => {
+        console.error('Erreur chargement points de retrait:', err);
+        this.error = this.extractError(err) || 'Impossible de charger les points de retrait.';
+      },
+    });
+  }
 
   ngOnInit() {
     this.authService.currentUser.subscribe((user) => {
       this.currentUser = user;
     });
-    this.cart.items$.subscribe((items) => {
-      this.cartCount = items.reduce((sum, i) => sum + i.quantity, 0);
-    });
     this.loadDeliveries();
+    this.loadSaleSessions();
+    this.loadPickupPoints();
+  }
+
+  loadDeliveries() {
+    this.loading = true;
+    this.error = '';
+
+    this.api.getManagerDeliveries().subscribe({
+      next: (data) => {
+        this.deliveries = data ?? [];
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement livraisons Mpandrindra:', err);
+        this.error = this.extractError(err) || 'Impossible de charger les commandes du point de retrait.';
+        this.deliveries = [];
+        this.loading = false;
+      },
+    });
+  }
+
+  get filteredDeliveries(): ManagerDelivery[] {
+    const q = this.searchTerm.trim().toLowerCase();
+    if (!q) return this.deliveries;
+    return this.deliveries.filter((delivery) => {
+      const text = [
+        delivery.transaction_code,
+        delivery.consumer_name,
+        delivery.consumer_phone,
+        delivery.status,
+        ...(delivery.items ?? []).map((item) => item.product_name),
+      ]
+        .join(' ')
+        .toLowerCase();
+      return text.includes(q);
+    });
+  }
+
+  get waitingCount(): number {
+    return this.deliveries.filter((d) => !this.isDelivered(d)).length;
+  }
+
+  get deliveredCount(): number {
+    return this.deliveries.filter((d) => this.isDelivered(d)).length;
+  }
+
+  validateHandover(delivery: ManagerDelivery) {
+    if (!delivery?.id || this.validatingOrderId) return;
+    if (this.isDelivered(delivery)) return;
+
+    const ok = confirm(`Valider la remise physique de la commande ${delivery.transaction_code} ?`);
+    if (!ok) return;
+
+    this.validatingOrderId = delivery.id;
+    this.error = '';
+    this.successMessage = '';
+
+    this.api.confirmHandover(delivery.id).subscribe({
+      next: (res) => {
+        this.successMessage = `Commande ${res.transaction_code} validée. Statut : ${res.status}.`;
+        this.validatingOrderId = null;
+        this.loadDeliveries();
+      },
+      error: (err) => {
+        console.error('Erreur validation remise:', err);
+        this.error = this.extractError(err) || 'Erreur lors de la validation de la remise.';
+        this.validatingOrderId = null;
+      },
+    });
+  }
+
+  openScanner() {
+    const code = prompt('Entrez ou scannez le code transaction à valider :');
+    if (!code) return;
+
+    const delivery = this.deliveries.find((d) => d.transaction_code.toLowerCase() === code.trim().toLowerCase());
+    if (!delivery) {
+      this.error = `Aucune commande trouvée pour le code ${code}.`;
+      this.successMessage = '';
+      return;
+    }
+
+    this.validateHandover(delivery);
+  }
+
+  isDelivered(delivery: ManagerDelivery): boolean {
+    return ['picked_up', 'delivered', 'completed', 'handed_over'].includes(
+      (delivery.status || '').toLowerCase()
+    );
+  }
+
+  statusLabel(status: string): string {
+    const normalized = (status || '').toLowerCase();
+    if (['picked_up', 'delivered', 'completed', 'handed_over'].includes(normalized)) {
+      return 'Remise validée';
+    }
+    if (['delivered', 'completed', 'handed_over'].includes(normalized)) return 'Remise validée';
+    if (['ready', 'prepared'].includes(normalized)) return 'Prêt au point de retrait';
+    if (['confirmed', 'paid'].includes(normalized)) return 'Payé / à remettre';
+    if (['pending'].includes(normalized)) return 'En attente';
+    return status || 'Statut inconnu';
   }
 
   get profileRoute(): string {
     return this.authService.getProfileRoute();
   }
 
-  get ordersRoute(): string {
-    return this.authService.getOrdersRoute();
-  }
+  saleSessions: any[] = [];
+  sessionLoading = false;
 
-  loadDeliveries() {
-    this.loading = true;
-    this.error = '';
-    this.api.getManagerDeliveries().subscribe({
-      next: (deliveries) => {
-        this.deliveries = deliveries;
-        this.applyFilter();
-        this.loading = false;
-      },
-      error: () => {
-        this.error = 'Impossible de charger les livraisons.';
-        this.loading = false;
-      },
-    });
-  }
+  newSession = {
+    pickup_point: '',
+    opens_at: '',
+    closes_at: '',
+    pickup_date: '',
+    status: 'open',
+  };
 
-  onSearchChange(event: Event) {
-    this.searchQuery = (event.target as HTMLInputElement).value;
-    this.applyFilter();
-  }
+  loadSaleSessions() {
+    this.sessionLoading = true;
 
-  applyFilter() {
-    const q = this.searchQuery.trim().toLowerCase();
-    if (!q) {
-      this.filteredDeliveries = [...this.deliveries];
-      return;
-    }
-    this.filteredDeliveries = this.deliveries.filter(
-      (d) =>
-        d.consumer_name.toLowerCase().includes(q) ||
-        d.transaction_code.toLowerCase().includes(q)
-    );
-  }
-
-  confirmHandover(delivery: ManagerDelivery) {
-    if (this.confirmingId) return;
-    this.confirmingId = delivery.id;
-    this.api.confirmHandover(delivery.id).subscribe({
-      next: () => {
-        this.confirmingId = null;
-        this.loadDeliveries();
+    this.api.getSaleSessions().subscribe({
+      next: (sessions) => {
+        this.saleSessions = sessions ?? [];
+        this.sessionLoading = false;
       },
       error: (err) => {
-        this.confirmingId = null;
-        alert(err?.error?.detail || 'Erreur lors de la confirmation.');
+        console.error('Erreur chargement sessions:', err);
+        this.error = this.extractError(err) || 'Impossible de charger les sessions de vente.';
+        this.sessionLoading = false;
+      },
+    });
+  }
+  createSaleSession() {
+    this.error = '';
+    this.successMessage = '';
+
+    if (
+      !this.newSession.pickup_point ||
+      !this.newSession.opens_at ||
+      !this.newSession.closes_at ||
+      !this.newSession.pickup_date
+    ) {
+      this.error = 'Veuillez remplir tous les champs de la session.';
+      return;
+    }
+
+    const opensAt = new Date(this.newSession.opens_at);
+    const closesAt = new Date(this.newSession.closes_at);
+    const pickupDate = new Date(this.newSession.pickup_date);
+
+    if (closesAt <= opensAt) {
+      this.error = 'La fin des ventes doit être après le début des ventes.';
+      return;
+    }
+
+    if (pickupDate < new Date(closesAt.toDateString())) {
+      this.error = 'La date de retrait doit être après ou égale à la date de clôture.';
+      return;
+    }
+
+    const payload = {
+      pickup_point: this.newSession.pickup_point,
+      opens_at: opensAt.toISOString(),
+      closes_at: closesAt.toISOString(),
+      pickup_date: this.newSession.pickup_date,
+      status: 'open',
+    };
+
+    console.log('Payload session envoyé:', payload);
+
+    this.api.createSaleSession(payload).subscribe({
+      next: () => {
+        this.successMessage = 'Session de vente créée avec succès.';
+        this.newSession = {
+          pickup_point: '',
+          opens_at: '',
+          closes_at: '',
+          pickup_date: '',
+          status: 'open',
+        };
+        this.loadSaleSessions();
+      },
+      error: (err: any) => {
+        console.error('Erreur création session complète:', err);
+        console.error('Détails Django:', JSON.stringify(err?.error, null, 2));
+
+        this.error =
+          this.extractError(err) ||
+          'Impossible de créer la session.';
       },
     });
   }
 
-  formatItem(item: ManagerDelivery['items'][0]): string {
-    return `${item.quantity} ${item.unit} ${item.product_name}`;
+  closeSaleSession(session: any) {
+    this.api.updateSaleSession(session.id, { status: 'closed' }).subscribe({
+      next: () => {
+        this.successMessage = 'Session fermée avec succès.';
+        this.loadSaleSessions();
+      },
+      error: (err: any) => {
+        console.error('Erreur création session complète:', err);
+        console.error('Détails Django:', JSON.stringify(err?.error, null, 2));
+
+        this.error =
+          this.extractError(err) ||
+          'Impossible de créer la session.';
+      }
+    });
   }
 
   logout() {
     this.authService.logout();
-    this.router.navigate(['/']);
+    this.router.navigate(['/login']);
+  }
+
+  private extractError(err: any): string {
+    const data = err?.error;
+    if (!data) return '';
+    if (typeof data === 'string') return data;
+    if (data.detail) return data.detail;
+    if (data.message) return data.message;
+    try {
+      return Object.entries(data)
+        .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
+        .join(' | ');
+    } catch {
+      return '';
+    }
   }
 }

@@ -9,9 +9,10 @@
       <div class="hidden md:flex items-center gap-8">
         <a class="font-body-md text-on-surface-variant hover:text-primary transition-colors" routerLink="/">Accueil</a>
         <a class="font-body-md text-on-surface-variant hover:text-primary transition-colors"
-          routerLink="/boutique-desktop">Catalogue</a>
-        <a class="font-body-md text-primary border-b-2 border-primary pb-1 font-semibold"
-          [routerLink]="ordersRoute">Commandes</a>
+          routerLink="/boutique-desktop">Marché
+          Éphémère</a>
+        <a class="font-body-md text-primary border-b-2 border-primary pb-1 font-semibold" [routerLink]="ordersRoute">Mes
+          Précommandes</a>
       </div>
 
       <div class="flex items-center gap-4" *ngIf="currentUser">

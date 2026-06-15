@@ -11,7 +11,8 @@ export class ApiService {
 
   getShop(params?: Record<string, string>): Observable<ShopProduct[]> {
     console.log('ApiService: loading shop with params:', params);
-    return this.http.get<ShopProduct[] | { results: ShopProduct[] }>(`${this.base}/shop/unified/`, { params }).pipe(
+    //  CORRECTION : Alignement avec la route simplifiée de Django 'api/shop/'
+    return this.http.get<ShopProduct[] | { results: ShopProduct[] }>(`${this.base}/shop/`, { params }).pipe(
       map((res) => {
         console.log('ApiService: shop loaded successfully:', res);
         return Array.isArray(res) ? res : res.results ?? [];
@@ -19,6 +20,19 @@ export class ApiService {
       tap({
         error: (err: any) => console.error('ApiService: error loading shop:', err)
       })
+    );
+  }
+
+  //  AJOUT : Récupérer la session de marché éphémère active pour l'accueil et les blocages de sécurité
+  getActiveMarketSession(): Observable<any> {
+    return this.http.get<any>(`${this.base}/shop/active-session/`);
+  }
+
+  //  AJOUT : Envoyer l'état de l'interrupteur "Mettre en avant" du Tantsaha à Django
+  toggleProductVisibility(stockId: string): Observable<{ status: string; is_promoted: boolean }> {
+    return this.http.post<{ status: string; is_promoted: boolean }>(
+      `${this.base}/stocks/${stockId}/toggle-visibility/`,
+      {}
     );
   }
 
@@ -85,7 +99,9 @@ export class ApiService {
   }
 
   getManagerDeliveries(): Observable<ManagerDelivery[]> {
-    return this.http.get<ManagerDelivery[]>(`${this.base}/manager/deliveries/`);
+    return this.http.get<ManagerDelivery[] | { results: ManagerDelivery[] }>(`${this.base}/manager/deliveries/`).pipe(
+      map((res) => (Array.isArray(res) ? res : res.results ?? []))
+    );
   }
 
   confirmHandover(orderId: string): Observable<{ status: string; transaction_code: string }> {
@@ -93,5 +109,22 @@ export class ApiService {
       `${this.base}/orders/${orderId}/handover/`,
       {}
     );
+  }
+
+  createStock(payload: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/producer/harvests/`, payload);
+  }
+
+
+  getSaleSessions(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/sale-sessions/`);
+  }
+
+  createSaleSession(payload: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/sale-sessions/`, payload);
+  }
+
+  updateSaleSession(id: string, payload: any): Observable<any> {
+    return this.http.patch<any>(`${this.base}/sale-sessions/${id}/`, payload);
   }
 }

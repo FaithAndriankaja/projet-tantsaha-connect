@@ -23,7 +23,7 @@ export class Home implements OnInit, AfterViewInit {
     private authService: AuthService,
     private api: ApiService,
     private cart: CartService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.authService.currentUser.subscribe((user) => {
@@ -39,6 +39,7 @@ export class Home implements OnInit, AfterViewInit {
     });
   }
 
+  // Utilise la méthode centralisée de votre AuthService pour rediriger vers /tantsaha/dashboard ou /mpandrindra/dashboard
   get profileRoute(): string {
     return this.authService.getProfileRoute();
   }
@@ -52,20 +53,39 @@ export class Home implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    const timerElement = this.el.nativeElement.querySelector('#countdown');
-    if (timerElement) {
-      let timeLeft = 24 * 60 * 60;
+    // Gestion du compte à rebours par blocs (Jours, Heures, Minutes)
+    const daysEl = this.el.nativeElement.querySelector('#days');
+    const hoursEl = this.el.nativeElement.querySelector('#hours');
+    const minutesEl = this.el.nativeElement.querySelector('#minutes');
+
+    if (daysEl && hoursEl && minutesEl) {
+      // Configuration initiale : 2 jours, 14 heures, 45 minutes convertis en secondes
+      let timeLeft = (2 * 24 * 3600) + (14 * 3600) + (45 * 60);
+
       const updateTimer = () => {
-        const hours = Math.floor(timeLeft / 3600);
+        if (timeLeft <= 0) {
+          daysEl.textContent = '00';
+          hoursEl.textContent = '00';
+          minutesEl.textContent = '00';
+          return;
+        }
+
+        const days = Math.floor(timeLeft / (24 * 3600));
+        const hours = Math.floor((timeLeft % (24 * 3600)) / 3600);
         const minutes = Math.floor((timeLeft % 3600) / 60);
-        const seconds = timeLeft % 60;
-        timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        if (timeLeft > 0) timeLeft--;
+
+        daysEl.textContent = days.toString().padStart(2, '0');
+        hoursEl.textContent = hours.toString().padStart(2, '0');
+        minutesEl.textContent = minutes.toString().padStart(2, '0');
+
+        timeLeft--;
       };
+
       setInterval(updateTimer, 1000);
       updateTimer();
     }
 
+    // Gestion des animations d'apparition au défilement (Intersection Observer)
     const observerOptions = {
       threshold: 0.1,
       rootMargin: '0px 0px -50px 0px',

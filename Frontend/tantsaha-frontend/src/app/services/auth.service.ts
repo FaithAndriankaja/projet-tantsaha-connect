@@ -100,36 +100,35 @@ export class AuthService {
   }
 
   isProducer(): boolean {
-    return this.currentUserValue?.role === 'tantsaha';
+    return this.currentUserValue?.role === 'producer';
   }
 
   isManager(): boolean {
-    return this.currentUserValue?.role === 'mpandrindra';
+    return this.currentUserValue?.role === 'manager';
   }
 
   isConsumer(): boolean {
-    const role = this.currentUserValue?.role;
-    return role === 'mpanjifa' || role === 'consumer';
+    return this.currentUserValue?.role === 'consumer';
   }
 
   getProfileRoute(): string {
     const role = this.currentUserValue?.role;
-    if (role === 'tantsaha') return '/tantsaha-ferme';
-    if (role === 'mpandrindra') return '/mpandrindra-livraison';
+    if (role === 'producer') return '/tantsaha-ferme';
+    if (role === 'manager') return '/mpandrindra-livraison';
     return '/profil-acheteur';
   }
 
   getOrdersRoute(): string {
     const role = this.currentUserValue?.role;
-    if (role === 'tantsaha') return '/tantsaha-recolte';
-    if (role === 'mpandrindra') return '/mpandrindra-livraison';
+    if (role === 'producer') return '/tantsaha-recolte';
+    if (role === 'manager') return '/mpandrindra-livraison';
     return '/mes-commandes';
   }
 
   getDefaultRouteAfterAuth(): string {
     const role = this.currentUserValue?.role;
-    if (role === 'tantsaha') return '/tantsaha-recolte';
-    if (role === 'mpandrindra') return '/mpandrindra-livraison';
+    if (role === 'producer') return '/tantsaha-recolte';
+    if (role === 'manager') return '/mpandrindra-livraison';
     return '/boutique-desktop';
   }
 
@@ -166,10 +165,10 @@ export class AuthService {
   }
 
   private mapRole(role: string): string {
-    if (role === 'producer') return 'tantsaha';
-    if (role === 'manager') return 'mpandrindra';
-    if (role === 'consumer') return 'mpanjifa';
-    return role;
+    if (['producer', 'tantsaha'].includes(role)) return 'producer';
+    if (['manager', 'mpandrindra'].includes(role)) return 'manager';
+    if (['consumer', 'acheteur', 'mpanjifa'].includes(role)) return 'consumer';
+    return role || 'consumer';
   }
 
   private readStoredUser(): User | null {

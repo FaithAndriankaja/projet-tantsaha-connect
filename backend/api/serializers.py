@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (
     User, UnifiedShopView, Order, OrderItem, Payment, HarvestSheetView, SaleSession,
-    PickupPoint, Producer, Product, Category
+    PickupPoint, Producer, Product, Category, ProductStock
 )
 from django.utils import timezone
 
@@ -114,3 +114,57 @@ class ProducerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Producer
         fields = ['id', 'farm_name', 'location', 'description', 'user']
+
+class ProductStockSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductStock
+        fields = [
+            'id',
+            'product',
+            'sale_session',
+            'available_quantity',
+            'reserved_quantity',
+            'is_promoted',
+        ]
+        read_only_fields = [
+            'id',
+            'reserved_quantity',
+        ]
+
+class ProducerHarvestCreateSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=150)
+    description = serializers.CharField(required=False, allow_blank=True)
+    category_id = serializers.UUIDField()
+    unit = serializers.CharField(max_length=30)
+    unit_price = serializers.DecimalField(max_digits=12, decimal_places=2)
+    quantity = serializers.DecimalField(max_digits=12, decimal_places=3)
+    image = serializers.ImageField(required=False, allow_null=True)
+
+    def validate_quantity(self, value):
+        if value <= 0:
+            raise serializers.ValidationError('La quantité doit être supérieure à 0.')
+        return value
+
+    def validate_unit_price(self, value):
+        if value < 0:
+            raise serializers.ValidationError('Le prix doit être positif.')
+        return value
+
+
+class SaleSessionSerializer(serializers.ModelSerializer):
+    pickup_point_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SaleSession
+        fields = [
+            'id',
+            'pickup_point',
+            'pickup_point_name',
+            'opens_at',
+            'closes_at',
+            'pickup_date',
+            'status',
+        ]
+
+    def get_pickup_point_name(self, obj):
+        return obj.pickup_point.name if obj.pickup_point_id else None

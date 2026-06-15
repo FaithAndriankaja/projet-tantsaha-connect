@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.db import connection
 
 class UserRole(models.TextChoices):
     CONSUMER = 'consumer', 'Consumer'
@@ -139,6 +140,7 @@ class Product(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    image_path = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -172,16 +174,21 @@ class ProductStock(models.Model):
     sale_session = models.ForeignKey(SaleSession, on_delete=models.CASCADE, db_column='sale_session_id')
     available_quantity = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     reserved_quantity = models.DecimalField(max_digits=12, decimal_places=3, default=0)
+    
+    #  AJOUT DE COHÉRENCE : L'état de l'interrupteur "Mettre en avant" du Tantsaha
+    is_promoted = models.BooleanField(default=False, db_column='is_promoted')
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.product.name} ({self.sale_session.pickup_date})"
+        return f"{self.product.name} dans Session {self.sale_session.pickup_date} (En vedette : {self.is_promoted})"
 
     class Meta:
         managed = False
         db_table = 'product_stocks'
         unique_together = (('product', 'sale_session'),)
+
 
 class Order(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
@@ -217,7 +224,7 @@ class OrderItem(models.Model):
         PostgreSQL calcule automatiquement cette valeur via GENERATED ALWAYS AS.
         """
         if self._state.adding:
-            from django.db import connection
+            
             with connection.cursor() as cursor:
                 cursor.execute(
                     """
@@ -304,14 +311,17 @@ class UnifiedShopView(models.Model):
         db_table = 'unified_shop_view'
 
 class HarvestSheetView(models.Model):
-    id = models.UUIDField(primary_key=True) # Fake PK for Django
+    id = models.UUIDField(primary_key=True)
+
     sale_session_id = models.UUIDField()
     pickup_point_id = models.UUIDField()
     producer_id = models.UUIDField()
+
     farm_name = models.CharField(max_length=150)
     product_id = models.UUIDField()
     product_name = models.CharField(max_length=150)
     unit = models.CharField(max_length=30)
+
     total_quantity_to_prepare = models.DecimalField(max_digits=12, decimal_places=3)
     order_count = models.IntegerField()
 

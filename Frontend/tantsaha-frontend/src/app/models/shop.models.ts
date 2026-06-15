@@ -5,6 +5,7 @@ export interface ShopProduct {
   pickup_point_name: string;
   product_name: string;
   product_description: string;
+  image_url?: string;
   unit: string;
   unit_price: string;
   category_name: string;
@@ -17,6 +18,7 @@ export interface ShopProduct {
   closes_at: string;
   pickup_date: string;
   sale_session_status: string;
+  product_image_path?: string;
 }
 
 export interface CartItem {
@@ -30,6 +32,8 @@ export interface CartItem {
   pickup_point_id: string;
   pickup_point_name: string;
   sale_session_id: string;
+  closes_at: string;
+  sale_session_status: string;
 }
 
 export interface CreatedOrder {
@@ -69,6 +73,18 @@ export interface HarvestLine {
   unit: string;
   total_quantity_to_prepare: string;
   order_count: number;
+  is_promoted: boolean;
+  image_url?: string | null;
+  unit_price: number;
+}
+
+export interface ProductStock {
+  id: string;
+  product: string;
+  sale_session: string;
+  available_quantity: string;
+  reserved_quantity: string;
+  is_promoted: boolean;
 }
 
 export interface PickupPoint {

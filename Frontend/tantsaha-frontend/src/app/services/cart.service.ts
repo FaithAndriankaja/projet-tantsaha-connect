@@ -61,6 +61,7 @@ export class CartService {
         sale_session_id: product.sale_session_id,
         closes_at: product.closes_at,
         sale_session_status: product.sale_session_status,
+        product_image_path: product.product_image_path,
       });
     }
 

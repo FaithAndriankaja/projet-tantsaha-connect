@@ -117,7 +117,9 @@ export class ApiService {
 
 
   getSaleSessions(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.base}/sale-sessions/`);
+    return this.http.get<any[] | { results: any[] }>(`${this.base}/sale-sessions/`).pipe(
+      map((res) => (Array.isArray(res) ? res : res.results ?? []))
+    );
   }
 
   createSaleSession(payload: any): Observable<any> {
@@ -127,4 +129,11 @@ export class ApiService {
   updateSaleSession(id: string, payload: any): Observable<any> {
     return this.http.patch<any>(`${this.base}/sale-sessions/${id}/`, payload);
   }
+
+  getMyStocks(): Observable<any[]> {
+    return this.http.get<any[] | { results: any[] }>(`${this.base}/stocks/`).pipe(
+      map((res) => Array.isArray(res) ? res : res.results ?? [])
+    );
+  }
+
 }

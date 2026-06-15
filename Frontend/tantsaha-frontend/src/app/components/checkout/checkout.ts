@@ -57,6 +57,24 @@ export class Checkout implements OnInit {
     return this.cartItems[0]?.farm_name ?? 'Producteur local';
   }
 
+  getProductImageUrl(path: string | null | undefined): string {
+    if (!path) return '';
+
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+
+    if (path.startsWith('/media/')) {
+      return `${window.location.origin}${path}`;
+    }
+
+    if (path.startsWith('media/')) {
+      return `${window.location.origin}/${path}`;
+    }
+
+    return `${window.location.origin}/media/${path}`;
+  }
+
   logout() {
     this.authService.logout();
     this.router.navigate(['/']);
@@ -133,24 +151,19 @@ export class Checkout implements OnInit {
         this.router.navigate(['/panier-paiement']);
       },
 
-      error: (err) => {
+      error: (err: any) => {
         this.submitting = false;
 
         console.error('Erreur création commande complète:', err);
-        console.error(
-          'Erreur Django details:',
-          JSON.stringify(err?.error?.details, null, 2)
-        );
-
-        const apiError = err?.error;
+        console.error('Erreur backend brute:', err?.error);
 
         this.error =
-          apiError?.details
-            ? JSON.stringify(apiError.details)
-            : apiError?.detail ||
-            apiError?.message ||
-            'Erreur lors de la création de la commande.';
-      },
+          err?.error?.details
+            ? JSON.stringify(err.error.details)
+            : err?.error?.detail
+            || err?.error?.message
+            || 'Erreur serveur lors de la création de la commande.';
+      }
     });
   }
 

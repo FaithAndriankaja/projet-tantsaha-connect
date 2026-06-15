@@ -12,11 +12,21 @@
     </div>
 
     <nav class="flex-grow space-y-2">
-      <a class="flex items-center gap-4 px-4 py-3 bg-primary text-on-primary rounded-xl font-bold transition-all">
-        <span class="material-symbols-outlined">dashboard</span>
-        <span class="font-label-md">Récoltes</span>
-      </a>
+      <button type="button" (click)="setSection('harvest')"
+        class="w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition-all text-left"
+        [class.bg-primary]="activeSection === 'harvest'" [class.text-on-primary]="activeSection === 'harvest'"
+        [class.text-on-surface-variant]="activeSection !== 'harvest'">
+        <span class="material-symbols-outlined">assignment</span>
+        <span class="font-label-md">Précommandes</span>
+      </button>
 
+      <button type="button" (click)="setSection('products')"
+        class="w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition-all text-left"
+        [class.bg-primary]="activeSection === 'products'" [class.text-on-primary]="activeSection === 'products'"
+        [class.text-on-surface-variant]="activeSection !== 'products'">
+        <span class="material-symbols-outlined">inventory_2</span>
+        <span class="font-label-md">Mes produits</span>
+      </button>
     </nav>
 
     <div class="mt-auto pt-4 border-t border-outline-variant/20 space-y-2">
@@ -102,50 +112,82 @@
         </div>
       </div>
 
-      <section class="space-y-4">
-        <h4 class="font-headline-sm text-on-surface font-bold">Feuille de récolte réelle</h4>
+      <section *ngIf="activeSection === 'harvest'" class="space-y-4">
+        <h4 class="font-headline-sm text-on-surface font-bold">Précommandes à préparer</h4>
 
-        <div *ngIf="loading" class="py-16 text-center text-on-surface-variant">Chargement des récoltes...</div>
+        <div *ngIf="loading" class="py-16 text-center text-on-surface-variant">
+          Chargement des précommandes...
+        </div>
 
         <div *ngIf="!loading && harvestLines.length === 0"
           class="p-8 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest text-center text-on-surface-variant">
-          Aucune récolte à préparer pour le moment. Ajoutez un produit ou attendez les premières précommandes.
+          Aucune précommande pour le moment.
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" *ngIf="!loading && harvestLines.length">
           <article *ngFor="let item of harvestLines"
             class="bg-surface-container-lowest border border-outline-variant/40 rounded-2xl overflow-hidden shadow-sm flex flex-col">
-            <div class="h-40 bg-surface-container-high flex items-center justify-center overflow-hidden">
-              <img *ngIf="item.image_url" [src]="item.image_url" [alt]="item.product_name"
-                class="w-full h-full object-cover" />
-              <span *ngIf="!item.image_url" class="material-symbols-outlined text-6xl text-primary/30">eco</span>
-            </div>
-            <div class="p-4 flex-grow space-y-3">
+
+            <div class="p-5 flex-grow space-y-3">
               <div class="flex justify-between items-start gap-3">
                 <h5 class="font-title-md font-bold text-on-surface">{{ item.product_name }}</h5>
-                <span
-                  class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-xs font-bold rounded whitespace-nowrap">
-                  {{ item.order_count || 0 }} commande(s)
+                <span class="px-2 py-0.5 bg-warning/10 text-warning text-xs font-bold rounded whitespace-nowrap">
+                  {{ item.order_count || 0 }} précommande(s)
                 </span>
               </div>
 
-              <p class="text-primary font-bold text-body-md">{{ formatPrice(item.unit_price) }} Ar / {{ item.unit ||
-                'kg' }}</p>
-              <p class="text-sm text-on-surface-variant">À préparer : <strong>{{
-                  formatQty(item.total_quantity_to_prepare) }} {{ item.unit || 'kg' }}</strong></p>
+              <p class="text-sm text-on-surface-variant">
+                Ferme : <strong>{{ item.farm_name }}</strong>
+              </p>
 
-              <div class="pt-3 border-t border-outline-variant/20 flex items-center justify-between">
-                <span class="text-xs font-medium text-on-surface-variant">Visible au catalogue</span>
-                <button type="button" (click)="toggleProductVisibility(item)"
-                  [disabled]="togglingProductId === item.product_id"
-                  class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
-                  [class.bg-primary]="item.is_promoted" [class.text-on-primary]="item.is_promoted"
-                  [class.bg-surface-container]="!item.is_promoted" [class.text-on-surface-variant]="!item.is_promoted">
-                  {{ item.is_promoted ? 'Visible' : 'Masqué' }}
-                </button>
-              </div>
+              <p class="text-sm text-on-surface-variant">
+                Quantité à préparer :
+                <strong>{{ formatQty(item.total_quantity_to_prepare) }} {{ item.unit || 'kg' }}</strong>
+              </p>
+
+              <p class="text-xs text-on-surface-variant">
+                Session : {{ item.sale_session_id }}
+              </p>
             </div>
           </article>
+        </div>
+      </section>
+      <section *ngIf="activeSection === 'products'" class="space-y-4">
+
+        <p class="text-sm text-primary font-bold">
+          Debug : {{ myProducts.length }} produit(s)
+        </p>
+
+        <div *ngIf="!productsLoading && myProducts.length > 0"
+          class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+          <article *ngFor="let stock of myProducts"
+            class="bg-surface-container-lowest border border-outline-variant/40 rounded-2xl p-5 space-y-3 shadow-sm">
+
+            <h5 class="font-bold text-primary">
+              Produit : {{ stock.product_name || stock.product }}
+            </h5>
+
+            <p class="text-sm">
+              Session : <strong>{{ stock.sale_session }}</strong>
+            </p>
+
+            <p class="text-sm">
+              Quantité disponible :
+              <strong>{{ formatQty(stock.available_quantity) }}</strong>
+            </p>
+
+            <p class="text-sm">
+              Quantité réservée :
+              <strong>{{ formatQty(stock.reserved_quantity) }}</strong>
+            </p>
+
+            <p class="text-sm">
+              Reste :
+              <strong>{{ formatQty(remainingQty(stock)) }}</strong>
+            </p>
+          </article>
+
         </div>
       </section>
     </div>

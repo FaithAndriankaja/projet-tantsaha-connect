@@ -32,6 +32,7 @@ export interface CartItem {
   pickup_point_id: string;
   pickup_point_name: string;
   sale_session_id: string;
+  product_image_path?: string;
   closes_at: string;
   sale_session_status: string;
 }

@@ -215,8 +215,8 @@
           <!-- Bloc Image Produit -->
           <div
             class="relative aspect-square overflow-hidden bg-surface-container-high flex items-center justify-center border-b border-outline-variant/10">
-            <img *ngIf="product.product_image_path" [src]="getProductImageUrl(product)"
-              class="absolute inset-0 w-full h-full object-cover" />
+            <img *ngIf="product.product_image_path" [src]="getProductImageUrl(product.product_image_path)"
+              [alt]="product.product_name" class="absolute inset-0 w-full h-full object-cover" />
 
             <span *ngIf="!product.product_image_path" class="material-symbols-outlined text-6xl text-primary/30">
               eco

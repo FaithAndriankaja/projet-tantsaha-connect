@@ -295,6 +295,7 @@ class UnifiedShopView(models.Model):
     product_description = models.TextField()
     unit = models.CharField(max_length=30)
     unit_price = models.DecimalField(max_digits=12, decimal_places=2)
+    product_image_path = models.TextField(null=True, blank=True)
     category_name = models.CharField(max_length=100)
     producer_id = models.UUIDField()
     farm_name = models.CharField(max_length=150)

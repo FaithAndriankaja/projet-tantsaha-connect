@@ -60,7 +60,8 @@
               "buildTarget": "tantsaha-frontend:build:production"
             },
             "development": {
-              "buildTarget": "tantsaha-frontend:build:development"
+              "buildTarget": "tantsaha-frontend:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

@@ -51,14 +51,14 @@ export class MarketplaceProduce implements OnInit {
     this.api.getCategories().subscribe({
       next: (cats) => {
         this.categories = cats;
-        // 🌟 SUPPRIMER OU COMMENTER : this.cdr.detectChanges();
+        // SUPPRIMER OU COMMENTER : this.cdr.detectChanges();
       }
     });
 
     this.api.getPickupPoints().subscribe({
       next: (pts) => {
         this.pickupPoints = pts;
-        // 🌟 SUPPRIMER OU COMMENTER : this.cdr.detectChanges();
+        //  SUPPRIMER OU COMMENTER : this.cdr.detectChanges();
       }
     });
     this.loadProducts();
@@ -157,16 +157,22 @@ export class MarketplaceProduce implements OnInit {
     }, 2000);
   }
 
-  getProductImageUrl(product: ShopProduct): string {
-    const path = product.product_image_path;
-
+  getProductImageUrl(path: string | null | undefined): string {
     if (!path) return '';
 
-    if (path.startsWith('http')) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
       return path;
     }
 
-    return `http://localhost:8000${path}`;
+    if (path.startsWith('/media/')) {
+      return `${window.location.origin}${path}`;
+    }
+
+    if (path.startsWith('media/')) {
+      return `${window.location.origin}/${path}`;
+    }
+
+    return `${window.location.origin}/media/${path}`;
   }
 
   isOutOfStock(product: ShopProduct): boolean {

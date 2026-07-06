@@ -27,6 +27,7 @@ class PaymentMethod(models.TextChoices):
     MVOLA = 'mvola', 'Mvola'
     ORANGE_MONEY = 'orange_money', 'Orange Money'
     AIRTEL_MONEY = 'airtel_money', 'Airtel Money'
+    STRIPE = 'stripe', 'Stripe (Carte bancaire)'
 
 class PaymentVerificationStatus(models.TextChoices):
     PENDING = 'pending', 'Pending'

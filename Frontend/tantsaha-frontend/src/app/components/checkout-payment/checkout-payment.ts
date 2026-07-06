@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewChecked, ChangeDetectorRef } from '@angular/core';
 import { RouterLink, Router, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { switchMap } from 'rxjs';
@@ -7,6 +7,7 @@ import { ApiService } from '../../services/api.service';
 import { CartService } from '../../services/cart.service';
 import { CreatedOrder, OrderItemSummary } from '../../models/shop.models';
 import { MVOLA_PAYMENT_NUMBER } from '../../config/nav.config';
+import { loadStripe, Stripe, StripeCardElement } from '@stripe/stripe-js';
 
 @Component({
   selector: 'app-checkout-payment',
@@ -15,22 +16,38 @@ import { MVOLA_PAYMENT_NUMBER } from '../../config/nav.config';
   templateUrl: './checkout-payment.html',
   styleUrl: './checkout-payment.css',
 })
-export class CheckoutPayment implements OnInit {
+export class CheckoutPayment implements OnInit, AfterViewChecked {
   currentUser: User | null = null;
   order: CreatedOrder | null = null;
+
+  // Mobile Money
   selectedFile: File | null = null;
   paymentMethod = 'mvola';
+  mvolaNumber = MVOLA_PAYMENT_NUMBER;
+
+  // Mode : 'mobile' | 'stripe'
+  activeTab: 'mobile' | 'stripe' = 'mobile';
+
+  // Stripe
+  private stripeInstance: Stripe | null = null;
+  private cardElement: StripeCardElement | null = null;
+  private cardElementMounted = false;
+  stripeLoading = false;
+  stripeReady = false;
+  stripeError = '';
+
+  // UI
   submitting = false;
   error = '';
   cartCount = 0;
-  mvolaNumber = MVOLA_PAYMENT_NUMBER;
 
   constructor(
     private authService: AuthService,
     private api: ApiService,
     private cart: CartService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit() {
     this.authService.currentUser.subscribe((user) => {
@@ -44,6 +61,94 @@ export class CheckoutPayment implements OnInit {
       this.router.navigate(['/panier-recap']);
     }
   }
+
+  ngAfterViewChecked() {
+    // Monte le CardElement Stripe dans le div dédié dès que l'onglet stripe est actif
+    if (this.activeTab === 'stripe' && this.stripeInstance && !this.cardElementMounted) {
+      const mountPoint = document.getElementById('stripe-card-element');
+      if (mountPoint && mountPoint.childElementCount === 0) {
+        const elements = this.stripeInstance.elements();
+        this.cardElement = elements.create('card', {
+          style: {
+            base: {
+              fontSize: '16px',
+              color: '#1a1a1a',
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              '::placeholder': { color: '#9ca3af' },
+            },
+            invalid: { color: '#ef4444' },
+          },
+          hidePostalCode: true,
+        });
+        this.cardElement.mount(mountPoint);
+        this.cardElementMounted = true;
+        this.stripeReady = true;
+        this.cdr.detectChanges();
+      }
+    }
+  }
+
+  switchTab(tab: 'mobile' | 'stripe') {
+    this.activeTab = tab;
+    this.error = '';
+    this.stripeError = '';
+
+    if (tab === 'stripe' && !this.stripeInstance) {
+      this.initStripe();
+    }
+  }
+
+  private async initStripe() {
+    this.stripeLoading = true;
+    try {
+      // On récupère d'abord la clé publique depuis le backend (sécurisé)
+      if (!this.order) return;
+      const intentData = await this.api.createPaymentIntent(this.order.id).toPromise();
+      if (!intentData) { this.stripeLoading = false; return; }
+
+      this.stripeInstance = await loadStripe(intentData.public_key);
+      this.stripeLoading = false;
+      this.cardElementMounted = false; // ngAfterViewChecked va monter l'élément
+      this.cdr.detectChanges();
+    } catch (err: any) {
+      this.stripeLoading = false;
+      this.stripeError = "Impossible de charger Stripe. Veuillez réessayer.";
+    }
+  }
+
+  async payWithStripe() {
+    if (!this.order || !this.stripeInstance || !this.cardElement) {
+      this.stripeError = 'Stripe non initialisé. Veuillez réessayer.';
+      return;
+    }
+
+    this.submitting = true;
+    this.stripeError = '';
+    this.error = '';
+
+    try {
+      // Crée un nouveau PaymentIntent (le premier était pour récupérer la clé publique)
+      const intentData = await this.api.createPaymentIntent(this.order.id).toPromise();
+      if (!intentData) { this.submitting = false; return; }
+
+      const result = await this.stripeInstance.confirmCardPayment(intentData.client_secret, {
+        payment_method: { card: this.cardElement },
+      });
+
+      if (result.error) {
+        this.stripeError = result.error.message || 'Erreur lors du paiement. Veuillez réessayer.';
+        this.submitting = false;
+      } else if (result.paymentIntent?.status === 'succeeded') {
+        this.submitting = false;
+        this.router.navigate(['/commande-succes']);
+      }
+    } catch (err: any) {
+      this.submitting = false;
+      this.stripeError = 'Une erreur réseau est survenue. Veuillez réessayer.';
+    }
+  }
+
+  // ---------- Mobile Money ----------
 
   get profileRoute(): string {
     return this.authService.getProfileRoute();

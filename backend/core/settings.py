@@ -132,6 +132,11 @@ SIMPLE_JWT = {
 # CORS Configuration
 CORS_ALLOW_ALL_ORIGINS = True # Change in production!
 
+# Stripe Configuration
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
+STRIPE_PUBLIC_KEY = env('STRIPE_PUBLIC_KEY', default='')
+STRIPE_WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET', default='')
+
 # Spectacular Settings (Swagger/OpenAPI)
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Tantsaha Connect API',

@@ -136,4 +136,11 @@ export class ApiService {
     );
   }
 
+  createPaymentIntent(orderId: string): Observable<{ client_secret: string; amount: number; currency: string; public_key: string }> {
+    return this.http.post<{ client_secret: string; amount: number; currency: string; public_key: string }>(
+      `${this.base}/stripe/create-payment-intent/`,
+      { order_id: orderId }
+    );
+  }
+
 }

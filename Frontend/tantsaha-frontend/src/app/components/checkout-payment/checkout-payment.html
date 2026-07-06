@@ -1,12 +1,10 @@
 <div class="bg-surface text-on-surface min-h-screen font-body-md overflow-x-hidden">
-  <!-- Navigation Bar (Consistent with Home/Market) -->
+  <!-- Navigation Bar -->
   <nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm border-b border-outline-variant/30">
     <div class="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop h-16 flex justify-between items-center">
-      <!-- Brand Logo -->
       <div class="text-headline-md font-bold text-primary">
         <a class="text-2xl font-bold text-primary tracking-tight" routerLink="/">Tantsaha Connect</a>
       </div>
-      <!-- Desktop Links -->
       <div class="hidden md:flex items-center gap-8">
         <a class="font-body-md text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
           routerLink="/">Accueil</a>
@@ -16,33 +14,26 @@
           class="font-body-md text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
           [routerLink]="ordersRoute">Commandes</a>
       </div>
-
-      <!-- Action Cluster -->
       <div class="flex items-center gap-4">
         <ng-container *ngIf="!currentUser">
           <button class="px-4 py-2 font-label-md text-primary hover:bg-primary/5 rounded-lg transition-colors"
-            routerLink="/login">
-            Se connecter
-          </button>
+            routerLink="/login">Se connecter</button>
           <button
             class="px-6 py-2.5 bg-primary text-on-primary font-label-md rounded-xl shadow-sm hover:opacity-90 transition-all active:scale-95"
-            routerLink="/register">
-            S'inscrire
-          </button>
+            routerLink="/register">S'inscrire</button>
         </ng-container>
-
         <ng-container *ngIf="currentUser">
           <div class="flex items-center gap-4">
             <button class="relative p-2 text-on-surface-variant hover:text-primary transition-colors"
               routerLink="/panier-recap">
               <span class="material-symbols-outlined text-2xl">shopping_cart</span>
               <span *ngIf="cartCount > 0"
-                class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">{{ cartCount }}</span>
+                class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">{{
+                cartCount }}</span>
             </button>
             <button
               class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold hover:shadow-md transition-all"
-              [routerLink]="profileRoute"
-              title="Mon profil">
+              [routerLink]="profileRoute" title="Mon profil">
               {{ currentUser.name.charAt(0).toUpperCase() }}
             </button>
           </div>
@@ -80,17 +71,15 @@
             <span class="material-symbols-outlined text-primary">receipt_long</span>
             <h2 class="font-bold text-on-surface">Récapitulatif des articles</h2>
           </div>
-
           <div class="divide-y divide-outline-variant/20">
             <div *ngFor="let item of items" class="p-6 flex gap-6">
-              <div class="w-20 h-20 md:w-24 md:h-24 rounded-2xl shadow-sm bg-primary/10 flex items-center justify-center shrink-0">
+              <div
+                class="w-20 h-20 md:w-24 md:h-24 rounded-2xl shadow-sm bg-primary/10 flex items-center justify-center shrink-0">
                 <span class="material-symbols-outlined text-primary text-3xl">shopping_basket</span>
               </div>
               <div class="flex-grow flex flex-col justify-between py-1">
                 <div class="flex justify-between items-start">
-                  <div>
-                    <h3 class="text-lg font-bold text-on-surface">{{ item.product_name || 'Article' }}</h3>
-                  </div>
+                  <h3 class="text-lg font-bold text-on-surface">{{ item.product_name || 'Article' }}</h3>
                   <p class="font-bold text-primary">{{ formatPrice(lineTotal(item)) }} Ar</p>
                 </div>
                 <div
@@ -115,62 +104,151 @@
       <!-- Right Column: Payment Form -->
       <div class="lg:col-span-5">
         <div class="glass-card rounded-3xl p-8 shadow-lg border border-primary/20 sticky top-24">
-          <div class="flex items-center gap-3 mb-8">
-            <div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
-              <span class="material-symbols-outlined text-3xl">payments</span>
-            </div>
-            <h2 class="text-2xl font-bold text-on-surface">Paiement Mobile</h2>
-          </div>
 
-          <div class="p-6 bg-primary/5 rounded-2xl border-l-4 border-primary mb-8 space-y-2">
-            <p class="text-sm font-bold text-primary uppercase tracking-widest">Instruction</p>
-            <p class="text-on-surface leading-relaxed">
-              Transférez le montant exact de <span class="font-bold text-secondary">{{ order?.total_amount }} Ar</span> par
-              <strong>Mvola</strong> au numéro suivant :
-            </p>
-            <div
-              class="text-2xl font-black text-primary font-mono bg-white p-3 rounded-xl border border-primary/10 text-center mt-2">
-              {{ mvolaNumber }}
-            </div>
-          </div>
-
-          <!-- Proof Upload -->
-          <div class="space-y-4">
-            <label class="text-sm font-bold text-on-surface-variant">Preuve de paiement</label>
-
-            <label class="border-2 border-dashed border-outline-variant/50 rounded-2xl p-8 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group">
-              <div class="w-16 h-16 bg-surface-container-low rounded-full flex items-center justify-center text-outline group-hover:text-primary transition-colors">
-                <span class="material-symbols-outlined text-4xl">add_a_photo</span>
-              </div>
-              <div class="text-center">
-                <p class="font-bold text-on-surface group-hover:text-primary transition-colors">Téléversez la capture d'écran SMS</p>
-                <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter mt-1">PNG, JPG • Max 5MB</p>
-              </div>
-              <input type="file" class="sr-only" accept="image/*" (change)="onFileSelected($event)" #fileInput>
-            </label>
-
-            <div *ngIf="selectedFile" class="p-4 bg-primary/5 rounded-2xl border border-primary/20 flex items-center gap-4">
-              <span class="material-symbols-outlined text-primary">check_circle</span>
-              <span class="flex-grow text-sm font-bold truncate">{{ selectedFile.name }}</span>
-            </div>
-          </div>
-
-          <p *ngIf="error" class="text-error text-sm mt-4">{{ error }}</p>
-
-          <div class="mt-10 space-y-4">
-            <button type="button" (click)="confirmOrder()" [disabled]="submitting"
-              class="w-full h-14 bg-primary text-on-primary rounded-xl font-bold shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-              {{ submitting ? 'Envoi...' : 'CONFIRMER MA COMMANDE' }}
-              <span class="material-symbols-outlined" *ngIf="!submitting">verified</span>
+          <!-- Payment Mode Tabs -->
+          <div class="flex rounded-2xl overflow-hidden border border-outline-variant/30 mb-8">
+            <button id="tab-mobile" type="button" (click)="switchTab('mobile')"
+              [class.bg-primary]="activeTab === 'mobile'" [class.text-on-primary]="activeTab === 'mobile'"
+              [class.text-on-surface-variant]="activeTab !== 'mobile'"
+              class="flex-1 py-3 flex items-center justify-center gap-2 font-bold text-sm transition-all">
+              <span class="material-symbols-outlined text-lg">phone_android</span>
+              Mobile Money
             </button>
-            <p class="text-[10px] text-center text-on-surface-variant font-medium">
-              En confirmant, vous acceptez nos <a routerLink="/register" class="text-primary hover:underline">Conditions
-                Générales de Vente</a>.
-            </p>
+            <button id="tab-stripe" type="button" (click)="switchTab('stripe')"
+              [class.bg-primary]="activeTab === 'stripe'" [class.text-on-primary]="activeTab === 'stripe'"
+              [class.text-on-surface-variant]="activeTab !== 'stripe'"
+              class="flex-1 py-3 flex items-center justify-center gap-2 font-bold text-sm transition-all">
+              <span class="material-symbols-outlined text-lg">credit_card</span>
+              Carte bancaire
+            </button>
           </div>
+
+          <!-- ===== TAB MOBILE MONEY ===== -->
+          <div *ngIf="activeTab === 'mobile'">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-3xl">payments</span>
+              </div>
+              <h2 class="text-2xl font-bold text-on-surface">Paiement Mobile</h2>
+            </div>
+
+            <div class="p-6 bg-primary/5 rounded-2xl border-l-4 border-primary mb-6 space-y-2">
+              <p class="text-sm font-bold text-primary uppercase tracking-widest">Instruction</p>
+              <p class="text-on-surface leading-relaxed">
+                Transférez le montant exact de <span class="font-bold text-secondary">{{ order?.total_amount }}
+                  Ar</span> par
+                <strong>Mvola</strong> au numéro suivant :
+              </p>
+              <div
+                class="text-2xl font-black text-primary font-mono bg-white p-3 rounded-xl border border-primary/10 text-center mt-2">
+                {{ mvolaNumber }}
+              </div>
+            </div>
+
+            <!-- Proof Upload -->
+            <div class="space-y-4">
+              <label class="text-sm font-bold text-on-surface-variant">Preuve de paiement</label>
+              <label
+                class="border-2 border-dashed border-outline-variant/50 rounded-2xl p-8 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group">
+                <div
+                  class="w-16 h-16 bg-surface-container-low rounded-full flex items-center justify-center text-outline group-hover:text-primary transition-colors">
+                  <span class="material-symbols-outlined text-4xl">add_a_photo</span>
+                </div>
+                <div class="text-center">
+                  <p class="font-bold text-on-surface group-hover:text-primary transition-colors">Téléversez la capture
+                    d'écran SMS</p>
+                  <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter mt-1">PNG, JPG •
+                    Max 5MB</p>
+                </div>
+                <input type="file" class="sr-only" accept="image/*" (change)="onFileSelected($event)" #fileInput>
+              </label>
+              <div *ngIf="selectedFile"
+                class="p-4 bg-primary/5 rounded-2xl border border-primary/20 flex items-center gap-4">
+                <span class="material-symbols-outlined text-primary">check_circle</span>
+                <span class="flex-grow text-sm font-bold truncate">{{ selectedFile.name }}</span>
+              </div>
+            </div>
+
+            <p *ngIf="error" class="text-error text-sm mt-4">{{ error }}</p>
+
+            <div class="mt-8">
+              <button id="btn-confirm-mobile" type="button" (click)="confirmOrder()" [disabled]="submitting"
+                class="w-full h-14 bg-primary text-on-primary rounded-xl font-bold shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                {{ submitting ? 'Envoi...' : 'CONFIRMER MA COMMANDE' }}
+                <span class="material-symbols-outlined" *ngIf="!submitting">verified</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ===== TAB STRIPE ===== -->
+          <div *ngIf="activeTab === 'stripe'">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-12 h-12 bg-[#635bff]/10 rounded-2xl flex items-center justify-center">
+                <!-- Stripe Logo SVG -->
+                <svg viewBox="0 0 60 25" class="w-10 h-5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M59.64 14.28h-8.06c.19 1.93 1.6 2.55 3.2 2.55 1.64 0 2.96-.37 4.05-.95v3.32a12.93 12.93 0 01-4.56.95c-4.01 0-6.83-2.31-6.83-7.18 0-4.83 2.88-7.37 6.3-7.37 3.41 0 5.6 2.38 5.6 6.21 0 .91-.17 1.47-.17 1.47H59.64zm-5.53-5.2c-1.06 0-2.03.67-2.03 2.25h3.91c0-1.58-.97-2.25-1.88-2.25zM38.93 6.3c1.25 0 2.27.58 2.75 1.52l.03-1.3H46v14.28h-4.29v-1.3c-.5.94-1.5 1.52-2.75 1.52-2.45 0-4.69-1.98-4.69-7.36 0-5.37 2.24-7.36 4.66-7.36zm1.27 11c.83 0 1.5-.36 1.88-1.01V10.5c-.37-.66-1.05-1.01-1.88-1.01-1.2 0-2.28.91-2.28 3.9 0 3 1.08 3.91 2.28 3.91zm-9.24-10.8V9.9c.52-.92 1.57-1.6 2.97-1.6v4.08c-.38-.06-.83-.1-1.35-.1-1.1 0-1.62.3-1.62 1.4v6.82H26.7V6.5h4.26zM23.68 0v4.14H19.4V0h4.28zm0 6.5v14h-4.28V6.5h4.28zm-5.83 9.77c0 2.56-2.01 4.5-5.44 4.5-2.08 0-3.67-.52-4.77-1.3v-3.97c.92.78 2.36 1.5 3.83 1.5 1.1 0 1.92-.38 1.92-1.18 0-.82-.97-1.2-2.33-1.7-2.02-.73-3.43-1.91-3.43-4.04 0-2.57 2-4.58 5.27-4.58 1.6 0 2.9.46 3.85 1.08v4.1c-.79-.66-2.04-1.26-3.1-1.26-.93 0-1.68.31-1.68 1.05 0 .7.73 1.06 2.18 1.6 2.04.76 3.7 1.92 3.7 4.2z"
+                    fill="#635bff" />
+                </svg>
+              </div>
+              <h2 class="text-2xl font-bold text-on-surface">Payer par carte</h2>
+            </div>
+
+            <!-- Loading Stripe -->
+            <div *ngIf="stripeLoading" class="py-12 flex flex-col items-center justify-center gap-4">
+              <div class="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+              <p class="text-on-surface-variant font-medium text-sm">Chargement sécurisé…</p>
+            </div>
+
+            <!-- Stripe error load -->
+            <div *ngIf="!stripeLoading && stripeError && !stripeInstance"
+              class="p-4 bg-error/10 rounded-2xl text-error text-sm font-medium mb-4">
+              {{ stripeError }}
+            </div>
+
+            <!-- Stripe Card Element -->
+            <div *ngIf="!stripeLoading">
+              <p class="text-sm font-bold text-on-surface-variant mb-3">Numéro de carte</p>
+              <div id="stripe-card-element"
+                class="p-4 rounded-2xl border-2 border-outline-variant/50 bg-white focus-within:border-primary transition-colors min-h-[52px]">
+              </div>
+
+              <p class="text-[11px] text-on-surface-variant mt-2 flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">lock</span>
+                Paiement sécurisé par Stripe • TLS 256-bit
+              </p>
+
+              <!-- Amount reminder -->
+              <div
+                class="mt-5 p-4 bg-[#635bff]/5 rounded-2xl border border-[#635bff]/20 flex justify-between items-center">
+                <span class="text-sm font-bold text-on-surface">Montant à débiter</span>
+                <span class="text-lg font-black text-[#635bff]">{{ formatPrice(order?.total_amount ?? 0) }} Ar</span>
+              </div>
+
+              <p *ngIf="stripeError && stripeInstance" class="text-error text-sm mt-4 p-3 bg-error/5 rounded-xl">{{
+                stripeError }}</p>
+
+              <div class="mt-6">
+                <button id="btn-pay-stripe" type="button" (click)="payWithStripe()"
+                  [disabled]="submitting || !stripeReady"
+                  class="w-full h-14 bg-[#635bff] text-white rounded-xl font-bold shadow-xl hover:bg-[#5851db] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                  <span *ngIf="submitting"
+                    class="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
+                  {{ submitting ? 'Traitement...' : 'PAYER PAR CARTE' }}
+                  <span class="material-symbols-outlined" *ngIf="!submitting">credit_card</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Terms -->
+          <p class="text-[10px] text-center text-on-surface-variant font-medium mt-6">
+            En confirmant, vous acceptez nos <a routerLink="/register" class="text-primary hover:underline">Conditions
+              Générales de Vente</a>.
+          </p>
 
           <!-- Security Badge -->
-          <div class="mt-8 pt-6 border-t border-outline-variant/20 flex gap-4 items-center">
+          <div class="mt-6 pt-4 border-t border-outline-variant/20 flex gap-4 items-center">
             <span class="material-symbols-outlined text-4xl text-primary/30">security</span>
             <p class="text-[10px] text-on-surface-variant leading-tight font-medium">
               Tantsaha Connect sécurise vos transactions. Les fonds sont débloqués pour le fermier uniquement après

@@ -8,3 +8,4 @@ python-dotenv>=1.0.0
 django-environ>=0.11.2
 gunicorn>=21.2.0
 Pillow
+stripe>=7.0.0

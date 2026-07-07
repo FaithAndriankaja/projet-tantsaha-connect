@@ -117,6 +117,7 @@ export interface ManagerDelivery {
   id: string;
   transaction_code: string;
   status: string;
+  total_amount?: string;
   consumer_name: string;
   consumer_phone: string;
   items: {

@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -50,7 +50,8 @@ export class Register implements OnInit, AfterViewInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private cart: CartService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
@@ -106,11 +107,13 @@ export class Register implements OnInit, AfterViewInit, OnDestroy {
         this.resendMessage = '';
         this.verificationSuccess = false;
         this.startResendCooldown(res.resend_available_in || 10);
+        this.cdr.detectChanges();
         setTimeout(() => this.focusVerificationInput(), 350);
       },
       error: (err) => {
         this.isSubmitting = false;
         this.currentStep = 2; // Slide back if fail
+        this.cdr.detectChanges();
         console.error("Erreur renvoyée par Django :", err);
 
         let errorMessage = err?.error?.detail || "Erreur lors de l'inscription. Vérifiez les informations saisies.";

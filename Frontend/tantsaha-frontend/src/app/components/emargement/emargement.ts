@@ -28,6 +28,9 @@ export class Emargement implements OnInit {
   allOrders: any[] = [];
   ordersLoading = false;
 
+  // --- États ---
+  activeTab: 'ongoing' | 'history' = 'ongoing';
+
   // Configuration de la modale personnalisée
   modalConfig: { isOpen: boolean, title: string, message: string, onConfirm: () => void } | null = null;
 
@@ -74,8 +77,8 @@ export class Emargement implements OnInit {
     this.loadAllOrders();
   }
 
-  loadDeliveries() {
-    this.loading = true;
+  loadDeliveries(showLoading = true) {
+    if (showLoading) this.loading = true;
     this.error = '';
 
     this.api.getManagerDeliveries().subscribe({
@@ -119,29 +122,37 @@ export class Emargement implements OnInit {
     return this.deliveries.filter((d) => this.isDelivered(d)).length;
   }
 
-  validateHandover(delivery: ManagerDelivery) {
+  validateHandover(delivery: any) {
     if (!delivery?.id || this.validatingOrderId) return;
     if (this.isDelivered(delivery)) return;
 
-    const ok = confirm(`Valider la remise physique de la commande ${delivery.transaction_code} ?`);
-    if (!ok) return;
-
     this.validatingOrderId = delivery.id;
-    this.error = '';
-    this.successMessage = '';
+    this.openModal(
+      'Remise de commande',
+      `Confirmez-vous que la commande ${delivery.transaction_code} a été remise à ${delivery.consumer_name} ?`,
+      () => {
+        const prevStatus = delivery.status;
+        delivery.status = 'picked_up';
+        this.successMessage = 'Validation de la remise en cours...';
+        this.cdr.detectChanges();
+        this.closeModal();
 
-    this.api.confirmHandover(delivery.id).subscribe({
-      next: (res) => {
-        this.successMessage = `Commande ${res.transaction_code} validée. Statut : ${res.status}.`;
-        this.validatingOrderId = null;
-        this.loadDeliveries();
-      },
-      error: (err) => {
-        console.error('Erreur validation remise:', err);
-        this.error = this.extractError(err) || 'Erreur lors de la validation de la remise.';
-        this.validatingOrderId = null;
-      },
-    });
+        this.api.confirmHandover(delivery.id).subscribe({
+          next: (res: any) => {
+            this.successMessage = `La commande ${res.transaction_code} a été validée avec succès.`;
+            delivery.status = res.status;
+            this.validatingOrderId = null;
+            this.cdr.detectChanges();
+          },
+          error: (err: any) => {
+            delivery.status = prevStatus;
+            this.error = this.extractError(err) || 'Erreur lors de la validation.';
+            this.validatingOrderId = null;
+            this.cdr.detectChanges();
+          }
+        });
+      }
+    );
   }
 
   openScanner() {
@@ -167,12 +178,14 @@ export class Emargement implements OnInit {
   statusLabel(status: string): string {
     const normalized = (status || '').toLowerCase();
     if (['picked_up', 'delivered', 'completed', 'handed_over'].includes(normalized)) {
-      return 'Remise validée';
+      return 'Remis';
     }
-    if (['delivered', 'completed', 'handed_over'].includes(normalized)) return 'Remise validée';
-    if (['ready', 'prepared'].includes(normalized)) return 'Prêt au point de retrait';
-    if (['confirmed', 'paid'].includes(normalized)) return 'Payé / à remettre';
-    if (['pending'].includes(normalized)) return 'En attente';
+    if (['ready', 'prepared'].includes(normalized)) return 'Prêt pour remise';
+    if (['confirmed', 'paid'].includes(normalized)) return 'Payé';
+    if (normalized === 'payment_submitted') return '🟡 Paiement soumis — à valider';
+    if (['pending', 'pending_payment'].includes(normalized)) return 'En attente de paiement';
+    if (normalized === 'delivering') return 'En cours de livraison / À reverser';
+    if (normalized === 'closed') return 'Transfert effectué';
     return status || 'Statut inconnu';
   }
 
@@ -191,13 +204,14 @@ export class Emargement implements OnInit {
     status: 'open',
   };
 
-  loadSaleSessions() {
-    this.sessionLoading = true;
+  loadSaleSessions(showLoading = true) {
+    if (showLoading) this.sessionLoading = true;
 
     this.api.getSaleSessions().subscribe({
       next: (sessions) => {
         this.saleSessions = sessions ?? [];
         this.sessionLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Erreur chargement sessions:', err);
@@ -254,7 +268,7 @@ export class Emargement implements OnInit {
           pickup_date: '',
           status: 'open',
         };
-        this.loadSaleSessions();
+        this.loadSaleSessions(false);
         this.loadPickupPoints();
       },
       error: (err: any) => {
@@ -272,7 +286,7 @@ export class Emargement implements OnInit {
     this.api.updateSaleSession(session.id, { status: 'closed' }).subscribe({
       next: () => {
         this.successMessage = 'Session fermée avec succès.';
-        this.loadSaleSessions();
+        session.status = 'closed';
       },
       error: (err: any) => {
         console.error('Erreur création session complète:', err);
@@ -308,12 +322,13 @@ export class Emargement implements OnInit {
     }
   }
 
-  // --- Workflow: Charger les offres en attente d'approbation ---
-  loadPendingStocks() {
-    this.pendingLoading = true;
+  // --- Workflow: Charger les offres de stock ---
+  loadPendingStocks(showLoading = true) {
+    if (showLoading) this.pendingLoading = true;
     this.api.getMyStocks().subscribe({
       next: (stocks) => {
-        this.pendingStocks = (stocks ?? []).filter((s: any) => s.approval_status === 'pending');
+        // We keep all stocks so they can be shown in ongoing/history
+        this.pendingStocks = (stocks ?? []);
         this.pendingLoading = false;
         this.cdr.detectChanges();
       },
@@ -326,24 +341,33 @@ export class Emargement implements OnInit {
   }
 
   approveOffer(stock: any) {
-    this.openModal('Mise en vitrine', 'Approuver et mettre ce produit en vitrine pour la session choisie ?', () => {
+    this.openModal('Mise en vitrine', `Confirmer le stock pour "${stock.product_name || 'ce produit'}" ?`, () => {
+      // Optimistic UI: update status directly, do not remove
+      const prevStatus = stock.approval_status;
+      stock.approval_status = 'published';
+      this.successMessage = 'Approbation en cours...';
+      this.cdr.detectChanges();
+      this.closeModal();
+
       this.api.approveStock(stock.id).subscribe({
         next: () => {
-          this.successMessage = 'Produit mis en vitrine avec succès.';
-          this.loadPendingStocks();
-          this.closeModal();
+          this.successMessage = `"${stock.product_name || 'Produit'}" confirmé ! Statut: Précommande Validée.`;
+          this.cdr.detectChanges();
         },
         error: (err: any) => {
-          this.error = this.extractError(err) || 'Impossible d\'approuver.';
-          this.closeModal();
+          // Rollback
+          stock.approval_status = prevStatus;
+          this.successMessage = '';
+          this.error = this.extractError(err) || 'Impossible d\'approuver ce produit.';
+          this.cdr.detectChanges();
         }
       });
     });
   }
 
   // --- Workflow: Charger toutes les commandes pour le manager ---
-  loadAllOrders() {
-    this.ordersLoading = true;
+  loadAllOrders(showLoading = true) {
+    if (showLoading) this.ordersLoading = true;
     this.api.getOrders().subscribe({
       next: (orders) => {
         this.allOrders = orders ?? [];
@@ -358,42 +382,104 @@ export class Emargement implements OnInit {
     });
   }
 
+  // Helper getters for ongoing vs history
+  get ongoingStocks(): any[] {
+    return this.pendingStocks.filter(s => s.approval_status === 'pending');
+  }
+  get historyStocks(): any[] {
+    return this.pendingStocks.filter(s => s.approval_status !== 'pending');
+  }
+
   get confirmedOrders(): any[] {
     return this.allOrders.filter((o: any) => o.status === 'confirmed');
   }
   get deliveringOrders(): any[] {
     return this.allOrders.filter((o: any) => o.status === 'delivering');
   }
+  get closedOrders(): any[] {
+    return this.allOrders.filter((o: any) => o.status === 'closed');
+  }
+  
+  get pendingPaymentOrders(): ManagerDelivery[] {
+    return this.deliveries.filter((d) => d.status === 'payment_submitted');
+  }
+  get awaitingHandoverOrders(): ManagerDelivery[] {
+    return this.deliveries.filter((d) => ['confirmed', 'ready', 'delivering'].includes(d.status));
+  }
+  get historyHandoverOrders(): ManagerDelivery[] {
+    return this.deliveries.filter((d) => ['picked_up', 'closed'].includes(d.status));
+  }
 
   startDelivery(order: any) {
     this.openModal('Lancer la livraison', 'Lancer la livraison de cette commande ?', () => {
+      // Optimistic UI
+      order.status = 'delivering';
+      this.successMessage = 'Livraison lancée.';
+      this.cdr.detectChanges();
+      this.closeModal();
+
       this.api.startDelivery(order.id).subscribe({
         next: (res: any) => {
-          this.successMessage = 'Livraison lancée.';
           order.status = res.status;
-          this.loadAllOrders();
-          this.closeModal();
+          this.cdr.detectChanges();
         },
         error: (err: any) => {
+          order.status = 'confirmed'; // rollback
+          this.successMessage = '';
           this.error = this.extractError(err) || 'Impossible de lancer la livraison.';
-          this.closeModal();
+          this.cdr.detectChanges();
         }
       });
     });
   }
 
+  validatePayment(delivery: ManagerDelivery) {
+    this.openModal(
+      'Valider le paiement',
+      `Confirmer la réception du paiement pour la commande ${delivery.transaction_code} (${delivery.total_amount ? this.formatPrice(delivery.total_amount) + ' Ar' : ''}) ?`,
+      () => {
+        // Optimistic UI: update status immediately
+        const prevStatus = delivery.status;
+        delivery.status = 'confirmed';
+        this.successMessage = 'Paiement validé. Commande confirmée.';
+        this.cdr.detectChanges();
+        this.closeModal();
+
+        this.api.validatePaymentByManager(delivery.id).subscribe({
+          next: (res: any) => {
+            delivery.status = res.status || 'confirmed';
+            this.successMessage = `Paiement validé — commande ${delivery.transaction_code} confirmée !`;
+            this.cdr.detectChanges();
+          },
+          error: (err: any) => {
+            delivery.status = prevStatus; // rollback
+            this.successMessage = '';
+            this.error = this.extractError(err) || 'Impossible de valider le paiement.';
+            this.cdr.detectChanges();
+          }
+        });
+      }
+    );
+  }
+
   validateTransfer(order: any) {
     this.openModal('Valider le transfert', 'Confirmer le transfert d\'argent au producteur pour cette commande ?', () => {
+      const prevStatus = order.status;
+      order.status = 'closed';
+      this.successMessage = 'Validation en cours...';
+      this.cdr.detectChanges();
+      this.closeModal();
+
       this.api.validateTransfer(order.id).subscribe({
         next: (res: any) => {
-          this.successMessage = 'Transfert validé.';
+          this.successMessage = 'Transfert validé avec succès.';
           order.status = res.status;
-          this.loadAllOrders();
-          this.closeModal();
+          this.cdr.detectChanges();
         },
         error: (err: any) => {
+          order.status = prevStatus;
           this.error = this.extractError(err) || 'Impossible de valider le transfert.';
-          this.closeModal();
+          this.cdr.detectChanges();
         }
       });
     });

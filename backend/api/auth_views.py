@@ -1,6 +1,7 @@
 import os
 import secrets
 import uuid
+import threading
 
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
@@ -93,17 +94,21 @@ def send_verification_code(user):
         'code': token_str,
         'phone': user.phone,
     })
-    send_html_email(
-        subject='Bienvenue sur Tantsaha Connect - Vérifiez votre email',
-        template_name='verify_email.html',
-        context={
-            'user': user,
-            'verification_url': verify_link,
-            'verification_code': token_str,
-            'expires_in_minutes': EMAIL_VERIFICATION_EXPIRY_MINUTES,
-        },
-        recipient_list=[user.email]
-    )
+    
+    threading.Thread(
+        target=send_html_email,
+        args=(
+            'Bienvenue sur Tantsaha Connect - Vérifiez votre email',
+            'verify_email.html',
+            {
+                'user': user,
+                'verification_url': verify_link,
+                'verification_code': token_str,
+                'expires_in_minutes': EMAIL_VERIFICATION_EXPIRY_MINUTES,
+            },
+            [user.email]
+        )
+    ).start()
 
 
 def build_auth_response(user):
@@ -411,12 +416,16 @@ class PasswordResetRequestView(APIView):
         )
 
         reset_link = build_frontend_url('/reset-password', {'token': token_str})
-        send_html_email(
-            subject='Réinitialisation de votre mot de passe - Tantsaha Connect',
-            template_name='reset_password.html',
-            context={'user': user, 'reset_url': reset_link},
-            recipient_list=[user.email]
-        )
+        
+        threading.Thread(
+            target=send_html_email,
+            args=(
+                'Réinitialisation de votre mot de passe - Tantsaha Connect',
+                'reset_password.html',
+                {'user': user, 'reset_url': reset_link},
+                [user.email]
+            )
+        ).start()
 
         return Response({'detail': 'Si cet email est enregistré, un lien de réinitialisation vous a été envoyé.'}, status=status.HTTP_200_OK)
 

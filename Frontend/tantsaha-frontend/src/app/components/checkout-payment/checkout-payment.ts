@@ -139,6 +139,16 @@ export class CheckoutPayment implements OnInit, AfterViewChecked {
         this.stripeError = result.error.message || 'Erreur lors du paiement. Veuillez réessayer.';
         this.submitting = false;
       } else if (result.paymentIntent?.status === 'succeeded') {
+        // Notify backend manually to handle local development without webhooks
+        try {
+          await this.api.uploadPayment(this.order.id, {
+            method: 'stripe',
+            proof_file_path: 'stripe:' + result.paymentIntent.id
+          }).toPromise();
+        } catch (e) {
+          console.error('Failed to notify backend of Stripe success', e);
+        }
+        
         this.submitting = false;
         this.router.navigate(['/commande-succes']);
       }

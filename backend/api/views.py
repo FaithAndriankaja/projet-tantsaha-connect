@@ -113,12 +113,21 @@ class OrderViewSet(viewsets.ModelViewSet):
         serializer = PaymentUploadSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
+        method = serializer.validated_data['method']
         Payment.objects.create(
             order=order,
-            method=serializer.validated_data['method'],
+            method=method,
             proof_file_path=serializer.validated_data['proof_file_path']
         )
-        return Response({"message": "Preuve envoyée avec succès."}, status=status.HTTP_201_CREATED)
+        
+        # Automatisation Stripe : passe directement à confirmé (sans validation manuelle du manager)
+        if method == 'stripe':
+            order.status = 'confirmed'
+        else:
+            order.status = 'payment_submitted'
+            
+        order.save(update_fields=['status', 'updated_at'])
+        return Response({"message": "Preuve envoyée avec succès.", "status": order.status}, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['post'], url_path='handover')
     def confirm_handover(self, request, pk=None):
@@ -139,6 +148,40 @@ class OrderViewSet(viewsets.ModelViewSet):
         HandoverConfirmation.objects.create(order=order, manager_user=request.user)
         order.refresh_from_db()
         return Response({'status': order.status, 'transaction_code': order.transaction_code})
+
+    @action(detail=True, methods=['post'], url_path='validate-payment')
+    def validate_payment_by_manager(self, request, pk=None):
+        """Le manager valide la preuve de paiement → commande passe à 'confirmed'."""
+        if request.user.role != 'manager':
+            return Response({'detail': 'Accès réservé aux managers.'}, status=status.HTTP_403_FORBIDDEN)
+
+        order = self.get_object()
+
+        if order.status != 'payment_submitted':
+            return Response(
+                {'detail': f'Statut incompatible pour la validation ({order.status}). La commande doit être en attente de validation paiement.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        order.status = 'confirmed'
+        order.save(update_fields=['status', 'updated_at'])
+
+        # Mettre à jour le paiement associé si présent
+        try:
+            payment = order.payment
+            payment.verification_status = 'accepted'
+            payment.verified_by_user = request.user
+            from django.utils import timezone
+            payment.verified_at = timezone.now()
+            payment.save(update_fields=['verification_status', 'verified_by_user', 'verified_at'])
+        except Exception:
+            pass
+
+        return Response({
+            'status': order.status,
+            'transaction_code': order.transaction_code,
+            'message': 'Paiement validé. Commande confirmée.'
+        })
 
     @action(detail=True, methods=['post'], url_path='start-delivery')
     def start_delivery(self, request, pk=None):
@@ -290,7 +333,7 @@ class ManagerDeliveriesView(views.APIView):
         pickup_points = PickupPoint.objects.filter(manager_user=request.user)
         orders = Order.objects.filter(
             pickup_point__in=pickup_points,
-            status__in=['ready', 'confirmed'],
+            status__in=['payment_submitted', 'ready', 'confirmed', 'delivering', 'picked_up', 'closed'],
         ).select_related('consumer_user').prefetch_related('items__product')
 
         data = []
@@ -307,6 +350,7 @@ class ManagerDeliveriesView(views.APIView):
                 'id': order.id,
                 'transaction_code': order.transaction_code,
                 'status': order.status,
+                'total_amount': str(order.total_amount),
                 'consumer_name': order.consumer_user.full_name,
                 'consumer_phone': order.consumer_user.phone,
                 'items': items,
@@ -358,13 +402,12 @@ class ProducerHarvestCreateView(views.APIView):
         sale_session_id = data.get('sale_session_id')
         sale_session = SaleSession.objects.filter(
             id=sale_session_id,
-            status='open',
-            pickup_point__producerpickuppoint__producer=producer
+            status='open'
         ).first()
 
         if not sale_session:
             return Response(
-                {'detail': 'Session de vente invalide, déjà clôturée ou non autorisée pour vos points de retrait.'},
+                {'detail': 'Session de vente invalide ou déjà clôturée.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -424,15 +467,10 @@ class SaleSessionViewSet(viewsets.ModelViewSet):
                 pickup_point__manager_user=user
             ).order_by('-opens_at')
         elif user.role == 'producer':
-            # Les producteurs peuvent voir les sessions ouvertes de leurs points de retrait
-            try:
-                producer = user.producer
-                return SaleSession.objects.filter(
-                    status='open',
-                    pickup_point__producerpickuppoint__producer=producer
-                ).distinct().order_by('closes_at')
-            except Exception:
-                return SaleSession.objects.none()
+            # Les producteurs peuvent voir toutes les sessions ouvertes (MVP)
+            return SaleSession.objects.filter(
+                status='open'
+            ).order_by('closes_at')
         
         return SaleSession.objects.none()
 

@@ -37,9 +37,9 @@ export class AuthInterceptor implements HttpInterceptor {
 
     let handler = next.handle(authReq);
 
-    // Apply a resilient 5s timeout on auth-specific routes to prevent infinite loading
+    // Apply a resilient 60s timeout on auth-specific routes to prevent infinite loading while emails are sent synchronously
     if (isPublicAuth) {
-      handler = handler.pipe(timeout(10000));
+      handler = handler.pipe(timeout(60000));
     }
 
     return handler.pipe(
@@ -52,7 +52,7 @@ export class AuthInterceptor implements HttpInterceptor {
         let errorMsg = 'Une erreur réseau ou serveur est survenue.';
 
         if (error instanceof TimeoutError || error.name === 'TimeoutError') {
-          errorMsg = 'Délai d\'attente dépassé (10s). Le serveur met trop de temps à répondre.';
+          errorMsg = 'Délai d\'attente dépassé (60s). Le serveur met trop de temps à répondre.';
           this.injector.get(NotificationService).showError(errorMsg);
           return throwError(() => error);
         }

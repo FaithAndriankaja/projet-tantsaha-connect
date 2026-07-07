@@ -73,6 +73,19 @@
         {{ error }}
       </div>
 
+      <!-- TABS -->
+      <div class="flex gap-4 border-b border-outline-variant/30 mt-4 mb-8">
+        <button (click)="activeTab = 'ongoing'" [class.border-b-2]="activeTab === 'ongoing'" [class.border-primary]="activeTab === 'ongoing'" [class.text-primary]="activeTab === 'ongoing'" [class.font-bold]="activeTab === 'ongoing'" class="pb-3 px-4 transition-all text-on-surface-variant">
+          En cours
+        </button>
+        <button (click)="activeTab = 'history'" [class.border-b-2]="activeTab === 'history'" [class.border-primary]="activeTab === 'history'" [class.text-primary]="activeTab === 'history'" [class.font-bold]="activeTab === 'history'" class="pb-3 px-4 transition-all text-on-surface-variant">
+          Historique / Clôturé
+        </button>
+      </div>
+
+      <!-- ONGLET: EN COURS -->
+      <div *ngIf="activeTab === 'ongoing'" class="space-y-8">
+
       <section class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 space-y-6">
         <div>
           <h4 class="font-headline-sm text-on-surface font-bold">Sessions de vente</h4>
@@ -228,7 +241,7 @@
               </thead>
 
               <tbody class="divide-y divide-outline-variant/10 text-body-md">
-                <tr *ngFor="let del of filteredDeliveries">
+                <tr *ngFor="let del of awaitingHandoverOrders">
                   <td class="p-4 font-mono font-bold text-primary">
                     {{ del.transaction_code }}
                   </td>
@@ -262,8 +275,7 @@
                     <button type="button" (click)="validateHandover(del)"
                       [disabled]="isDelivered(del) || validatingOrderId === del.id"
                       class="px-4 py-2 bg-primary text-on-primary text-xs font-bold rounded-xl hover:opacity-90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                      {{ isDelivered(del) ? 'Déjà validée' : (validatingOrderId === del.id ? 'Validation...' : 'Valider
-                      la remise') }}
+                      {{ isDelivered(del) ? 'Déjà validée' : (validatingOrderId === del.id ? 'Validation...' : 'Valider la remise') }}
                     </button>
                   </td>
                 </tr>
@@ -271,6 +283,71 @@
             </table>
           </div>
 
+        </div>
+      </section>
+
+      <!-- Section : Paiements soumis à valider -->
+      <section class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h4 class="font-headline-sm text-on-surface font-bold">Paiements à valider</h4>
+            <p class="text-body-sm text-on-surface-variant">
+              Vérifiez les preuves de paiement et confirmez les commandes des acheteurs.
+            </p>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold"
+            [class.bg-warning/10]="pendingPaymentOrders.length > 0"
+            [class.text-warning]="pendingPaymentOrders.length > 0"
+            [class.bg-surface-container-low]="pendingPaymentOrders.length === 0"
+            [class.text-on-surface-variant]="pendingPaymentOrders.length === 0">
+            {{ pendingPaymentOrders.length }} en attente
+          </span>
+        </div>
+
+        <div *ngIf="loading" class="p-4 text-on-surface-variant">Chargement...</div>
+
+        <div *ngIf="!loading && pendingPaymentOrders.length === 0"
+          class="p-4 rounded-xl bg-surface-container-low text-on-surface-variant">
+          Aucun paiement en attente de validation.
+        </div>
+
+        <div *ngIf="!loading && pendingPaymentOrders.length > 0"
+          class="bg-surface-container-low border border-outline-variant/30 rounded-2xl overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse whitespace-nowrap">
+              <thead>
+                <tr class="bg-surface-container-lowest text-label-md text-on-surface-variant border-b border-outline-variant/30">
+                  <th class="p-4">Code</th>
+                  <th class="p-4">Acheteur</th>
+                  <th class="p-4">Contact</th>
+                  <th class="p-4">Montant</th>
+                  <th class="p-4">Produits</th>
+                  <th class="p-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant/10 text-body-md bg-surface-container-lowest">
+                <tr *ngFor="let del of pendingPaymentOrders" class="hover:bg-warning/5 transition-colors">
+                  <td class="p-4 font-mono font-bold text-primary">{{ del.transaction_code }}</td>
+                  <td class="p-4 font-semibold">{{ del.consumer_name }}</td>
+                  <td class="p-4 text-xs">{{ del.consumer_phone }}</td>
+                  <td class="p-4 font-bold text-success">{{ formatPrice(del.total_amount) }} Ar</td>
+                  <td class="p-4">
+                    <div *ngFor="let item of del.items" class="text-xs font-medium">
+                      {{ item.product_name }} —
+                      <span class="text-secondary font-bold">{{ item.quantity }} {{ item.unit }}</span>
+                    </div>
+                  </td>
+                  <td class="p-4 text-right">
+                    <button (click)="validatePayment(del)"
+                      class="px-4 py-2 bg-success text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all shadow-sm inline-flex items-center gap-2">
+                      <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                      Valider le paiement
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -303,17 +380,20 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-outline-variant/10 text-body-md bg-surface-container-lowest">
-                <tr *ngFor="let stock of pendingStocks" class="hover:bg-outline-variant/5 transition-colors">
+                <tr *ngFor="let stock of ongoingStocks" class="hover:bg-outline-variant/5 transition-colors">
                   <td class="p-4 font-bold text-on-surface">{{ stock.producer_name || 'N/A' }}</td>
                   <td class="p-4 text-primary font-semibold">{{ stock.product_name || 'N/A' }}</td>
                   <td class="p-4">{{ stock.available_quantity }} {{ stock.unit || 'kg' }}</td>
                   <td class="p-4">{{ formatPrice(stock.unit_price) }} Ar</td>
                   <td class="p-4 text-sm">{{ stock.sale_session_date | date:'dd/MM/yyyy' }}</td>
                   <td class="p-4 text-right">
-                    <button (click)="approveOffer(stock)"
+                    <span *ngIf="stock.approval_status === 'published'" class="text-success font-bold text-xs bg-success/10 px-3 py-1 rounded-full">
+                      Précommande Validée
+                    </span>
+                    <button *ngIf="stock.approval_status === 'pending'" (click)="approveOffer(stock)"
                       class="px-5 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all text-sm shadow-md inline-flex items-center gap-2">
-                      <span class="material-symbols-outlined text-[18px]">storefront</span>
-                      Mettre en vitrine
+                      <span class="material-symbols-outlined text-[18px]">check</span>
+                      Confirmer le stock
                     </button>
                   </td>
                 </tr>
@@ -343,10 +423,13 @@
               <p class="font-mono font-bold text-primary">{{ order.transaction_code }}</p>
               <p class="text-xs text-on-surface-variant">{{ orderStatusLabel(order.status) }} — {{ order.total_amount }} Ar</p>
             </div>
-            <button (click)="startDelivery(order)"
+            <button *ngIf="order.status === 'confirmed'" (click)="startDelivery(order)"
               class="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all shadow-sm">
               Lancer la livraison
             </button>
+            <span *ngIf="order.status === 'delivering'" class="text-success text-xs font-bold px-3 py-1 bg-success/10 rounded-full">
+              En cours de livraison
+            </span>
           </div>
         </div>
 
@@ -359,10 +442,13 @@
               <p class="font-mono font-bold text-primary">{{ order.transaction_code }}</p>
               <p class="text-xs text-on-surface-variant">{{ orderStatusLabel(order.status) }} — {{ order.total_amount }} Ar</p>
             </div>
-            <button (click)="validateTransfer(order)"
+            <button *ngIf="order.status === 'delivering'" (click)="validateTransfer(order)"
               class="px-4 py-2 bg-teal-600 text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all shadow-sm">
-              Valider le transfert d'argent
+              Valider le transfert
             </button>
+            <span *ngIf="order.status === 'closed'" class="text-success text-xs font-bold px-3 py-1 bg-success/10 rounded-full">
+              Transfert effectué
+            </span>
           </div>
         </div>
 
@@ -371,6 +457,60 @@
           Aucune commande en attente de livraison ou de transfert.
         </div>
       </section>
+
+      </div> <!-- END ONGLET EN COURS -->
+
+      <!-- ONGLET: HISTORIQUE -->
+      <div *ngIf="activeTab === 'history'" class="space-y-8">
+        
+        <section class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 space-y-4">
+          <div>
+            <h4 class="font-headline-sm text-on-surface font-bold">Précommandes validées</h4>
+            <p class="text-body-sm text-on-surface-variant">Historique des stocks confirmés.</p>
+          </div>
+          <div *ngIf="historyStocks.length === 0" class="p-4 rounded-xl bg-surface-container-low text-on-surface-variant">
+            Aucun historique.
+          </div>
+          <div *ngIf="historyStocks.length > 0" class="overflow-x-auto">
+            <table class="w-full text-left border-collapse whitespace-nowrap">
+              <tbody class="divide-y divide-outline-variant/10 text-body-md bg-surface-container-lowest">
+                <tr *ngFor="let stock of historyStocks" class="opacity-75">
+                  <td class="p-4 font-bold text-on-surface">{{ stock.producer_name || 'N/A' }}</td>
+                  <td class="p-4 text-primary font-semibold">{{ stock.product_name || 'N/A' }}</td>
+                  <td class="p-4">{{ stock.available_quantity }} {{ stock.unit || 'kg' }}</td>
+                  <td class="p-4 text-right">
+                    <span class="text-success font-bold text-xs bg-success/10 px-3 py-1 rounded-full">Précommande Validée</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 space-y-4">
+          <div>
+            <h4 class="font-headline-sm text-on-surface font-bold">Commandes Clôturées</h4>
+            <p class="text-body-sm text-on-surface-variant">Historique des remises et transferts effectués.</p>
+          </div>
+          <div *ngIf="historyHandoverOrders.length === 0" class="p-4 rounded-xl bg-surface-container-low text-on-surface-variant">
+            Aucun historique.
+          </div>
+          <div *ngIf="historyHandoverOrders.length > 0" class="overflow-x-auto">
+            <table class="w-full text-left border-collapse whitespace-nowrap">
+              <tbody class="divide-y divide-outline-variant/10 text-body-md bg-surface-container-lowest">
+                <tr *ngFor="let del of historyHandoverOrders" class="opacity-75">
+                  <td class="p-4 font-mono font-bold text-primary">{{ del.transaction_code }}</td>
+                  <td class="p-4 font-semibold">{{ del.consumer_name }}</td>
+                  <td class="p-4">
+                    <span class="text-success font-bold text-xs bg-success/10 px-3 py-1 rounded-full">{{ statusLabel(del.status) }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div> <!-- END ONGLET HISTORIQUE -->
 
     </div>
   </main>

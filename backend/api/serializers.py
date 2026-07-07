@@ -84,6 +84,7 @@ class ManagerDeliverySerializer(serializers.Serializer):
     id = serializers.UUIDField()
     transaction_code = serializers.CharField()
     status = serializers.CharField()
+    total_amount = serializers.CharField(allow_null=True, required=False, default='0')
     consumer_name = serializers.CharField()
     consumer_phone = serializers.CharField()
     items = ManagerDeliveryItemSerializer(many=True)

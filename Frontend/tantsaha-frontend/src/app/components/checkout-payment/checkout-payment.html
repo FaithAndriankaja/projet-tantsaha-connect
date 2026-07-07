@@ -201,7 +201,7 @@
             </div>
 
             <!-- Stripe error load -->
-            <div *ngIf="!stripeLoading && stripeError && !stripeInstance"
+            <div *ngIf="!stripeLoading && stripeError && !stripeInitialized"
               class="p-4 bg-error/10 rounded-2xl text-error text-sm font-medium mb-4">
               {{ stripeError }}
             </div>
@@ -225,7 +225,7 @@
                 <span class="text-lg font-black text-[#635bff]">{{ formatPrice(order?.total_amount ?? 0) }} Ar</span>
               </div>
 
-              <p *ngIf="stripeError && stripeInstance" class="text-error text-sm mt-4 p-3 bg-error/5 rounded-xl">{{
+              <p *ngIf="stripeError && stripeInitialized" class="text-error text-sm mt-4 p-3 bg-error/5 rounded-xl">{{
                 stripeError }}</p>
 
               <div class="mt-6">

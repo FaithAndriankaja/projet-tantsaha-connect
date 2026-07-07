@@ -162,6 +162,10 @@ export class CheckoutPayment implements OnInit, AfterViewChecked {
     return this.order?.items ?? [];
   }
 
+  get stripeInitialized(): boolean {
+    return !!this.stripeInstance;
+  }
+
   formatPrice(value: string | number): string {
     const num = typeof value === 'number' ? value : parseFloat(value);
     return new Intl.NumberFormat('fr-MG').format(num);

@@ -2,6 +2,9 @@ import { Routes } from '@angular/router';
 import { Home } from './components/home/home';
 import { Login } from './components/login/login';
 import { Register } from './components/register/register';
+import { VerifyEmail } from './components/verify-email/verify-email';
+import { ForgotPassword } from './components/forgot-password/forgot-password';
+import { ResetPassword } from './components/reset-password/reset-password';
 import { MarketplaceProduce } from './components/marketplace-produce/marketplace-produce';
 import { MarketplaceMobile } from './components/marketplace-mobile/marketplace-mobile';
 import { Checkout } from './components/checkout/checkout';
@@ -22,6 +25,9 @@ export const routes: Routes = [
 
   { path: 'login', component: Login },
   { path: 'register', component: Register },
+  { path: 'verify-email', component: VerifyEmail },
+  { path: 'forgot-password', component: ForgotPassword },
+  { path: 'reset-password', component: ResetPassword },
 
   // Sécurisation des Marchés Éphémères : Seuls les acheteurs (connectés ou visiteurs selon votre logique) peuvent y entrer.
   // Si le producteur essaie d'aller ici, le consumerGuard va bloquer l'accès.

@@ -8,6 +8,7 @@ export interface User {
   email: string;
   role: string;
   name: string;
+  is_email_verified?: boolean;
 }
 
 @Injectable({
@@ -35,12 +36,43 @@ export class AuthService {
     phone: string;
     password: string;
     full_name: string;
-    email?: string;
+    email: string;
     role: string;
     farm_name?: string;
     location?: string;
-  }): Observable<any> {
-    return this.api.register(userData).pipe(tap((res) => this.storeSession(res, userData.phone)));
+    pickup_point_name?: string;
+    pickup_address?: string;
+    pickup_city?: string;
+  }): Observable<{
+    detail: string;
+    email: string;
+    phone: string;
+    expires_in_minutes: number;
+    resend_available_in: number;
+  }> {
+    return this.api.register(userData);
+  }
+
+  verifyEmail(payload: { code: string; email?: string }): Observable<{
+    detail: string;
+    access: string;
+    refresh: string;
+    user: {
+      id: string;
+      phone: string;
+      full_name: string;
+      email: string;
+      role: string;
+      is_email_verified: boolean;
+    };
+  }> {
+    return this.api.verifyEmail(payload).pipe(
+      tap((res) => this.storeSession(res, res.user?.phone || ''))
+    );
+  }
+
+  resendVerificationCode(email: string): Observable<{ detail: string; resend_available_in?: number; retry_after?: number }> {
+    return this.api.resendVerificationCode(email);
   }
 
   logout() {
@@ -144,6 +176,7 @@ export class AuthService {
       email: apiUser?.email || '',
       role: this.mapRole(apiUser?.role || payload.role || 'consumer'),
       name: apiUser?.full_name || payload.name || phone,
+      is_email_verified: apiUser?.is_email_verified ?? payload.is_email_verified ?? true,
     };
 
     localStorage.setItem('currentUser', JSON.stringify(user));

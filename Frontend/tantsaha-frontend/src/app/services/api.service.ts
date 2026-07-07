@@ -52,12 +52,52 @@ export class ApiService {
     phone: string;
     password: string;
     full_name: string;
-    email?: string;
+    email: string;
     role: string;
     farm_name?: string;
     location?: string;
+    pickup_point_name?: string;
+    pickup_address?: string;
+    pickup_city?: string;
   }) {
-    return this.http.post(`${this.base}/auth/register/`, payload);
+    return this.http.post<{
+      detail: string;
+      email: string;
+      phone: string;
+      expires_in_minutes: number;
+      resend_available_in: number;
+    }>(`${this.base}/auth/register/`, payload);
+  }
+
+  verifyEmail(payload: { code: string; email?: string }) {
+    return this.http.post<{
+      detail: string;
+      access: string;
+      refresh: string;
+      user: {
+        id: string;
+        phone: string;
+        full_name: string;
+        email: string;
+        role: string;
+        is_email_verified: boolean;
+      };
+    }>(`${this.base}/auth/verify-email/`, payload);
+  }
+
+  resendVerificationCode(email: string) {
+    return this.http.post<{ detail: string; resend_available_in?: number; retry_after?: number }>(
+      `${this.base}/auth/resend-verification-code/`,
+      { email }
+    );
+  }
+
+  requestPasswordReset(email: string) {
+    return this.http.post<{ detail: string }>(`${this.base}/auth/password-reset-request/`, { email });
+  }
+
+  confirmPasswordReset(token: string, password: string) {
+    return this.http.post<{ detail: string }>(`${this.base}/auth/password-reset-confirm/`, { token, password });
   }
 
   refreshToken(refresh: string) {

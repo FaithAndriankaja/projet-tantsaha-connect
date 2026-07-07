@@ -1,14 +1,14 @@
 import { Component, AfterViewInit, ElementRef, OnInit } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // 🌟 AJOUT : Indispensable pour lier le formulaire
+import { FormsModule } from '@angular/forms';
 import { AuthService, User } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CommonModule, FormsModule], // 🌟 AJOUT : FormsModule ici
+  imports: [RouterLink, RouterLinkActive, CommonModule, FormsModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
@@ -16,24 +16,34 @@ export class Login implements OnInit, AfterViewInit {
   currentUser: User | null = null;
   cartCount = 0;
 
-  //  AJOUT : États du formulaire gérés proprement par Angular
   phone = '';
   password = '';
   isSubmitting = false;
   loginError = '';
+  verifiedSuccess = false;
+  emailNotVerified = false;
+  unverifiedEmail = '';
+  isResendingCode = false;
+  resendMessage = '';
 
   constructor(
     private el: ElementRef,
     private router: Router,
+    private route: ActivatedRoute,
     private authService: AuthService,
     private cart: CartService
   ) { }
 
   ngOnInit() {
+    const phoneParam = this.route.snapshot.queryParamMap.get('phone');
+    if (phoneParam) {
+      this.phone = phoneParam;
+    }
+    this.verifiedSuccess = this.route.snapshot.queryParamMap.get('verified') === '1';
+
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
 
-      // Sécurité : Si un utilisateur déjà connecté revient sur /login, on le réoriente vers sa zone
       if (user) {
         this.redirectToDashboard();
       }
@@ -52,7 +62,6 @@ export class Login implements OnInit, AfterViewInit {
     return this.authService.getOrdersRoute();
   }
 
-  //  AJOUT : Gestionnaire de soumission de formulaire 100% Angular (à lier avec (ngSubmit)="onSubmit()" dans le HTML)
   onSubmit() {
     if (!this.phone.trim() || !this.password) {
       this.loginError = 'Veuillez remplir tous les champs.';
@@ -61,6 +70,8 @@ export class Login implements OnInit, AfterViewInit {
 
     this.isSubmitting = true;
     this.loginError = '';
+    this.emailNotVerified = false;
+    this.resendMessage = '';
 
     this.authService.login(this.phone.trim(), this.password).subscribe({
       next: () => {
@@ -70,13 +81,40 @@ export class Login implements OnInit, AfterViewInit {
       error: (err) => {
         this.isSubmitting = false;
         console.error('Erreur authentification Django:', err);
-        this.loginError = 'Numéro de téléphone ou mot de passe incorrect.';
+
+        if (err?.status === 403 && err?.error?.code === 'email_not_verified') {
+          this.loginError = err.error.detail;
+          this.emailNotVerified = true;
+          this.unverifiedEmail = err.error.email || '';
+        } else {
+          this.loginError = err?.error?.detail || 'Numéro de téléphone ou mot de passe incorrect.';
+        }
+      }
+    });
+  }
+
+  resendVerificationCode(): void {
+    const email = this.unverifiedEmail.trim();
+    if (!email) {
+      return;
+    }
+
+    this.isResendingCode = true;
+    this.resendMessage = '';
+
+    this.authService.resendVerificationCode(email).subscribe({
+      next: (res) => {
+        this.isResendingCode = false;
+        this.resendMessage = res.detail || 'Un nouveau code de vérification a été envoyé.';
+      },
+      error: (err) => {
+        this.isResendingCode = false;
+        this.resendMessage = err?.error?.detail || "Impossible de renvoyer le code pour le moment.";
       }
     });
   }
 
   private redirectToDashboard() {
-    // Redirige dynamiquement selon le rôle (tantsaha, mpandrindra, acheteur) décodé par le backend Django
     const targetRoute = this.authService.getDefaultRouteAfterAuth();
     this.router.navigate([targetRoute]);
   }
@@ -87,7 +125,6 @@ export class Login implements OnInit, AfterViewInit {
     const passwordIcon = this.el.nativeElement.querySelector('#passwordIcon');
     const inputs = this.el.nativeElement.querySelectorAll('input');
 
-    // Effets visuels Material 3 sur les étiquettes (Labels)
     inputs.forEach((input: HTMLInputElement) => {
       input.addEventListener('focus', () => {
         const label = input.parentElement?.previousElementSibling;
@@ -101,7 +138,6 @@ export class Login implements OnInit, AfterViewInit {
       });
     });
 
-    // Gestionnaire de visibilité du mot de passe
     if (togglePassword && passwordInput && passwordIcon) {
       togglePassword.addEventListener('click', () => {
         const isPassword = passwordInput.getAttribute('type') === 'password';

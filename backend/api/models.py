@@ -43,6 +43,7 @@ class User(models.Model):
     role = models.CharField(max_length=20, choices=UserRole.choices)
     default_pickup_point = models.ForeignKey('PickupPoint', on_delete=models.SET_NULL, null=True, blank=True, db_column='default_pickup_point_id')
     is_active = models.BooleanField(default=True)
+    is_email_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -66,6 +67,21 @@ class User(models.Model):
     class Meta:
         managed = False
         db_table = 'users'
+
+class AuthToken(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id')
+    token = models.CharField(max_length=255, unique=True)
+    token_type = models.CharField(max_length=50) # 'verify_email', 'reset_password'
+    expires_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.token_type} for {self.user.email}"
+
+    class Meta:
+        managed = False
+        db_table = 'auth_tokens'
 
 class PickupPoint(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)

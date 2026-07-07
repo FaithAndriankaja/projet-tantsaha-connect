@@ -45,6 +45,7 @@ CREATE TABLE users (
     role user_role NOT NULL,
     default_pickup_point_id UUID,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_email_verified BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     profile_picture_path TEXT NULL
@@ -62,6 +63,18 @@ CREATE TABLE pickup_points (
     CONSTRAINT fk_pickup_points_manager
         FOREIGN KEY (manager_user_id) REFERENCES users(id)
         ON DELETE SET NULL
+);
+
+CREATE TABLE auth_tokens (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    token_type VARCHAR(50) NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_auth_tokens_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE
 );
 
 ALTER TABLE users

@@ -109,6 +109,17 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Email Configuration (Mailtrap)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = env('EMAIL_HOST', default='sandbox.smtp.mailtrap.io')
+EMAIL_PORT = env('EMAIL_PORT', default=2525)
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='eb97ffdc91b4a0')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='55dc6c429adba5')
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
+EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)
+DEFAULT_FROM_EMAIL = 'noreply@tantsaha-connect.mg'
+FRONTEND_BASE_URL = env('FRONTEND_BASE_URL', default='http://localhost:4200')
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # REST Framework Configuration

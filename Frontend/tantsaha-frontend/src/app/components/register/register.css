@@ -1,0 +1,146 @@
+/* =============================================
+   REGISTER — Slide Track pour l'animation OTP
+   ============================================= */
+
+/* Le conteneur parent qui masque le débordement sans créer de scroll container natif */
+.register-slide-viewport {
+  position: relative;
+  overflow: clip;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* La piste en grille permet d'empiler les panneaux dans la même cellule */
+.register-step-track {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 100%;
+}
+
+/* Chaque panneau occupe exactement la cellule de la grille */
+.register-step-panel {
+  grid-area: 1 / 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: transform 480ms cubic-bezier(0.22, 1, 0.36, 1), opacity 480ms cubic-bezier(0.22, 1, 0.36, 1), visibility 480ms;
+  will-change: transform, opacity;
+}
+
+/* 
+ * ÉTAT PAR DÉFAUT (Étapes 1 & 2 affichées) 
+ */
+.register-step-panel:nth-child(1) {
+  transform: translateX(0);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.register-step-panel:nth-child(2) {
+  transform: translateX(50%);
+  /* Start slightly to the right */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* 
+ * ÉTAT VÉRIFICATION (Étape 3 affichée) 
+ */
+.register-step-track.is-verification .register-step-panel:nth-child(1) {
+  transform: translateX(-50%);
+  /* Slide slightly to the left */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.register-step-track.is-verification .register-step-panel:nth-child(2) {
+  transform: translateX(0);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Accessibilité : désactiver les animations réduites */
+@media (prefers-reduced-motion: reduce) {
+  .register-step-track {
+    transition: none;
+  }
+}
+
+/* =============================================
+   OTP Input — Style chiffres larges et centrés
+   ============================================= */
+.otp-input {
+  letter-spacing: 0.35em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Animation shake sur erreur */
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-6px);
+  }
+
+  40% {
+    transform: translateX(6px);
+  }
+
+  60% {
+    transform: translateX(-4px);
+  }
+
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+.otp-error-shake {
+  animation: shake 400ms ease-in-out;
+}
+
+/* Animation pulse pour le succès */
+@keyframes pulse-success {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--color-success-rgb, 34, 197, 94), 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(var(--color-success-rgb, 34, 197, 94), 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--color-success-rgb, 34, 197, 94), 0);
+  }
+}
+
+.otp-success-pulse {
+  animation: pulse-success 600ms ease-out;
+}
+
+/* Animation fade-in générique */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 300ms ease-out both;
+}

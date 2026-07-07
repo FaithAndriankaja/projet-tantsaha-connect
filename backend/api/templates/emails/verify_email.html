@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Vérification de votre adresse email</title>
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background-color: #f5f6f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            background-color: #4CAF50;
+            color: #ffffff;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .content {
+            padding: 30px;
+            color: #333333;
+            line-height: 1.6;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 14px 28px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .code {
+            display: inline-block;
+            padding: 14px 20px;
+            margin: 10px 0 20px;
+            border: 1px solid #d8ead9;
+            border-radius: 10px;
+            background-color: #f1f8f1;
+            color: #1f6f2a;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 6px;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            color: #777777;
+            font-size: 12px;
+            background-color: #f9fafb;
+            border-top: 1px solid #eeeeee;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Bienvenue sur Tantsaha Connect</h1>
+        </div>
+        <div class="content">
+            <p>Bonjour {{ user.full_name }},</p>
+            <p>Merci de vous être inscrit(e) sur Tantsaha Connect. Pour sécuriser votre compte et finaliser votre
+                inscription, veuillez confirmer votre adresse email en cliquant sur le bouton ci-dessous :</p>
+
+            <div style="text-align: center;">
+                <div class="code">{{ verification_code }}</div>
+                <p>Vous pouvez aussi saisir ce code dans l'application.</p>
+                <a href="{{ verification_url }}" class="button">Vérifier mon email</a>
+            </div>
+
+            <p>Ce code est valable pendant <strong>{{ expires_in_minutes }} minutes</strong>. Après vérification, vous
+                serez connecté automatiquement à votre espace.</p>
+
+            <p>Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer ce message.</p>
+            <p>À très bientôt,<br>L'équipe Tantsaha Connect</p>
+        </div>
+        <div class="footer">
+            <p>© 2026 Tantsaha Connect. Tous droits réservés.</p>
+        </div>
+    </div>
+</body>
+
+</html>

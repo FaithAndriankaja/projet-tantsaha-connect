@@ -1,1 +1,32 @@
 <router-outlet></router-outlet>
+
+<!-- Global Toast Notification -->
+<div *ngIf="notificationService.currentNotification() as notification"
+    class="fixed top-20 left-1/2 -translate-x-1/2 z-[100] min-w-80 max-w-md px-6 py-4 rounded-xl shadow-lg border flex items-center gap-3"
+    [class]="notification.type === 'error' ? 'bg-error text-on-error border-error-container' : 
+              notification.type === 'success' ? 'bg-success text-on-success border-success' : 
+              'bg-primary text-on-primary border-primary-container'"
+    style="animation: fadeDownIn 0.3s cubic-bezier(0, 0, 0.2, 1) forwards;">
+
+    <span class="material-symbols-outlined shrink-0 text-2xl">
+        {{ notification.type === 'error' ? 'error' : notification.type === 'success' ? 'check_circle' : 'info' }}
+    </span>
+    <p class="font-bold text-sm tracking-wide m-0">{{ notification.message }}</p>
+    <button (click)="notificationService.clear()" class="ml-auto opacity-70 hover:opacity-100 transition-opacity">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+    </button>
+</div>
+
+<style>
+    @keyframes fadeDownIn {
+        from {
+            opacity: 0;
+            transform: translate(-50%, -10px) scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: translate(-50%, 0) scale(1);
+        }
+    }
+</style>

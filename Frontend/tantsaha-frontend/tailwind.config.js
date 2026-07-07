@@ -16,6 +16,10 @@ module.exports = {
         tertiary: '#5d3900',
         'on-error': '#ffffff',
         error: '#ba1a1a',
+        success: '#15803d',
+        'on-success': '#ffffff',
+        warning: '#d97706',
+        'on-warning': '#ffffff',
         primary: '#004c22',
         'secondary-container': '#fb7b54',
         'surface-container-lowest': '#ffffff',
@@ -57,7 +61,7 @@ module.exports = {
         DEFAULT: '0.125rem',
         lg: '0.25rem',
         xl: '0.5rem',
-        full: '0.75rem',
+        full: '9999px',
       },
       spacing: {
         'margin-desktop': '32px',
@@ -78,6 +82,8 @@ module.exports = {
         'headline-md': ['Public Sans', 'sans-serif'],
         'label-sm': ['Public Sans', 'sans-serif'],
         'body-lg': ['Public Sans', 'sans-serif'],
+        display: ['Public Sans', 'sans-serif'],
+        material: ['Material Symbols Outlined'],
         sans: ['Public Sans', 'sans-serif'],
       },
       fontSize: {

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, catchError, map, of, tap, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, map, of, tap, throwError, Subject } from 'rxjs';
 import { ApiService } from './api.service';
 
 export interface User {
@@ -75,7 +75,14 @@ export class AuthService {
     return this.api.resendVerificationCode(email);
   }
 
-  logout() {
+  private logoutRequestSubject = new Subject<void>();
+  public logoutRequest$ = this.logoutRequestSubject.asObservable();
+
+  logout(force: boolean = false) {
+    if (!force) {
+      this.logoutRequestSubject.next();
+      return;
+    }
     this.clearSession();
   }
 

@@ -70,7 +70,7 @@ class OrderResponseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'transaction_code', 'status', 'total_amount', 'pickup_point', 'pickup_point_name', 'sale_session', 'items', 'created_at']
+        fields = ['id', 'transaction_code', 'status', 'total_amount', 'pickup_point', 'pickup_point_name', 'sale_session', 'items', 'created_at', 'reception_validated_by_consumer', 'transfer_validated_by_manager']
 
     def get_pickup_point_name(self, obj):
         return obj.pickup_point.name if obj.pickup_point_id else None
@@ -116,25 +116,74 @@ class ProducerProfileSerializer(serializers.ModelSerializer):
         fields = ['id', 'farm_name', 'location', 'description', 'user']
 
 class ProductStockSerializer(serializers.ModelSerializer):
+    product_name = serializers.SerializerMethodField()
+    producer_name = serializers.SerializerMethodField()
+    unit = serializers.SerializerMethodField()
+    unit_price = serializers.SerializerMethodField()
+    image_path = serializers.SerializerMethodField()
+    remaining_quantity = serializers.SerializerMethodField()
+    pickup_point_name = serializers.SerializerMethodField()
+    sale_session_date = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductStock
         fields = [
             'id',
             'product',
+            'product_name',
+            'producer_name',
+            'unit',
+            'unit_price',
+            'image_path',
+            'pickup_point_name',
             'sale_session',
+            'sale_session_date',
             'available_quantity',
             'reserved_quantity',
+            'remaining_quantity',
             'is_promoted',
+            'approval_status',
         ]
         read_only_fields = [
             'id',
             'reserved_quantity',
+            'is_promoted',
+            'approval_status',
         ]
+
+    def get_product_name(self, obj):
+        return obj.product.name if obj.product_id else None
+
+    def get_producer_name(self, obj):
+        return obj.product.producer.farm_name if obj.product_id and obj.product.producer_id else None
+
+    def get_unit(self, obj):
+        return obj.product.unit if obj.product_id else None
+
+    def get_unit_price(self, obj):
+        return obj.product.unit_price if obj.product_id else None
+
+    def get_image_path(self, obj):
+        return obj.product.image_path if obj.product_id else None
+
+    def get_remaining_quantity(self, obj):
+        available = obj.available_quantity or 0
+        reserved = obj.reserved_quantity or 0
+        return max(available - reserved, 0)
+
+    def get_pickup_point_name(self, obj):
+        if obj.sale_session_id and obj.sale_session.pickup_point_id:
+            return obj.sale_session.pickup_point.name
+        return None
+
+    def get_sale_session_date(self, obj):
+        return obj.sale_session.pickup_date if obj.sale_session_id else None
 
 class ProducerHarvestCreateSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=150)
     description = serializers.CharField(required=False, allow_blank=True)
     category_id = serializers.UUIDField()
+    sale_session_id = serializers.UUIDField()
     unit = serializers.CharField(max_length=30)
     unit_price = serializers.DecimalField(max_digits=12, decimal_places=2)
     quantity = serializers.DecimalField(max_digits=12, decimal_places=3)

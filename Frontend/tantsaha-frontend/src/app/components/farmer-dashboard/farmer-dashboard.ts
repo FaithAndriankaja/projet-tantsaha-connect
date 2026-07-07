@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -26,12 +26,16 @@ export class FarmerDashboard implements OnInit {
   loading = false;
   productsLoading = false;
   categoriesLoading = false;
+  sessionsLoading = false;
+
+  availableSessions: any[] = [];
 
   error = '';
   successMessage = '';
 
   isSidePanelOpen = false;
   isSavingProduct = false;
+  editingStockId: string | null = null;
 
   farmName = 'Ma ferme';
   totalProducts = 0;
@@ -40,6 +44,7 @@ export class FarmerDashboard implements OnInit {
 
   newProductName = '';
   newProductCategory = '';
+  newProductSaleSession = '';
   newProductQty = 1;
   newProductUnit = 'kg';
   newProductPrice = 0;
@@ -51,10 +56,13 @@ export class FarmerDashboard implements OnInit {
   constructor(
     private authService: AuthService,
     private api: ApiService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
+    this.authService.syncSession();
+
     this.authService.currentUser.subscribe((user) => {
       this.currentUser = user;
     });
@@ -68,6 +76,7 @@ export class FarmerDashboard implements OnInit {
     this.productsLoading = false;
 
     this.loadCategories();
+    this.loadSaleSessions();
     this.loadHarvestSheet();
     this.loadMyProducts();
   }
@@ -95,18 +104,21 @@ export class FarmerDashboard implements OnInit {
         this.harvestLines = lines ?? [];
         this.recalculateStats();
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         console.error('Erreur chargement précommandes:', err);
         this.harvestLines = [];
         this.recalculateStats();
         this.loading = false;
+        this.cdr.detectChanges();
 
         if (this.handleAuthError(err)) return;
 
         this.error =
           this.extractError(err) ||
           'Impossible de charger les précommandes à préparer.';
+        this.cdr.detectChanges();
       },
     });
   }
@@ -121,6 +133,7 @@ export class FarmerDashboard implements OnInit {
         this.myProducts = data ?? [];
         this.recalculateStats();
         this.productsLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         console.error('Erreur chargement produits producteur:', err);
@@ -129,15 +142,17 @@ export class FarmerDashboard implements OnInit {
         this.myProducts = [];
         this.recalculateStats();
         this.productsLoading = false;
+        this.cdr.detectChanges();
 
         if (err?.status === 401) {
           this.error = 'Session expirée. Veuillez vous reconnecter.';
-          this.authService.logout();
+          this.authService.logout(true);
           this.router.navigate(['/login']);
           return;
         }
 
         this.error = this.extractError(err) || 'Impossible de charger vos produits.';
+        this.cdr.detectChanges();
       },
     });
   }
@@ -165,6 +180,26 @@ export class FarmerDashboard implements OnInit {
     });
   }
 
+  loadSaleSessions() {
+    this.sessionsLoading = true;
+    this.api.getSaleSessions().subscribe({
+      next: (sessions) => {
+        this.availableSessions = sessions ?? [];
+        if (!this.newProductSaleSession && this.availableSessions.length > 0) {
+          this.newProductSaleSession = this.availableSessions[0].id;
+        }
+        this.sessionsLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Erreur chargement sessions:', err);
+        this.availableSessions = [];
+        this.sessionsLoading = false;
+        if (this.handleAuthError(err)) return;
+      }
+    });
+  }
+
   onAddProductSubmit() {
     this.error = '';
     this.successMessage = '';
@@ -172,19 +207,48 @@ export class FarmerDashboard implements OnInit {
     if (
       !this.newProductName.trim() ||
       !this.newProductCategory ||
+      !this.newProductSaleSession ||
       this.newProductQty <= 0 ||
       this.newProductPrice <= 0
     ) {
-      this.error = 'Veuillez renseigner le nom, la catégorie, la quantité et le prix.';
+      this.error = 'Veuillez renseigner le nom, la catégorie, la session de vente, la quantité et le prix.';
       return;
     }
 
     this.isSavingProduct = true;
 
+    if (this.editingStockId) {
+      if (this.newProductQty < 0) {
+        this.error = 'La quantité ne peut pas être négative.';
+        this.isSavingProduct = false;
+        return;
+      }
+      this.api.updateStock(this.editingStockId, {
+        available_quantity: this.newProductQty
+      }).subscribe({
+        next: () => {
+          this.successMessage = 'Stock mis à jour avec succès.';
+          this.isSavingProduct = false;
+          this.isSidePanelOpen = false;
+          this.resetForm();
+          this.activeSection = 'products';
+          this.loadMyProducts();
+        },
+        error: (err: any) => {
+          console.error('Erreur mise à jour stock:', err);
+          this.isSavingProduct = false;
+          if (this.handleAuthError(err)) return;
+          this.error = this.extractError(err) || "Erreur lors de la mise à jour.";
+        }
+      });
+      return;
+    }
+
     const formData = new FormData();
     formData.append('name', this.newProductName.trim());
     formData.append('description', this.newProductDescription.trim());
     formData.append('category_id', this.newProductCategory);
+    formData.append('sale_session_id', this.newProductSaleSession);
     formData.append('unit', this.newProductUnit);
     formData.append('unit_price', String(this.newProductPrice));
     formData.append('quantity', String(this.newProductQty));
@@ -214,6 +278,30 @@ export class FarmerDashboard implements OnInit {
           this.extractError(err) ||
           "Erreur lors de l'enregistrement de la récolte.";
       },
+    });
+  }
+
+  onEditProduct(stock: any) {
+    this.editingStockId = stock.id;
+    this.newProductName = stock.product_name || `Produit #${stock.product}`;
+    this.newProductQty = Number(stock.available_quantity) || 0;
+    this.isSidePanelOpen = true;
+    this.error = '';
+    this.successMessage = '';
+  }
+
+  onDeleteProduct(stockId: string) {
+    if (!confirm('Êtes-vous sûr de vouloir retirer ce produit de la vente pour cette session ?')) return;
+    this.api.deleteStock(stockId).subscribe({
+      next: () => {
+        this.successMessage = 'Produit retiré avec succès.';
+        this.loadMyProducts();
+      },
+      error: (err: any) => {
+        console.error('Erreur suppression stock:', err);
+        if (this.handleAuthError(err)) return;
+        this.error = this.extractError(err) || "Erreur lors de la suppression.";
+      }
     });
   }
 
@@ -265,16 +353,8 @@ export class FarmerDashboard implements OnInit {
     return `${window.location.origin}/media/${path}`;
   }
 
-  toggleProductVisibility(item: HarvestLine) {
-    console.warn(
-      'toggleProductVisibility désactivé : harvest_sheet_view ne contient pas stock_id/is_promoted.',
-      item
-    );
-  }
-
   logout() {
     this.authService.logout();
-    this.router.navigate(['/login']);
   }
 
   get profileRoute(): string {
@@ -301,6 +381,24 @@ export class FarmerDashboard implements OnInit {
     return Math.max(available - reserved, 0);
   }
 
+  productStatusLabel(stock: any): string {
+    const status = (stock?.approval_status || '').toLowerCase();
+    if (status === 'pending') return 'En attente d\'approbation';
+    if (status === 'published' && stock?.is_promoted) return 'En vitrine';
+    if (status === 'published') return 'Approuvé (hors vitrine)';
+    return stock?.approval_status || 'Inconnu';
+  }
+
+  productStatusClass(stock: any): Record<string, boolean> {
+    const status = (stock?.approval_status || '').toLowerCase();
+    return {
+      'bg-amber-50 text-amber-700': status === 'pending',
+      'bg-green-50 text-green-700': status === 'published' && stock?.is_promoted,
+      'bg-blue-50 text-blue-700': status === 'published' && !stock?.is_promoted,
+      'bg-gray-50 text-gray-600': status !== 'pending' && status !== 'published',
+    };
+  }
+
   private recalculateStats() {
     this.farmName =
       this.harvestLines[0]?.farm_name ||
@@ -321,12 +419,14 @@ export class FarmerDashboard implements OnInit {
   }
 
   private resetForm() {
+    this.editingStockId = null;
     this.newProductName = '';
-    this.newProductQty = 1;
+    this.newProductDescription = '';
+    this.newProductCategory = this.categories.length > 0 ? this.categories[0].id : '';
+    this.newProductSaleSession = this.availableSessions.length > 0 ? this.availableSessions[0].id : '';
     this.newProductUnit = 'kg';
     this.newProductPrice = 0;
-    this.newProductDescription = '';
-    this.newProductCategory = this.categories[0]?.id ?? '';
+    this.newProductQty = 0;
     this.resetImageOnly();
   }
 
@@ -348,7 +448,7 @@ export class FarmerDashboard implements OnInit {
     this.productsLoading = false;
     this.categoriesLoading = false;
 
-    this.authService.logout();
+    this.authService.logout(true);
     this.router.navigate(['/login']);
 
     return true;

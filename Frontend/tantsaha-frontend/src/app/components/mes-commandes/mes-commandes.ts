@@ -127,9 +127,11 @@ export class MesCommandes implements OnInit {
     const map: Record<string, string> = {
       pending_payment: 'En attente de paiement',
       payment_submitted: 'Paiement soumis',
-      confirmed: 'Confirmée',
+      confirmed: 'Payée',
       ready: 'Prête à récupérer',
       picked_up: 'Récupérée',
+      delivering: 'En cours de livraison',
+      closed: 'Clôturée',
       cancelled: 'Annulée',
     };
     return map[status] || status;
@@ -142,6 +144,8 @@ export class MesCommandes implements OnInit {
       confirmed: 'check_circle',
       ready: 'store',
       picked_up: 'verified',
+      delivering: 'local_shipping',
+      closed: 'verified',
       cancelled: 'cancel',
     };
     return map[status] || 'help';
@@ -154,6 +158,8 @@ export class MesCommandes implements OnInit {
       confirmed: 'text-green-600 bg-green-50',
       ready: 'text-purple-600 bg-purple-50',
       picked_up: 'text-primary bg-primary/10',
+      delivering: 'text-indigo-600 bg-indigo-50',
+      closed: 'text-teal-600 bg-teal-50',
       cancelled: 'text-red-600 bg-red-50',
     };
     return map[status] || 'text-gray-600 bg-gray-50';
@@ -164,10 +170,28 @@ export class MesCommandes implements OnInit {
       pending_payment: 1,
       payment_submitted: 2,
       confirmed: 3,
-      ready: 4,
-      picked_up: 5,
+      delivering: 4,
+      closed: 5,
       cancelled: 0,
     };
     return steps[status] ?? 0;
+  }
+
+  validatingReceptionId: string | null = null;
+
+  validateReception(order: OrderSummary) {
+    if (!confirm('Confirmez-vous la bonne réception de votre commande ?')) return;
+    this.validatingReceptionId = order.id;
+    this.api.validateReception(order.id).subscribe({
+      next: (res: any) => {
+        order.status = res.status;
+        this.validatingReceptionId = null;
+      },
+      error: (err: any) => {
+        console.error('Erreur validation réception:', err);
+        this.error = 'Impossible de valider la réception.';
+        this.validatingReceptionId = null;
+      }
+    });
   }
 }

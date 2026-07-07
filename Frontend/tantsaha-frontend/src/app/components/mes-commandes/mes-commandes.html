@@ -124,9 +124,9 @@
             class="mt-1 ml-16 hidden sm:flex justify-between text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wide">
             <span>Paiement</span>
             <span>Soumis</span>
-            <span>Confirmé</span>
-            <span>Dispo</span>
-            <span>Récupéré</span>
+            <span>Payée</span>
+            <span>Livraison</span>
+            <span>Clôturée</span>
           </div>
         </div>
 
@@ -168,6 +168,17 @@
                 <p class="text-xs text-on-surface-variant mt-1"><span class="font-bold">Statut :</span> {{
                   statusLabel(order.status) }}</p>
               </div>
+            </div>
+
+            <!-- Bouton Valider la réception (Mpanjifa) -->
+            <div *ngIf="order.status === 'confirmed' || order.status === 'delivering'"
+              class="p-6 border-t border-outline-variant/30">
+              <button (click)="validateReception(order)"
+                [disabled]="validatingReceptionId === order.id"
+                class="w-full md:w-auto px-8 py-3 bg-primary text-on-primary rounded-xl font-bold shadow-md hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">verified</span>
+                {{ validatingReceptionId === order.id ? 'Validation...' : 'Valider la réception' }}
+              </button>
             </div>
           </div>
         </div>

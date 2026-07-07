@@ -64,6 +64,9 @@ class Command(BaseCommand):
                 'manager_user': manager
             }
         )
+        if pickup.manager_user_id != manager.id:
+            pickup.manager_user = manager
+            pickup.save(update_fields=['manager_user'])
         consumer.default_pickup_point = pickup
         consumer.save()
 

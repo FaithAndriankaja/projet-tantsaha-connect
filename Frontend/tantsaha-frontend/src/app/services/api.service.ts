@@ -176,11 +176,72 @@ export class ApiService {
     );
   }
 
-  createPaymentIntent(orderId: string): Observable<{ client_secret: string; amount: number; currency: string; public_key: string }> {
-    return this.http.post<{ client_secret: string; amount: number; currency: string; public_key: string }>(
+
+  updateStock(id: string | number, payload: any): Observable<any> {
+    return this.http.patch<any>(`${this.base}/stocks/${id}/`, payload);
+  }
+
+  deleteStock(id: string | number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/stocks/${id}/`);
+  }
+
+  // Workflow : approbation d'un stock
+  approveStock(stockId: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.base}/stocks/${stockId}/approve/`,
+      {}
+    );
+  }
+
+  // Workflow : démarrage de la livraison
+  startDelivery(orderId: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.base}/orders/${orderId}/start-delivery/`,
+      {}
+    );
+  }
+
+  // Workflow : validation de la réception par le client
+  validateReception(orderId: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.base}/orders/${orderId}/validate-reception/`,
+      {}
+    );
+  }
+
+  // Workflow : validation du transfert vers le Tantsaha
+  validateTransfer(orderId: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.base}/orders/${orderId}/validate-transfer/`,
+      {}
+    );
+  }
+
+  // Workflow : validation du paiement par le manager
+  validatePaymentByManager(orderId: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.base}/orders/${orderId}/validate-payment/`,
+      {}
+    );
+  }
+
+  createPaymentIntent(orderId: string): Observable<{
+    client_secret: string;
+    amount: number;
+    currency: string;
+    public_key: string;
+  }> {
+    return this.http.post<{
+      client_secret: string;
+      amount: number;
+      currency: string;
+      public_key: string;
+    }>(
       `${this.base}/stripe/create-payment-intent/`,
       { order_id: orderId }
     );
   }
-
 }
+
+
+

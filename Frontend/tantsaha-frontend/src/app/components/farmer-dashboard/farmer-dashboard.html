@@ -1,9 +1,10 @@
 <div class="bg-surface font-body-md text-on-surface min-h-screen">
   <aside
-    class="fixed h-full w-72 left-0 top-0 bg-surface-container-low shadow-sm border-r border-outline-variant/30 flex-col p-4 z-50 hidden md:flex">
+    class="fixed h-full w-72 left-0 top-0 bg-surface-container-low shadow-sm border-r border-outline-variant/30 flex-col p-4 z-50 hidden md:flex"
+  >
     <div class="flex items-center gap-3 mb-10 px-2 mt-4">
       <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
-        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">eco</span>
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">eco</span>
       </div>
       <div>
         <h1 class="font-display text-headline-md text-primary leading-none">Tantsaha</h1>
@@ -12,18 +13,26 @@
     </div>
 
     <nav class="flex-grow space-y-2">
-      <button type="button" (click)="setSection('harvest')"
+      <button
+        type="button"
+        (click)="setSection('harvest')"
         class="w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition-all text-left"
-        [class.bg-primary]="activeSection === 'harvest'" [class.text-on-primary]="activeSection === 'harvest'"
-        [class.text-on-surface-variant]="activeSection !== 'harvest'">
+        [class.bg-primary]="activeSection === 'harvest'"
+        [class.text-on-primary]="activeSection === 'harvest'"
+        [class.text-on-surface-variant]="activeSection !== 'harvest'"
+      >
         <span class="material-symbols-outlined">assignment</span>
         <span class="font-label-md">Précommandes</span>
       </button>
 
-      <button type="button" (click)="setSection('products')"
+      <button
+        type="button"
+        (click)="setSection('products')"
         class="w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition-all text-left"
-        [class.bg-primary]="activeSection === 'products'" [class.text-on-primary]="activeSection === 'products'"
-        [class.text-on-surface-variant]="activeSection !== 'products'">
+        [class.bg-primary]="activeSection === 'products'"
+        [class.text-on-primary]="activeSection === 'products'"
+        [class.text-on-surface-variant]="activeSection !== 'products'"
+      >
         <span class="material-symbols-outlined">inventory_2</span>
         <span class="font-label-md">Mes produits</span>
       </button>
@@ -31,16 +40,22 @@
 
     <div class="mt-auto pt-4 border-t border-outline-variant/20 space-y-2">
       <div class="flex items-center gap-3 p-2 rounded-xl bg-surface-container-high">
-        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+        <div
+          class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold"
+        >
           {{ (currentUser?.name || 'T').charAt(0) | uppercase }}
         </div>
         <div class="overflow-hidden">
-          <p class="font-label-md text-on-surface truncate">{{ currentUser?.name || 'Producteur' }}</p>
+          <p class="font-label-md text-on-surface truncate">
+            {{ currentUser?.name || 'Producteur' }}
+          </p>
           <p class="text-label-sm text-primary font-bold truncate">{{ farmName }}</p>
         </div>
       </div>
-      <button (click)="logout()"
-        class="w-full flex items-center gap-4 px-4 py-3 text-error hover:bg-error/10 rounded-xl transition-colors font-medium">
+      <button
+        (click)="logout()"
+        class="w-full flex items-center gap-4 px-4 py-3 text-error hover:bg-error/10 rounded-xl transition-colors font-medium"
+      >
         <span class="material-symbols-outlined">logout</span>
         <span class="font-label-md">Déconnexion</span>
       </button>
@@ -48,12 +63,14 @@
   </aside>
 
   <header
-    class="fixed top-0 right-0 left-0 md:left-72 h-20 bg-surface/80 backdrop-blur-md border-b border-outline-variant/20 flex justify-between items-center px-4 md:px-10 z-40">
+    class="fixed top-0 right-0 left-0 md:left-72 h-20 bg-surface/80 backdrop-blur-md border-b border-outline-variant/20 flex justify-between items-center px-4 md:px-10 z-40"
+  >
     <h2 class="font-headline-md text-primary font-bold">Espace Producteur Local</h2>
 
     <button
       class="h-11 px-5 rounded-xl bg-primary text-on-primary font-label-md hover:opacity-90 transition-all flex items-center gap-2 shadow-sm"
-      (click)="toggleSidePanel()">
+      (click)="toggleSidePanel()"
+    >
       <span class="material-symbols-outlined text-[18px]">add</span>
       Mettre en vente
     </button>
@@ -61,54 +78,73 @@
 
   <main class="w-full pt-24 min-h-screen bg-surface md:ml-72 p-4 md:p-8">
     <div class="max-w-[1280px] space-y-8 pb-32">
-      <div class="flex flex-col md:flex-row md:justify-between  md:items-end gap-4">
+      <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
         <div>
           <h3 class="font-headline-lg text-on-surface mb-1">Vos activités récolte</h3>
-          <p class="text-body-md text-on-surface-variant">Suivez les quantités à préparer et gérez la visibilité de vos
-            produits.</p>
+          <p class="text-body-md text-on-surface-variant">
+            Suivez les quantités à préparer et consultez l'état de vos produits par session.
+          </p>
         </div>
         <div class="flex flex-col sm:flex-row gap-3">
           <button
             class="h-11 px-5 rounded-xl border border-outline-variant text-on-surface-variant font-bold hover:bg-surface-container-low transition-colors"
-            (click)="loadHarvestSheet()" [disabled]="loading">
+            (click)="loadHarvestSheet()"
+            [disabled]="loading"
+          >
             Actualiser
           </button>
         </div>
       </div>
 
-      <div *ngIf="successMessage" class="p-4 rounded-xl bg-success/10 text-success font-bold border border-success/20">
+      <div
+        *ngIf="successMessage"
+        class="p-4 rounded-xl bg-success/10 text-success font-bold border border-success/20"
+      >
         {{ successMessage }}
       </div>
-      <div *ngIf="error" class="p-4 rounded-xl bg-error/10 text-error font-bold border border-error/20">
+      <div
+        *ngIf="error"
+        class="p-4 rounded-xl bg-error/10 text-error font-bold border border-error/20"
+      >
         {{ error }}
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div
-          class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 flex items-center justify-between">
+          class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 flex items-center justify-between"
+        >
           <div>
             <p class="text-label-md text-on-surface-variant mb-1">Produits suivis</p>
             <h4 class="font-display text-3xl font-bold text-on-surface">{{ totalProducts }}</h4>
           </div>
-          <span class="material-symbols-outlined text-4xl text-primary bg-primary/10 p-3 rounded-xl">potted_plant</span>
+          <span class="material-symbols-outlined text-4xl text-primary bg-primary/10 p-3 rounded-xl"
+            >potted_plant</span
+          >
         </div>
         <div
-          class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 flex items-center justify-between">
+          class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 flex items-center justify-between"
+        >
           <div>
             <p class="text-label-md text-on-surface-variant mb-1">Précommandes</p>
             <h4 class="font-display text-3xl font-bold text-warning">{{ totalOrdersCount }}</h4>
           </div>
-          <span
-            class="material-symbols-outlined text-4xl text-warning bg-warning/10 p-3 rounded-xl">pending_actions</span>
+          <span class="material-symbols-outlined text-4xl text-warning bg-warning/10 p-3 rounded-xl"
+            >pending_actions</span
+          >
         </div>
         <div
-          class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 flex items-center justify-between">
+          class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 flex items-center justify-between"
+        >
           <div>
             <p class="text-label-md text-on-surface-variant mb-1">Quantité totale à préparer</p>
-            <h4 class="font-display text-3xl font-bold text-secondary">{{ formatQty(totalQuantityToPrepare) }}</h4>
+            <h4 class="font-display text-3xl font-bold text-secondary">
+              {{ formatQty(totalQuantityToPrepare) }}
+            </h4>
           </div>
           <span
-            class="material-symbols-outlined text-4xl text-secondary bg-secondary/10 p-3 rounded-xl">inventory</span>
+            class="material-symbols-outlined text-4xl text-secondary bg-secondary/10 p-3 rounded-xl"
+            >inventory</span
+          >
         </div>
       </div>
 
@@ -119,19 +155,27 @@
           Chargement des précommandes...
         </div>
 
-        <div *ngIf="!loading && harvestLines.length === 0"
-          class="p-8 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest text-center text-on-surface-variant">
+        <div
+          *ngIf="!loading && harvestLines.length === 0"
+          class="p-8 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest text-center text-on-surface-variant"
+        >
           Aucune précommande pour le moment.
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" *ngIf="!loading && harvestLines.length">
-          <article *ngFor="let item of harvestLines"
-            class="bg-surface-container-lowest border border-outline-variant/40 rounded-2xl overflow-hidden shadow-sm flex flex-col">
-
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+          *ngIf="!loading && harvestLines.length"
+        >
+          <article
+            *ngFor="let item of harvestLines"
+            class="bg-surface-container-lowest border border-outline-variant/40 rounded-2xl overflow-hidden shadow-sm flex flex-col"
+          >
             <div class="p-5 flex-grow space-y-3">
               <div class="flex justify-between items-start gap-3">
                 <h5 class="font-title-md font-bold text-on-surface">{{ item.product_name }}</h5>
-                <span class="px-2 py-0.5 bg-warning/10 text-warning text-xs font-bold rounded whitespace-nowrap">
+                <span
+                  class="px-2 py-0.5 bg-warning/10 text-warning text-xs font-bold rounded whitespace-nowrap"
+                >
                   {{ item.order_count || 0 }} précommande(s)
                 </span>
               </div>
@@ -142,98 +186,240 @@
 
               <p class="text-sm text-on-surface-variant">
                 Quantité à préparer :
-                <strong>{{ formatQty(item.total_quantity_to_prepare) }} {{ item.unit || 'kg' }}</strong>
+                <strong
+                  >{{ formatQty(item.total_quantity_to_prepare) }} {{ item.unit || 'kg' }}</strong
+                >
               </p>
 
-              <p class="text-xs text-on-surface-variant">
-                Session : {{ item.sale_session_id }}
-              </p>
+              <p class="text-xs text-on-surface-variant">Session : {{ item.sale_session_id }}</p>
             </div>
           </article>
         </div>
       </section>
       <section *ngIf="activeSection === 'products'" class="space-y-4">
+        <div>
+          <h4 class="font-headline-sm text-on-surface font-bold">Mes produits</h4>
+          <p class="text-sm text-on-surface-variant">
+            La mise en vitrine est gérée par le Mpandrindra après validation de votre offre pour la session choisie.
+          </p>
+        </div>
 
-        <p class="text-sm text-primary font-bold">
-          Debug : {{ myProducts.length }} produit(s)
-        </p>
+        <div *ngIf="productsLoading" class="py-12 text-center text-on-surface-variant">
+          Chargement de vos produits...
+        </div>
 
-        <div *ngIf="!productsLoading && myProducts.length > 0"
-          class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div
+          *ngIf="!productsLoading && myProducts.length === 0"
+          class="p-8 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest text-center text-on-surface-variant"
+        >
+          Aucun produit enregistré. Cliquez sur « Mettre en vente » pour ajouter une récolte.
+        </div>
 
-          <article *ngFor="let stock of myProducts"
-            class="bg-surface-container-lowest border border-outline-variant/40 rounded-2xl p-5 space-y-3 shadow-sm">
+        <div
+          *ngIf="!productsLoading && myProducts.length > 0"
+          class="bg-surface-container-low border border-outline-variant/30 rounded-2xl overflow-hidden"
+        >
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr
+                  class="bg-surface-container-lowest text-label-md text-on-surface-variant border-b border-outline-variant/30"
+                >
+                  <th class="p-4 w-20">Image</th>
+                  <th class="p-4">Produit</th>
+                  <th class="p-4">Prix</th>
+                  <th class="p-4">Disponible</th>
+                  <th class="p-4">Reste</th>
+                  <th class="p-4">Statut</th>
+                  <th class="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant/10 text-body-md bg-surface-container-lowest">
+                <tr
+                  *ngFor="let stock of myProducts"
+                  class="hover:bg-outline-variant/5 transition-colors"
+                >
+                  <td class="p-4">
+                    <div
+                      class="w-14 h-14 rounded-xl overflow-hidden bg-surface-container-high border border-outline-variant/20 flex items-center justify-center"
+                    >
+                      <img
+                        *ngIf="getProductImageUrl(stock.image_path); else noImage"
+                        [src]="getProductImageUrl(stock.image_path)"
+                        [alt]="stock.product_name || 'Produit'"
+                        class="w-full h-full object-cover"
+                      />
+                      <ng-template #noImage>
+                        <span class="material-symbols-outlined text-on-surface-variant">image</span>
+                      </ng-template>
+                    </div>
+                  </td>
 
-            <h5 class="font-bold text-primary">
-              Produit : {{ stock.product_name || stock.product }}
-            </h5>
+                  <td class="p-4">
+                    <p class="font-bold text-on-surface">{{ stock.product_name || stock.product }}</p>
+                    <p class="text-xs text-on-surface-variant mt-1">
+                      {{ stock.pickup_point_name || 'Point de retrait' }}
+                      · Retrait :
+                      {{ stock.sale_session_date ? (stock.sale_session_date | date: 'dd/MM/yyyy') : '—' }}
+                    </p>
+                  </td>
 
-            <p class="text-sm">
-              Session : <strong>{{ stock.sale_session }}</strong>
-            </p>
+                  <td class="p-4 whitespace-nowrap font-semibold text-primary">
+                    {{ formatPrice(stock.unit_price) }} Ar
+                    <span class="text-xs text-on-surface-variant font-normal">/ {{ stock.unit || 'kg' }}</span>
+                  </td>
 
-            <p class="text-sm">
-              Quantité disponible :
-              <strong>{{ formatQty(stock.available_quantity) }}</strong>
-            </p>
+                  <td class="p-4 whitespace-nowrap">
+                    {{ formatQty(stock.available_quantity) }} {{ stock.unit || 'kg' }}
+                  </td>
 
-            <p class="text-sm">
-              Quantité réservée :
-              <strong>{{ formatQty(stock.reserved_quantity) }}</strong>
-            </p>
+                  <td class="p-4 whitespace-nowrap font-semibold">
+                    {{ formatQty(stock.remaining_quantity ?? remainingQty(stock)) }} {{ stock.unit || 'kg' }}
+                  </td>
 
-            <p class="text-sm">
-              Reste :
-              <strong>{{ formatQty(remainingQty(stock)) }}</strong>
-            </p>
-          </article>
+                  <td class="p-4">
+                    <span
+                      class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold"
+                      [ngClass]="productStatusClass(stock)"
+                    >
+                      {{ productStatusLabel(stock) }}
+                    </span>
+                  </td>
 
+                  <td class="p-4">
+                    <div class="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        (click)="onEditProduct(stock)"
+                        title="Modifier la quantité"
+                        class="p-2 text-on-surface-variant hover:text-primary transition-colors bg-surface-container-low hover:bg-surface-container rounded-xl"
+                      >
+                        <span class="material-symbols-outlined text-sm">edit</span>
+                      </button>
+                      <button
+                        type="button"
+                        (click)="onDeleteProduct(stock.id)"
+                        title="Retirer"
+                        class="p-2 text-error hover:text-on-error hover:bg-error transition-colors bg-error/10 rounded-xl"
+                      >
+                        <span class="material-symbols-outlined text-sm">delete</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
     </div>
   </main>
 
-  <div *ngIf="isSidePanelOpen" class="fixed inset-0 z-[60] bg-black/40" (click)="toggleSidePanel()"></div>
+  <div
+    *ngIf="isSidePanelOpen"
+    class="fixed inset-0 z-[60] bg-black/40"
+    (click)="toggleSidePanel()"
+  ></div>
 
-  <aside *ngIf="isSidePanelOpen"
-    class="fixed right-0 top-0 h-full w-full sm:w-[440px] bg-surface z-[70] shadow-2xl p-6 overflow-y-auto">
+  <aside
+    *ngIf="isSidePanelOpen"
+    class="fixed right-0 top-0 h-full w-full sm:w-[440px] bg-surface z-[70] shadow-2xl p-6 overflow-y-auto"
+  >
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h3 class="text-2xl font-bold text-primary">Nouvelle récolte</h3>
-        <p class="text-sm text-on-surface-variant">Ajoutez un produit à vendre dans la session active.</p>
+        <h3 class="text-2xl font-bold text-primary">
+          {{ editingStockId ? 'Modifier la quantité' : 'Nouvelle récolte' }}
+        </h3>
+        <p class="text-sm text-on-surface-variant">
+          {{ editingStockId ? 'Mettre à jour la quantité.' : 'Ajoutez un produit à vendre.' }}
+        </p>
       </div>
-      <button type="button" class="p-2 rounded-full hover:bg-surface-container" (click)="toggleSidePanel()">
+      <button
+        type="button"
+        class="p-2 rounded-full hover:bg-surface-container"
+        (click)="toggleSidePanel()"
+      >
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
 
     <form class="space-y-4" (ngSubmit)="onAddProductSubmit()">
-      <div class="flex flex-col gap-1">
-        <label class="text-xs font-bold text-on-surface-variant" for="productName">Nom du produit</label>
-        <input id="productName" name="productName" required [(ngModel)]="newProductName"
-          class="h-12 px-4 rounded-xl bg-surface-container-low border border-outline-variant/30 outline-none focus:border-primary"
-          placeholder="Ex: Tomates" />
-      </div>
+      <ng-container *ngIf="!editingStockId">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-bold text-on-surface-variant" for="productName"
+            >Nom du produit</label
+          >
+          <input
+            id="productName"
+            name="productName"
+            required
+            [(ngModel)]="newProductName"
+            class="h-12 px-4 rounded-xl bg-surface-container-low border border-outline-variant/30 outline-none focus:border-primary"
+            placeholder="Ex: Tomates"
+          />
+        </div>
 
-      <div class="flex flex-col gap-1">
-        <label class="text-xs font-bold text-on-surface-variant" for="category">Catégorie</label>
-        <select id="category" name="category" required [(ngModel)]="newProductCategory"
-          class="h-12 px-4 rounded-xl bg-surface-container-low border border-outline-variant/30 outline-none focus:border-primary">
-          <option value="" disabled>Choisir une catégorie</option>
-          <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
-        </select>
-      </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-bold text-on-surface-variant" for="category">Catégorie</label>
+          <select
+            id="category"
+            name="category"
+            required
+            [(ngModel)]="newProductCategory"
+            class="h-12 px-4 rounded-xl bg-surface-container-low border border-outline-variant/30 outline-none focus:border-primary"
+          >
+            <option value="" disabled>Choisir une catégorie</option>
+            <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+          </select>
+        </div>
 
-      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-bold text-on-surface-variant" for="saleSession"
+            >Session de vente</label
+          >
+          <select
+            id="saleSession"
+            name="saleSession"
+            required
+            [(ngModel)]="newProductSaleSession"
+            class="h-12 px-4 rounded-xl bg-surface-container-low border border-outline-variant/30 outline-none focus:border-primary"
+          >
+            <option value="" disabled *ngIf="availableSessions.length === 0">
+              Aucune session ouverte trouvée...
+            </option>
+            <option *ngFor="let session of availableSessions" [value]="session.id">
+              Points: {{ session.pickup_point?.name }} | Clôture:
+              {{ session.closes_at | date: 'dd/MM HH:mm' }}
+            </option>
+          </select>
+          <p class="text-[10px] text-error mt-1" *ngIf="availableSessions.length === 0">
+            Le gestionnaire doit d'abord ouvrir une session de vente pour votre point de retrait.
+          </p>
+        </div>
+      </ng-container>
+
+      <div class="grid grid-cols-2 gap-3" [class.grid-cols-1]="editingStockId">
         <div class="flex flex-col gap-1">
           <label class="text-xs font-bold text-on-surface-variant" for="qty">Quantité</label>
-          <input id="qty" name="qty" required type="number" min="1" [(ngModel)]="newProductQty"
-            class="h-12 px-4 rounded-xl bg-surface-container-low border border-outline-variant/30 outline-none focus:border-primary" />
+          <input
+            id="qty"
+            name="qty"
+            required
+            type="number"
+            min="1"
+            [(ngModel)]="newProductQty"
+            class="h-12 px-4 rounded-xl bg-surface-container-low border border-outline-variant/30 outline-none focus:border-primary"
+          />
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-bold text-on-surface-variant" for="unit">Unité</label>
-          <select id="unit" name="unit" [(ngModel)]="newProductUnit"
-            class="h-12 px-4 rounded-xl bg-surface-container-low border border-outline-variant/30 outline-none focus:border-primary">
+          <select
+            id="unit"
+            name="unit"
+            [(ngModel)]="newProductUnit"
+            [disabled]="editingStockId !== null"
+            class="h-12 px-4 rounded-xl bg-surface-container-low border border-outline-variant/30 outline-none focus:border-primary disabled:opacity-50"
+          >
             <option value="kg">kg</option>
             <option value="botte">botte</option>
             <option value="pièce">pièce</option>
@@ -242,64 +428,84 @@
         </div>
       </div>
 
-      <div class="flex flex-col gap-1">
-        <label class="text-xs font-bold text-on-surface-variant" for="price">Prix unitaire Ar</label>
-        <input id="price" name="price" required type="number" min="0" [(ngModel)]="newProductPrice"
-          class="h-12 px-4 rounded-xl bg-surface-container-low border border-outline-variant/30 outline-none focus:border-primary" />
-      </div>
+      <ng-container *ngIf="!editingStockId">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-bold text-on-surface-variant" for="price"
+            >Prix unitaire Ar</label
+          >
+          <input
+            id="price"
+            name="price"
+            required
+            type="number"
+            min="0"
+            [(ngModel)]="newProductPrice"
+            class="h-12 px-4 rounded-xl bg-surface-container-low border border-outline-variant/30 outline-none focus:border-primary"
+          />
+        </div>
 
-      <div class="flex flex-col gap-1">
-        <label class="text-xs font-bold text-on-surface-variant" for="description">Description</label>
-        <textarea id="description" name="description" rows="3" [(ngModel)]="newProductDescription"
-          class="px-4 py-3 rounded-xl bg-surface-container-low border border-outline-variant/30 outline-none focus:border-primary"
-          placeholder="Ex: récolte fraîche du jour"></textarea>
-      </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-bold text-on-surface-variant" for="description"
+            >Description</label
+          >
+          <textarea
+            id="description"
+            name="description"
+            rows="3"
+            [(ngModel)]="newProductDescription"
+            class="px-4 py-3 rounded-xl bg-surface-container-low border border-outline-variant/30 outline-none focus:border-primary"
+            placeholder="Ex: récolte fraîche du jour"
+          ></textarea>
+        </div>
 
-      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-4">
+          <label
+            class="relative flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-primary/30 rounded-2xl cursor-pointer bg-surface-container-low hover:bg-surface-container transition-all duration-300 group overflow-hidden"
+          >
+            <input
+              type="file"
+              accept="image/*"
+              name="productImage"
+              (change)="onImageSelected($event)"
+              class="absolute inset-0 opacity-0 cursor-pointer"
+            />
 
-        <label
-          class="relative flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-primary/30 rounded-2xl cursor-pointer bg-surface-container-low hover:bg-surface-container transition-all duration-300 group overflow-hidden">
-
-          <input type="file" accept="image/*" name="productImage" (change)="onImageSelected($event)"
-            class="absolute inset-0 opacity-0 cursor-pointer" />
-
-          <ng-container *ngIf="!imagePreviewUrl">
-            <span
-              class="material-symbols-outlined text-5xl text-primary mb-2 group-hover:scale-110 transition-transform">
-              add_photo_alternate
-            </span>
-
-            <p class="font-semibold text-on-surface">
-              Ajouter une photo du produit
-            </p>
-
-            <p class="text-sm text-on-surface-variant">
-              JPG, PNG ou WEBP
-            </p>
-          </ng-container>
-
-          <img *ngIf="imagePreviewUrl" [src]="imagePreviewUrl" class="absolute inset-0 w-full h-full object-cover" />
-
-          <div *ngIf="imagePreviewUrl"
-            class="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-
-            <div class="text-white text-center">
-              <span class="material-symbols-outlined text-4xl">
-                edit
+            <ng-container *ngIf="!imagePreviewUrl">
+              <span
+                class="material-symbols-outlined text-5xl text-primary mb-2 group-hover:scale-110 transition-transform"
+              >
+                add_photo_alternate
               </span>
-              <p class="font-medium">
-                Changer l'image
-              </p>
+
+              <p class="font-semibold text-on-surface">Ajouter une photo du produit</p>
+
+              <p class="text-sm text-on-surface-variant">JPG, PNG ou WEBP</p>
+            </ng-container>
+
+            <img
+              *ngIf="imagePreviewUrl"
+              [src]="imagePreviewUrl"
+              class="absolute inset-0 w-full h-full object-cover"
+            />
+
+            <div
+              *ngIf="imagePreviewUrl"
+              class="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
+            >
+              <div class="text-white text-center">
+                <span class="material-symbols-outlined text-4xl"> edit </span>
+                <p class="font-medium">Changer l'image</p>
+              </div>
             </div>
+          </label>
+        </div>
+      </ng-container>
 
-          </div>
-
-        </label>
-
-      </div>
-
-      <button type="submit" [disabled]="isSavingProduct"
-        class="w-full h-12 rounded-xl bg-primary text-on-primary font-bold hover:opacity-90 disabled:opacity-50">
+      <button
+        type="submit"
+        [disabled]="isSavingProduct"
+        class="w-full h-12 rounded-xl bg-primary text-on-primary font-bold hover:opacity-90 disabled:opacity-50"
+      >
         {{ isSavingProduct ? 'Enregistrement...' : 'Enregistrer la récolte' }}
       </button>
     </form>

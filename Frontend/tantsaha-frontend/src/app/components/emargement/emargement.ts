@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -22,10 +22,20 @@ export class Emargement implements OnInit {
   validatingOrderId: string | null = null;
   searchTerm = '';
 
+  pendingStocks: any[] = [];
+  pendingLoading = false;
+
+  allOrders: any[] = [];
+  ordersLoading = false;
+
+  // Configuration de la modale personnalisée
+  modalConfig: { isOpen: boolean, title: string, message: string, onConfirm: () => void } | null = null;
+
   constructor(
     private authService: AuthService,
     private api: ApiService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) { }
 
   pickupPoints: PickupPoint[] = [];
@@ -34,6 +44,11 @@ export class Emargement implements OnInit {
     this.api.getPickupPoints().subscribe({
       next: (points) => {
         this.pickupPoints = points ?? [];
+
+        if (this.pickupPoints.length === 0 && this.authService.isManager()) {
+          this.error =
+            'Aucun point de retrait ne vous est assigné. Contactez un administrateur pour rattacher votre compte Mpandrindra à un point de retrait.';
+        }
 
         if (!this.newSession.pickup_point && this.pickupPoints.length > 0) {
           this.newSession.pickup_point = this.pickupPoints[0].id;
@@ -47,12 +62,16 @@ export class Emargement implements OnInit {
   }
 
   ngOnInit() {
+    this.authService.syncSession();
     this.authService.currentUser.subscribe((user) => {
       this.currentUser = user;
+      this.cdr.detectChanges();
     });
     this.loadDeliveries();
     this.loadSaleSessions();
     this.loadPickupPoints();
+    this.loadPendingStocks();
+    this.loadAllOrders();
   }
 
   loadDeliveries() {
@@ -63,12 +82,14 @@ export class Emargement implements OnInit {
       next: (data) => {
         this.deliveries = data ?? [];
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Erreur chargement livraisons Mpandrindra:', err);
         this.error = this.extractError(err) || 'Impossible de charger les commandes du point de retrait.';
         this.deliveries = [];
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -234,6 +255,7 @@ export class Emargement implements OnInit {
           status: 'open',
         };
         this.loadSaleSessions();
+        this.loadPickupPoints();
       },
       error: (err: any) => {
         console.error('Erreur création session complète:', err);
@@ -263,16 +285,19 @@ export class Emargement implements OnInit {
     });
   }
 
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
+
 
   private extractError(err: any): string {
     const data = err?.error;
     if (!data) return '';
     if (typeof data === 'string') return data;
     if (data.detail) return data.detail;
+    if (data.details && typeof data.details === 'object') {
+      return Object.entries(data.details)
+        .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
+        .join(' | ');
+    }
+    if (data.message && data.error_code) return data.message;
     if (data.message) return data.message;
     try {
       return Object.entries(data)
@@ -282,4 +307,128 @@ export class Emargement implements OnInit {
       return '';
     }
   }
+
+  // --- Workflow: Charger les offres en attente d'approbation ---
+  loadPendingStocks() {
+    this.pendingLoading = true;
+    this.api.getMyStocks().subscribe({
+      next: (stocks) => {
+        this.pendingStocks = (stocks ?? []).filter((s: any) => s.approval_status === 'pending');
+        this.pendingLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Erreur chargement offres en attente:', err);
+        this.pendingLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  approveOffer(stock: any) {
+    this.openModal('Mise en vitrine', 'Approuver et mettre ce produit en vitrine pour la session choisie ?', () => {
+      this.api.approveStock(stock.id).subscribe({
+        next: () => {
+          this.successMessage = 'Produit mis en vitrine avec succès.';
+          this.loadPendingStocks();
+          this.closeModal();
+        },
+        error: (err: any) => {
+          this.error = this.extractError(err) || 'Impossible d\'approuver.';
+          this.closeModal();
+        }
+      });
+    });
+  }
+
+  // --- Workflow: Charger toutes les commandes pour le manager ---
+  loadAllOrders() {
+    this.ordersLoading = true;
+    this.api.getOrders().subscribe({
+      next: (orders) => {
+        this.allOrders = orders ?? [];
+        this.ordersLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Erreur chargement commandes:', err);
+        this.ordersLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  get confirmedOrders(): any[] {
+    return this.allOrders.filter((o: any) => o.status === 'confirmed');
+  }
+  get deliveringOrders(): any[] {
+    return this.allOrders.filter((o: any) => o.status === 'delivering');
+  }
+
+  startDelivery(order: any) {
+    this.openModal('Lancer la livraison', 'Lancer la livraison de cette commande ?', () => {
+      this.api.startDelivery(order.id).subscribe({
+        next: (res: any) => {
+          this.successMessage = 'Livraison lancée.';
+          order.status = res.status;
+          this.loadAllOrders();
+          this.closeModal();
+        },
+        error: (err: any) => {
+          this.error = this.extractError(err) || 'Impossible de lancer la livraison.';
+          this.closeModal();
+        }
+      });
+    });
+  }
+
+  validateTransfer(order: any) {
+    this.openModal('Valider le transfert', 'Confirmer le transfert d\'argent au producteur pour cette commande ?', () => {
+      this.api.validateTransfer(order.id).subscribe({
+        next: (res: any) => {
+          this.successMessage = 'Transfert validé.';
+          order.status = res.status;
+          this.loadAllOrders();
+          this.closeModal();
+        },
+        error: (err: any) => {
+          this.error = this.extractError(err) || 'Impossible de valider le transfert.';
+          this.closeModal();
+        }
+      });
+    });
+  }
+
+  orderStatusLabel(status: string): string {
+    const map: Record<string, string> = {
+      pending_payment: 'En attente de paiement',
+      payment_submitted: 'Paiement soumis',
+      confirmed: 'Payée',
+      ready: 'Prête',
+      picked_up: 'Récupérée',
+      delivering: 'En cours de livraison',
+      closed: 'Clôturée',
+      cancelled: 'Annulée',
+    };
+    return map[status] || status;
+  }
+
+  formatPrice(value: string | number | null | undefined): string {
+    const n = typeof value === 'string' ? parseFloat(value) : Number(value ?? 0);
+    return Number.isFinite(n) ? new Intl.NumberFormat('fr-MG').format(n) : '0';
+  }
+
+  logout() {
+    this.authService.logout();
+  }
+
+  openModal(title: string, message: string, onConfirm: () => void) {
+    this.modalConfig = { isOpen: true, title, message, onConfirm };
+  }
+
+  closeModal() {
+    this.modalConfig = null;
+  }
 }
+
+

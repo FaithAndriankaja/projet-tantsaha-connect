@@ -274,6 +274,127 @@
         </div>
       </section>
 
+      <!-- Section : Offres en attente d'approbation -->
+      <section class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 space-y-4">
+        <div>
+          <h4 class="font-headline-sm text-on-surface font-bold">Offres Tantsaha en attente</h4>
+          <p class="text-body-sm text-on-surface-variant">
+            Validez les offres des producteurs et mettez-les en vitrine pour la session choisie.
+          </p>
+        </div>
+
+        <div *ngIf="pendingLoading" class="p-4 text-on-surface-variant">Chargement...</div>
+        <div *ngIf="!pendingLoading && pendingStocks.length === 0"
+          class="p-4 rounded-xl bg-surface-container-low text-on-surface-variant">
+          Aucune offre en attente d'approbation.
+        </div>
+
+        <div class="bg-surface-container-low border border-outline-variant/30 rounded-2xl overflow-hidden mt-4" *ngIf="!pendingLoading && pendingStocks.length > 0">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse whitespace-nowrap">
+              <thead>
+                <tr class="bg-surface-container-lowest text-label-md text-on-surface-variant border-b border-outline-variant/30">
+                  <th class="p-4">Producteur</th>
+                  <th class="p-4">Produit</th>
+                  <th class="p-4">Quantité</th>
+                  <th class="p-4">Prix Unit.</th>
+                  <th class="p-4">Retrait prévu</th>
+                  <th class="p-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant/10 text-body-md bg-surface-container-lowest">
+                <tr *ngFor="let stock of pendingStocks" class="hover:bg-outline-variant/5 transition-colors">
+                  <td class="p-4 font-bold text-on-surface">{{ stock.producer_name || 'N/A' }}</td>
+                  <td class="p-4 text-primary font-semibold">{{ stock.product_name || 'N/A' }}</td>
+                  <td class="p-4">{{ stock.available_quantity }} {{ stock.unit || 'kg' }}</td>
+                  <td class="p-4">{{ formatPrice(stock.unit_price) }} Ar</td>
+                  <td class="p-4 text-sm">{{ stock.sale_session_date | date:'dd/MM/yyyy' }}</td>
+                  <td class="p-4 text-right">
+                    <button (click)="approveOffer(stock)"
+                      class="px-5 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all text-sm shadow-md inline-flex items-center gap-2">
+                      <span class="material-symbols-outlined text-[18px]">storefront</span>
+                      Mettre en vitrine
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section : Gestion des livraisons -->
+      <section class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 space-y-4">
+        <div>
+          <h4 class="font-headline-sm text-on-surface font-bold">Gestion des livraisons</h4>
+          <p class="text-body-sm text-on-surface-variant">
+            Lancez la livraison des commandes payées et validez le transfert d'argent.
+          </p>
+        </div>
+
+        <div *ngIf="ordersLoading" class="p-4 text-on-surface-variant">Chargement...</div>
+
+        <!-- Commandes payées (confirmed) à envoyer en livraison -->
+        <div *ngIf="!ordersLoading && confirmedOrders.length > 0" class="space-y-2">
+          <h5 class="font-bold text-sm text-on-surface-variant uppercase">Commandes payées — prêtes à livrer</h5>
+          <div *ngFor="let order of confirmedOrders"
+            class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-4 rounded-xl bg-surface-container-low border border-outline-variant/20">
+            <div>
+              <p class="font-mono font-bold text-primary">{{ order.transaction_code }}</p>
+              <p class="text-xs text-on-surface-variant">{{ orderStatusLabel(order.status) }} — {{ order.total_amount }} Ar</p>
+            </div>
+            <button (click)="startDelivery(order)"
+              class="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all shadow-sm">
+              Lancer la livraison
+            </button>
+          </div>
+        </div>
+
+        <!-- Commandes en livraison — valider le transfert d'argent -->
+        <div *ngIf="!ordersLoading && deliveringOrders.length > 0" class="space-y-2 mt-4">
+          <h5 class="font-bold text-sm text-on-surface-variant uppercase">En cours de livraison — valider le transfert</h5>
+          <div *ngFor="let order of deliveringOrders"
+            class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-4 rounded-xl bg-surface-container-low border border-outline-variant/20">
+            <div>
+              <p class="font-mono font-bold text-primary">{{ order.transaction_code }}</p>
+              <p class="text-xs text-on-surface-variant">{{ orderStatusLabel(order.status) }} — {{ order.total_amount }} Ar</p>
+            </div>
+            <button (click)="validateTransfer(order)"
+              class="px-4 py-2 bg-teal-600 text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all shadow-sm">
+              Valider le transfert d'argent
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="!ordersLoading && confirmedOrders.length === 0 && deliveringOrders.length === 0"
+          class="p-4 rounded-xl bg-surface-container-low text-on-surface-variant">
+          Aucune commande en attente de livraison ou de transfert.
+        </div>
+      </section>
+
     </div>
   </main>
+
+  <!-- Modale globale réutilisable pour validations et déconnexion -->
+  <div *ngIf="modalConfig" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-on-surface/40 backdrop-blur-sm animate-fade-in">
+    <div class="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-slide-up relative">
+      <div class="p-6 border-b border-outline-variant/30 flex items-center gap-4">
+        <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined">help</span>
+        </div>
+        <h3 class="font-headline-sm font-bold text-on-surface">{{ modalConfig.title }}</h3>
+      </div>
+      <div class="p-6 text-body-lg text-on-surface-variant">
+        <p>{{ modalConfig.message }}</p>
+      </div>
+      <div class="p-4 bg-surface-container-low border-t border-outline-variant/30 flex justify-end gap-3">
+        <button (click)="closeModal()" class="px-5 py-2.5 rounded-xl font-bold bg-surface-container-highest text-on-surface hover:bg-outline-variant/20 transition-all">
+          Annuler
+        </button>
+        <button (click)="modalConfig.onConfirm()" class="px-5 py-2.5 rounded-xl font-bold bg-primary text-on-primary hover:opacity-90 shadow-sm transition-all">
+          Confirmer
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

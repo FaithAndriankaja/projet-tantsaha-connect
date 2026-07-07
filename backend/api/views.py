@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from django.db import transaction
+from django.db.models import Exists, OuterRef
 from .models import Product
 from django.conf import settings
 from django.core.files.storage import default_storage
@@ -12,6 +13,7 @@ from .models import (
     UnifiedShopView, Order, OrderItem, Payment, HarvestSheetView, SaleSession,
     PickupPoint, Producer, HandoverConfirmation, Category, ProductStock
 )
+from .permissions import IsManager
 from .serializers import (
     UnifiedShopSerializer, OrderCreateSerializer, OrderResponseSerializer,
     PaymentUploadSerializer, PaymentValidateSerializer, HarvestSheetSerializer,
@@ -25,12 +27,15 @@ class ShopViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        #  CORRECTION : Afficher uniquement ce qui est OUVERT et mis en avant (is_promoted) par le Tantsaha
-        # Note : Assurez-vous que votre vue matérialisée 'UnifiedShopView' expose le champ 'is_promoted'.
-        # Sinon, filtrez via la table ProductStock sous-jacente.
         qs = super().get_queryset().filter(sale_session_status='open')
-        
-        # Optionnel si le champ est dans la vue SQL : qs = qs.filter(is_promoted=True)
+
+        promoted_stocks = ProductStock.objects.filter(
+            product_id=OuterRef('product_id'),
+            sale_session_id=OuterRef('sale_session_id'),
+            approval_status='published',
+            is_promoted=True,
+        )
+        qs = qs.filter(Exists(promoted_stocks))
 
         pickup_point = self.request.query_params.get('pickup_point_id')
         if pickup_point:
@@ -135,10 +140,59 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.refresh_from_db()
         return Response({'status': order.status, 'transaction_code': order.transaction_code})
 
+    @action(detail=True, methods=['post'], url_path='start-delivery')
+    def start_delivery(self, request, pk=None):
+        if request.user.role != 'manager':
+            return Response({'detail': 'Accès refusé.'}, status=403)
+        order = self.get_object()
+        if order.status != 'confirmed':
+            return Response({'detail': 'La commande doit être payée (confirmée).'}, status=400)
+        order.status = 'delivering'
+        order.save()
+        return Response({'status': order.status})
+
+    @action(detail=True, methods=['post'], url_path='validate-reception')
+    def validate_reception(self, request, pk=None):
+        if request.user.role != 'consumer':
+            return Response({'detail': 'Accès refusé.'}, status=403)
+        order = self.get_object()
+        if order.status not in ['confirmed', 'delivering']:
+            return Response({'detail': 'Statut invalide.'}, status=400)
+        order.reception_validated_by_consumer = True
+        if order.transfer_validated_by_manager:
+            order.status = 'closed'
+        order.save()
+        return Response({'status': order.status})
+
+    @action(detail=True, methods=['post'], url_path='validate-transfer')
+    def validate_transfer(self, request, pk=None):
+        if request.user.role != 'manager':
+            return Response({'detail': 'Accès refusé.'}, status=403)
+        order = self.get_object()
+        order.transfer_validated_by_manager = True
+        if order.reception_validated_by_consumer:
+            order.status = 'closed'
+        order.save()
+        return Response({'status': order.status})
+
 class PickupPointViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = PickupPoint.objects.all()
     serializer_class = PickupPointSerializer
     permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user and user.is_authenticated:
+            if user.role == 'manager':
+                return PickupPoint.objects.filter(manager_user=user)
+            if user.role == 'producer':
+                try:
+                    producer = user.producer
+                    return PickupPoint.objects.filter(
+                        producerpickuppoint__producer=producer
+                    ).distinct()
+                except Exception:
+                    return PickupPoint.objects.none()
+        return PickupPoint.objects.all()
 
 class ProducerMeView(views.APIView):
     permission_classes = [IsAuthenticated]
@@ -169,33 +223,61 @@ class ProductStockViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        if self.request.user.role != 'producer':
-            return ProductStock.objects.none()
-
-        return ProductStock.objects.filter(
-            product__producer__user=self.request.user
+        qs = ProductStock.objects.select_related(
+            'product',
+            'product__producer',
+            'sale_session',
+            'sale_session__pickup_point',
         )
+        if self.request.user.role == 'manager':
+            return qs.filter(sale_session__pickup_point__manager_user=self.request.user)
+        if self.request.user.role != 'producer':
+            return qs.none()
+
+        return qs.filter(product__producer__user=self.request.user)
+
+    @action(detail=True, methods=['post'], url_path='approve')
+    def approve(self, request, pk=None):
+        if request.user.role != 'manager':
+            return Response({'detail': 'Accès interdit'}, status=403)
+        try:
+            stock = self.get_object()
+            stock.approval_status = 'published'
+            stock.is_promoted = True
+            stock.save(update_fields=['approval_status', 'is_promoted', 'updated_at'])
+            return Response({
+                'status': 'Approved',
+                'approval_status': 'published',
+                'is_promoted': True,
+            })
+        except Exception as e:
+            return Response({'detail': str(e)}, status=400)
 
     def perform_create(self, serializer):
         serializer.save()
 
     @action(detail=True, methods=['post'], url_path='toggle-visibility')
     def toggle_visibility(self, request, pk=None):
+        if request.user.role != 'manager':
+            return Response({'detail': 'Seul le Mpandrindra peut mettre un produit en vitrine.'}, status=403)
+
         try:
-            stock = ProductStock.objects.get(
-                id=pk,
-                product__producer__user=request.user
-            )
+            stock = self.get_object()
+            if stock.approval_status != 'published':
+                return Response(
+                    {'detail': 'Le produit doit d\'abord être approuvé avant d\'être mis en vitrine.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             stock.is_promoted = not stock.is_promoted
-            stock.save()
+            stock.save(update_fields=['is_promoted', 'updated_at'])
             return Response({
                 'status': 'success',
-                'is_promoted': stock.is_promoted
+                'is_promoted': stock.is_promoted,
             })
         except ProductStock.DoesNotExist:
             return Response(
                 {'detail': 'Stock introuvable ou non autorisé.'},
-                status=status.HTTP_404_NOT_FOUND
+                status=status.HTTP_404_NOT_FOUND,
             )
 
 class ManagerDeliveriesView(views.APIView):
@@ -273,14 +355,16 @@ class ProducerHarvestCreateView(views.APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+        sale_session_id = data.get('sale_session_id')
         sale_session = SaleSession.objects.filter(
+            id=sale_session_id,
             status='open',
             pickup_point__producerpickuppoint__producer=producer
-        ).order_by('closes_at').first()
+        ).first()
 
         if not sale_session:
             return Response(
-                {'detail': 'Aucune session de vente ouverte trouvée pour vos points de retrait.'},
+                {'detail': 'Session de vente invalide, déjà clôturée ou non autorisée pour vos points de retrait.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -308,6 +392,8 @@ class ProducerHarvestCreateView(views.APIView):
             product=product,
             sale_session=sale_session,
             available_quantity=data['quantity'],
+            approval_status='pending',
+            is_promoted=False,
         )
 
         return Response(
@@ -326,18 +412,46 @@ class SaleSessionViewSet(viewsets.ModelViewSet):
     serializer_class = SaleSessionSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        if self.request.user.role != 'manager':
-            return SaleSession.objects.none()
+    def get_permissions(self):
+        if self.action in ('create', 'update', 'partial_update', 'destroy'):
+            return [IsManager()]
+        return [IsAuthenticated()]
 
-        return SaleSession.objects.filter(
-            pickup_point__manager_user=self.request.user
-        ).order_by('-opens_at')
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'manager':
+            return SaleSession.objects.filter(
+                pickup_point__manager_user=user
+            ).order_by('-opens_at')
+        elif user.role == 'producer':
+            # Les producteurs peuvent voir les sessions ouvertes de leurs points de retrait
+            try:
+                producer = user.producer
+                return SaleSession.objects.filter(
+                    status='open',
+                    pickup_point__producerpickuppoint__producer=producer
+                ).distinct().order_by('closes_at')
+            except Exception:
+                return SaleSession.objects.none()
+        
+        return SaleSession.objects.none()
 
     def perform_create(self, serializer):
         pickup_point = serializer.validated_data['pickup_point']
+        user = self.request.user
 
-        if pickup_point.manager_user_id != self.request.user.id:
+        if not PickupPoint.objects.filter(id=pickup_point.id, manager_user=user).exists():
+            raise serializers.ValidationError({
+                'pickup_point': 'Vous ne gérez pas ce point de retrait.'
+            })
+
+        serializer.save()
+
+    def perform_update(self, serializer):
+        pickup_point = serializer.validated_data.get('pickup_point', serializer.instance.pickup_point)
+        user = self.request.user
+
+        if not PickupPoint.objects.filter(id=pickup_point.id, manager_user=user).exists():
             raise serializers.ValidationError({
                 'pickup_point': 'Vous ne gérez pas ce point de retrait.'
             })

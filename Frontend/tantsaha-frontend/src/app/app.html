@@ -2,31 +2,58 @@
 
 <!-- Global Toast Notification -->
 <div *ngIf="notificationService.currentNotification() as notification"
-    class="fixed top-20 left-1/2 -translate-x-1/2 z-[100] min-w-80 max-w-md px-6 py-4 rounded-xl shadow-lg border flex items-center gap-3"
-    [class]="notification.type === 'error' ? 'bg-error text-on-error border-error-container' : 
+  class="fixed top-20 left-1/2 -translate-x-1/2 z-[100] min-w-80 max-w-md px-6 py-4 rounded-xl shadow-lg border flex items-center gap-3"
+  [class]="notification.type === 'error' ? 'bg-error text-on-error border-error-container' : 
               notification.type === 'success' ? 'bg-success text-on-success border-success' : 
               'bg-primary text-on-primary border-primary-container'"
-    style="animation: fadeDownIn 0.3s cubic-bezier(0, 0, 0.2, 1) forwards;">
+  style="animation: fadeDownIn 0.3s cubic-bezier(0, 0, 0.2, 1) forwards;">
 
-    <span class="material-symbols-outlined shrink-0 text-2xl">
-        {{ notification.type === 'error' ? 'error' : notification.type === 'success' ? 'check_circle' : 'info' }}
-    </span>
-    <p class="font-bold text-sm tracking-wide m-0">{{ notification.message }}</p>
-    <button (click)="notificationService.clear()" class="ml-auto opacity-70 hover:opacity-100 transition-opacity">
-        <span class="material-symbols-outlined text-[20px]">close</span>
-    </button>
+  <span class="material-symbols-outlined shrink-0 text-2xl">
+    {{ notification.type === 'error' ? 'error' : notification.type === 'success' ? 'check_circle' : 'info' }}
+  </span>
+  <p class="font-bold text-sm tracking-wide m-0">{{ notification.message }}</p>
+  <button (click)="notificationService.clear()" class="ml-auto opacity-70 hover:opacity-100 transition-opacity">
+    <span class="material-symbols-outlined text-[20px]">close</span>
+  </button>
 </div>
 
 <style>
-    @keyframes fadeDownIn {
-        from {
-            opacity: 0;
-            transform: translate(-50%, -10px) scale(0.95);
-        }
-
-        to {
-            opacity: 1;
-            transform: translate(-50%, 0) scale(1);
-        }
+  @keyframes fadeDownIn {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -10px) scale(0.95);
     }
+
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0) scale(1);
+    }
+  }
 </style>
+
+<!-- Global Logout Modal -->
+<div *ngIf="showLogoutModal"
+  class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-on-surface/40 backdrop-blur-sm animate-fade-in">
+  <div
+    class="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-slide-up relative">
+    <div class="p-6 border-b border-outline-variant/30 flex items-center gap-4">
+      <div class="w-10 h-10 rounded-full bg-error/10 text-error flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined">logout</span>
+      </div>
+      <h3 class="font-headline-sm font-bold text-on-surface">Déconnexion</h3>
+    </div>
+    <div class="p-6 text-body-lg text-on-surface-variant">
+      <p>Êtes-vous sûr de vouloir vous déconnecter ?</p>
+    </div>
+    <div class="p-4 bg-surface-container-low border-t border-outline-variant/30 flex justify-end gap-3">
+      <button (click)="cancelLogout()"
+        class="px-5 py-2.5 rounded-xl font-bold bg-surface-container-highest text-on-surface hover:bg-outline-variant/20 transition-all">
+        Annuler
+      </button>
+      <button (click)="confirmLogout()"
+        class="px-5 py-2.5 rounded-xl font-bold bg-error text-white hover:opacity-90 shadow-sm transition-all">
+        Se déconnecter
+      </button>
+    </div>
+  </div>
+</div>

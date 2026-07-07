@@ -21,6 +21,8 @@ class OrderStatus(models.TextChoices):
     CONFIRMED = 'confirmed', 'Confirmed'
     READY = 'ready', 'Ready'
     PICKED_UP = 'picked_up', 'Picked Up'
+    DELIVERING = 'delivering', 'Delivering'
+    CLOSED = 'closed', 'Closed'
     CANCELLED = 'cancelled', 'Cancelled'
 
 class PaymentMethod(models.TextChoices):
@@ -195,6 +197,8 @@ class ProductStock(models.Model):
     #  AJOUT DE COHÉRENCE : L'état de l'interrupteur "Mettre en avant" du Tantsaha
     is_promoted = models.BooleanField(default=False, db_column='is_promoted')
     
+    approval_status = models.CharField(max_length=20, default='pending')
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -215,6 +219,8 @@ class Order(models.Model):
     sale_session = models.ForeignKey(SaleSession, on_delete=models.RESTRICT, db_column='sale_session_id')
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0) # Handled by trigger
     status = models.CharField(max_length=30, choices=OrderStatus.choices, default=OrderStatus.PENDING_PAYMENT)
+    reception_validated_by_consumer = models.BooleanField(default=False)
+    transfer_validated_by_manager = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
